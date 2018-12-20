@@ -1,0 +1,356 @@
+{extend name="wap/default_new/base" /}
+{block name="resources"}
+<link rel="stylesheet" type="text/css" href="__TEMP__/{$style}/public/css/common-v4.4.css">
+<link rel="stylesheet" type="text/css" href="__TEMP__/{$style}/public/css/member_address.css">
+
+{/block}
+{block name="main"}
+<input type="hidden" id="newshop_rewrite_model" value="1">
+<input type="hidden" id="newshop_url_model" value="0">
+
+<style>
+.panel.memberhead {
+	background: #FF4E00;
+	margin-top: 0px;
+	padding: 0;
+	margin-bottom: 0;
+	overflow: hidden;
+	border: none;
+	background-size: 100% auto;
+	width: 100%;
+	height: auto;
+	position: relative;
+}
+
+.member_head {
+	overflow: hidden;
+	margin: 0px;
+	padding: 0px;
+}
+
+.member_head p {
+	text-align: center;
+	font-size: 12px;
+	color: #FFFFFF;
+	line-height: 20px;
+	margin-bottom: 0px;
+}
+
+.member_head p:first-child {
+	height: 70px;
+	margin-top: 6px;
+}
+
+.member_head p:first-child i.face_img {
+	background: #FFFFFF;
+	border: 2px solid #FFFFFF;
+	top: 6px;
+	height: 60px;
+	border-radius: 50%;
+	width: 60px;
+	margin: auto;
+	display: block;
+	text-align: center;
+	line-height: 60px;
+	overflow: hidden;
+}
+
+.member_head p:first-child img {
+	max-width: 100%;
+	max-height: 100%;
+	vertical-align: middle;
+	width: auto;
+	height: auto;
+	display: block;
+}
+
+.member_head p:last-child {
+	margin-bottom: 5px;
+}
+
+.member_head a p span.account_management {
+	float: right;
+	position: absolute;
+	right: 20px;
+	font-size: 13px;
+	top: 5px;
+}
+
+.member_head a p span.account_management i.data-go {
+	width: 10px;
+	height: 10px;
+	display: inline-block;
+	background: url("../images/account_management.png") center no-repeat;
+	background-size: 8px 10px;
+	margin-left: 5px;
+}
+
+.member_head p.info-content-top,.member_head p.info-content-bottom {
+	width: 90%;
+	margin: 0 5%;
+}
+
+.member_head p.info-content-top span {
+	width: 30%;
+	height: 20px;
+	line-height: 20px;
+	text-align: center;
+	display: inline-block;
+	font-size: 13px;
+}
+
+.member_head p.info-content-top span:nth-child(2) {
+	font-size: 16px;
+	overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.member_head p.info-content-bottom span {
+	display: inline-block;
+	font-size: 20px;
+	color: yellow;
+	text-align: center;
+	width: 30%;
+	height: 30px;
+	line-height: 30px;
+}
+
+.member_head p.info-content-bottom span mark.level {
+	padding: 0 5px;
+	border: 1px solid yellow;
+	border-radius: 3px;
+	background: none;
+	color: yellow;
+	font-size: 13px;
+}
+
+
+.money-detail  li {
+	float: left;
+	width: 31.4%;
+	text-align: center;
+	font-size: 12px;
+    line-height: 19px;
+    padding: 3px;
+}
+.money-detail .money {
+	font-size: 16px;
+}
+.store-personal-title {
+	padding: 10px;
+	border-left: 5px solid #595959;
+	font-size: 16px;
+	color: #333333;
+	font-weight: normal;
+	background: #ffffff;
+}
+.segmentation-line {
+	border: 0;
+	border-bottom: 1px solid #eeeeee;
+}
+.personal-menu {
+	background: #ffffff;
+	overflow: hidden;
+}
+.personal-menu li {
+	float: left;
+	width: 33%;
+	text-align: center;
+	padding: 10px 0;
+	border-right: 1px solid #eeeeee;
+	border-bottom: 1px solid #eeeeee;
+}
+.personal-menu li img {
+	width: 50px;
+	height: 50px;
+}
+.personal-menu li h5 {
+	padding-top: 5px;
+	font-weight: normal;
+	font-size: 14px;
+}
+.personal-menu li span {
+	color: #999999;
+	font-size: 12px;
+}
+
+.body-gray .panel.memberhead {
+    background: #006ab6;
+}
+
+
+
+</style>
+
+<link type="text/css" rel="stylesheet" href="/template/wap/default_new/public/css/distribution.css">
+<link rel="stylesheet" type="text/css" href="/template/wap/default_new/public/css/member_index.css">
+<style>
+.money-detail li {
+    line-height: 22px;
+	font-size:14px;
+}
+.money-detail .money {
+    font-size: 14px;
+}
+.panel.memberhead{
+	margin-top: 44px;
+}
+.panel.memberhead .member_head{
+	padding-bottom: 10px;
+}
+.panel.memberhead .member_foot{
+	width: 100%;
+	height: 50px;
+	background: rgba(255,255,255,0.15);
+	padding: 8px 0;
+}
+.member_foot .info-content-top span{
+	display:inline-block;
+	width:32.5%;
+	color:#fff;
+	text-align:center;
+	height:25px;
+	line-height:25px;
+}
+.member_foot .info-content-bottom span{
+	display:inline-block;
+	width:32%;
+	color:#fff;
+	text-align:center;
+	font-size:17px;
+}
+/*本月业绩*/
+.commission_time{
+	width:100%;
+	float:left;
+	background:#fafbeb;
+}
+.commission_time li{
+    width:50%;
+    font-size:15px;
+    color:#5a5b56;
+    line-height:50px;
+    text-align:center;
+    float:left;
+    border-left:1px solid #f3edd4;
+    margin-left:-1px;
+    border-bottom:1px solid #f3edd4;
+    margin-bottom:-1px;
+}
+.commission_time li span{
+    color:#fc4d4a;
+}
+</style>	
+<section class="head">
+	<a class="head_back" href="{:__URL('APP_MAIN/member/index')}"><i class="icon-back"></i></a>
+	<div class="head-title">{:lang('distribution_extension_center')}</div>
+</section>
+
+	
+	<!-- showBox弹出框 -->
+	<div class="motify" style="display: none;">
+		<i class="show_type warning"></i>
+		<div class="motify-inner">弹出框提示</div>
+	</div>
+
+	
+<div class="panel memberhead">
+	<div class="member_head">
+		<a onclick="location.href='{:__URL('APP_MAIN/member/personaldata')}'">
+			<p style="margin: 20px 0 10px 0;position:relative;">
+				<i class="face_img">
+				{if condition="$member_info['user_info']['user_headimg'] eq ''"}
+					<img src="{:__IMG($default_headimg)}" />
+				{else/}
+					<img src="{:__IMG($default_headimg)}" class="lazy_load" data-original="{:__IMG($member_info['user_info']['user_headimg'])}"/>
+				{/if}
+								</i>
+			</p>
+		</a>
+		<p class="info-content-top">
+			<span>{:lang('member_balance')}</span>
+			<span>{$member_info["user_info"]['nick_name']}</span>
+			<span>{:lang('goods_integral')}</span>
+		</p>
+		<p class="info-content-bottom">
+			<a href="{:__URL('APP_MAIN/member/balancewater?shop_id='.$shop_id)}"><span>{$member_info['balance']}</span></a>
+			<span><mark class="level">{$member_info['level_name']}</mark></span>
+			<a href="{:__URL('APP_MAIN/member/integralwater?shop_id='.$shop_id)}"><span>{$member_info['point']}</span></a>
+		</p>
+	</div>
+	<div class="member_foot">
+		<p class="info-content-top">
+			<span>{:lang('distribution_total_commission')}</span>
+			<span style="font-size: 14px;">{:lang('distribution_amount_audited')}</span>
+			<span>{:lang('distribution_already_presented')}</span>
+		</p>
+		<p class="info-content-bottom">
+			<span>￥{$userCon.total_commission}</span>
+			<span>￥{$commission_money}</span>
+			<span>￥{$userCon.stop_commission}</span>
+		</p>
+	</div>
+	<div class="commission_time">
+       <ul>
+         <li>总业绩 : <span>{$score.total_score}</span></li>
+         <li>本月业绩 : <span>{$score.this_month}</span></li>
+         <li>上月业绩 : <span>{$score.last_month}</span></li>
+         <li>今日新增 : <span>{$score.today}</span></li>
+       </ul>
+	</div>
+</div>
+	<hr class="segmentation-line">
+	
+	<div class="personal-menu">
+		<ul>
+						<li>
+				<a href="{:__URL('APP_MAIN/Distribution/myTeam')}">
+					<!-- <img src="__TEMP__/{$style}/public/images/store_my_team.png"> -->
+					<img src="__TEMP__/{$style}/public/images/team2.png">
+					<h5>{:lang('distribution_my_team')}</h5>
+					<span>{$res.teamNum}个</span>
+				</a>
+			</li>
+						<li>
+				<a href="{:__URL('APP_MAIN/Distribution/distributionCommission')}">
+					<!-- <img src="__TEMP__/{$style}/public/images/store_shareholders.png"> -->
+					<img src="__TEMP__/{$style}/public/images/store_my_commission.png">
+					<h5>{:lang('distribution_distribution_commission')}</h5>
+					<span>{$userCon.can_commission}</span>
+				</a>
+			</li>
+						<li>
+				<a href="{:__URL('APP_MAIN/Distribution/detailed')}">
+					<img src="__TEMP__/{$style}/public/images/store_region_agent.png">
+					<h5>{:lang('distribution_commissions')}</h5>
+					<span>{$detail_money}</span>
+				</a>
+			</li>
+			<li>
+				<a href="{:__URL('APP_MAIN/member/getWchatQrcode')}">
+					<img src="__TEMP__/{$style}/public/images/store_promote_qrcode2.png">
+					<h5>{:lang('extended_two_dimensional_code')}</h5>
+					<span>{:lang('distribution_explain')}</span>
+				</a>
+			</li>
+						<li>
+				<a href="{:__URL('APP_MAIN/Distribution/myCommission')}">
+					<img src="__TEMP__/{$style}/public/images/yongjin2.png">
+					<h5>{:lang('distribution_my_commission')}</h5>
+					<span>{$userCon.can_commission}</span>
+				</a>
+			</li>
+					</ul>
+	</div>
+	
+ 
+	<!-- 微信登录弹出绑定手机号遮罩层 -->
+	
+	
+	<input type="hidden" value="20" id="uid">
+	<!-- 加载弹出层 -->
+	<div class="mask-layer-loading">
+		<img src="__TEMP__/{$style}/public/images/mask_load.gif">
+	</div>
+{/block}
+{block name="bottom"}{/block}

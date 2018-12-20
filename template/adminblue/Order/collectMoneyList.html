@@ -1,0 +1,506 @@
+{extend name="adminblue/base" /}
+{block name="resources"/}
+<script type="text/javascript" src="__STATIC__/My97DatePicker/WdatePicker.js"></script>
+<link href="__STATIC__/blue/css/order/ns_orderlist.css" rel="stylesheet" type="text/css" />
+<style>
+.mytable.select td{padding-bottom:0;}
+.mytable.select #more_search{display: block;}
+.table-class tbody td a {margin-left: 0;}
+.to-fixed{position: fixed;width: 85.5%;top: 50px;box-shadow: 0 2px 6px 0 rgba(0,0,0,.3);z-index: 5;}
+.mytable td{padding:10px 0;}
+.btn-common-white{line-height: 20px;outline: none;background: white}
+.ns-main{margin-top: 0;}
+.seller_memo{background: #FFF9DF!important;color: #D09B4C;}
+</style>
+<style>
+.modal-infp-style{width:90%;margin:10px auto;}
+.modal-infp-style table{width:100%;}
+.modal-infp-style table tr td{border: 1px solid #e5e5e5;padding: 10px;}
+.modal{width:814px;}
+.type-two{display: none;}
+.ns-main{margin-top:0px;}
+</style>
+{/block}
+<!-- {1block name="thirdmenu"}{/block} -->
+<!-- {1block name="warm_prompt"}{/block} -->
+<!-- {1block name="right_tab_tip"}{/block} -->
+{block name="main"}
+<div class="ns-main">
+			
+<table class="mytable">
+	
+	<tbody><tr>
+		<th>
+		    <a href="{:__URL('ADMIN_MAIN/order/addCollectMoney')}" class="btn-common" style="float:left">添加收银</a>
+		    <!-- <button style="margin:0 5px 0 10px !important;float:left" class="btn-common-delete btn-small" onclick="batchDelete()">批量删除</button> -->
+			添加时间：
+			<input type="text" id="startDate" class="input-common middle" placeholder="请选择开始日期" onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})">
+			&nbsp;-&nbsp;
+			<input type="text" id="endDate" placeholder="请选择结束日期" class="input-common middle" onclick="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})">
+			<button class="btn-common-white more-search"><i class="fa fa-chevron-down"></i></button>
+			<button onclick="searchData()" value="搜索" class="btn-common">搜索</button>
+			<button onclick="promoterExcel()" value="搜索" class="btn-common">导出数据</button>
+			<div class="more-search-container">
+			    <dl>
+					<dt>订单号：</dt>
+					<dd>
+						<input id="order_no" class="input-common middle" type="text" value="">
+					</dd>
+				</dl>
+				<dl>
+					<dt>付款人：</dt>
+					<dd>
+						<input id="nick_name" class="input-common middle" type="text" value="">
+					</dd>
+				</dl>
+				<dl>
+					<dt>付款方式：</dt>
+					<dd>
+						<select id="payment_method" class="input-medium input-common middle" type="text" value="">
+			               <option value="-1">全部</option>
+			               <option value="0">支付宝</option>
+			               <option value="1">微信</option>
+			               <option value="2">现金</option>
+			               <option value="3">银行卡</option>
+			               <option value="4">其他</option>
+						</select>
+					</dd>
+				</dl>
+				<dl>
+					<dt></dt>
+					<dd>
+						<button onclick="searchData()" class="btn-common">完成</button>
+					</dd>
+				</dl>
+			</div>	
+		</th>
+	</tr>
+</tbody></table>
+<div class="mod-table">
+	<div class="mod-table-head">
+		<div class="con style0list">
+				<style>
+       .status-success {
+		    display: inline-block;
+		    color: #FFF;
+		    padding-left: 5px;
+		    padding-right: 5px;
+		    padding-bottom: 3px;
+		    padding-top: 3px;
+		    background-color: #5be15b;
+		}
+		.table-class tbody td {
+		    border-right: none;
+		}
+		#myModalLabel {
+		    /*color: #fff;*/
+		}
+		.set-style dl dd {
+		    width: 67.5%;
+		}
+		.ncsc-form-goods dl dt, .set-style dl dt {
+		    width: 20% !important;
+		}
+		.input-common.harf, .select-common.harf {
+		    width: 100% !important; 
+		}
+		.what{
+			width:12px;
+			height:12px;
+			display:inline-block;
+			background:url(ADMIN_IMG/what.png) no-repeat;
+			background-size:100% 100%;
+			margin-left:3px;
+			cursor:pointer;
+		}
+		.whatContent{
+			width:400px;
+			float:left;
+			background:#fff;
+			position: absolute;
+			right:-410px;
+			top:0px;
+			border:2px solid #ccc;
+			display:none;
+			height:200px;
+			overflow-y:auto;
+			overflow-x:hidden;
+		}
+		.whatContent .title{
+			width: 100%;
+		}
+		.table-class tbody td {
+		    padding: 5px 0px;
+		}
+	</style>
+	<table class="table-class" id="productTbody">
+				<colgroup>
+				    <col style="width: 0.5%;">
+					<col style="width: 2%;">
+					<col style="width: 4%;">
+					<col style="width: 2.5%;">
+					<col style="width: 1.5%;">
+					<col style="width: 2.5%;">
+					<col style="width: 2%;">
+					<col style="width: 2%;">
+					<col style="width: 2.5%;">
+					<col style="width: 5%;">
+					<col style="width: 5%;">
+					<col style="width: 3%;">
+				</colgroup>
+				<thead>
+					<tr>
+					    <th><i class="checkbox-common"><input type="checkbox" onclick="CheckAll(this)"></i></th>
+						<th>订单号</th>
+						<th>课程</th>
+						<th>付款人</th>
+						<th>手机号码</th>
+						<th>金额</th>
+						<th>应付金额</th>
+						<th>实付金额</th>
+						<th>付款方式</th>
+						<th>备注</th>
+						<th>添加时间</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+				<tbody>
+				  
+				</tbody>
+			</table>
+			
+		</div>
+	</div>
+</div>
+
+<!-- 收银续添 -->
+<div class="modal fade hide ui-draggable ui-draggable-handle" id="editGoodsCommissionRate" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="width: 400px; display: none;">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title" id="myModalLabel">金额添加</h4>
+            </div>
+            <div class="modal-body">
+            	<div class="set-style">
+            		<input type="hidden" id="collect_id" value="">
+            		<input type="hidden" id="realPayment_money" value="">
+            		<dl>
+						<dt>金额：</dt>
+						<dd>
+							<p><input name="" id="money" type="number" class="input-common harf" value="" onkeyup="javascript:CheckInputIntFloat(this);"></p>	
+							<p class="error">请输入金额</p>
+						</dd>
+					</dl>
+					<dl>
+						<dt>备注：</dt>
+						<dd>
+						  <textarea id="remark" class="textarea-common"></textarea>
+						</dd>
+					</dl>    		            		
+            	</div>
+            </div>
+            <div class="modal-footer">
+            	<button type="button" class="btn-common btn-big" onclick="addContinuedMoney();">确定</button>
+                <button type="button" class="btn-common-cancle btn-big" data-dismiss="modal">关闭</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal -->
+</div>
+<!-- 收银详情详情模态框（Modal） -->
+<div class="modal fade hide" id="details" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h3>收银详情</h3>
+			</div>
+			<div class="modal-body">
+				<div class="modal-infp-style">
+					<table>
+						<tbody></tbody>
+					</table>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-big" data-dismiss="modal">关闭</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<input type="hidden" id="page_count" value="1">
+<input type="hidden" id="page_size" value="7">
+
+
+<script type="text/javascript">
+/**
+ * 订单数据导出
+ */
+function promoterExcel(){
+    var start_date = $("#startDate").val();
+	var end_date = $("#endDate").val();
+	var order_no = $("#order_no").val();
+	var nick_name = $("#nick_name").val();
+	var payment_method = $("#payment_method").val();
+
+	var collect_ids= new Array();
+	$(".table-class tbody input[type = 'checkbox']:checked").each(function() {
+		if (!isNaN($(this).val())) {
+			collect_ids.push($(this).val());
+		}
+	});
+	window.location.href=__URL("ADMIN_MAIN/order/promoterExcel?start_date="+start_date+"&end_date="+end_date+"&order_no="+order_no+"&nick_name="+nick_name+"&payment_method="+payment_method+"&collect_ids="+collect_ids.toString()); 	
+}
+//显示金额添加
+function showWhat(obj,collect_id){
+	if($(obj).hasClass("active")){
+       var val=$(obj).find(".whatContent").hide();
+       $(obj).removeClass("active");
+	}else{
+		var index=$(obj).parents("tr").attr('data-i');
+		$.ajax({
+			type:"post",
+			url:"{:__URL('ADMIN_MAIN/order/getWhatMoney')}",
+			data:{
+				'collect_id':collect_id,
+			},
+			async:true,
+			success:function (data) {
+				if (data!=0) {
+					var html = '<table class="title"><tr><colgroup><col style="width: 22%;"><col style="width: 40%;"><col style="width: 38%;"></colgroup></tr><tr><th>金额</th><th>备注</th><th>添加时间</th></tr>';
+					if (data.length > 0) {
+						for (var i = 0; i < data.length; i++) {
+							html += '<tr><td align="center">'+data[i]['money']+'</td><td>'+data[i]['remark']+'</td><td align="center">'+timeStampTurnTime(data[i]['create_time'])+'</td></tr>';
+						}
+					}
+					html+='</table>';
+					$(obj).find(".whatContent").html(html);
+					if(index>=10){
+						$(obj).find(".whatContent").css('top','-190px');
+					}
+					var val=$(obj).find(".whatContent").show();
+	                $(obj).addClass("active");
+				}
+			}
+		});	
+	}
+	
+}
+//金额添加
+function addContinuedMoney(){
+	var collect_id=$("#collect_id").val();
+	var realPayment_money=$("#realPayment_money").val();
+	var money=$("#money").val();
+	var remark=$("#remark").val();
+	if(money==''){
+		$("#money").parent().siblings(".error").show();
+        return false;
+	}
+	if(money<0){
+		if((realPayment_money*1+money*1)<0){
+			showMessage('error', '金额超出了实付金额范围');
+			return false;
+		}
+	}
+	$.ajax({
+		type:"post",
+		url:"{:__URL('ADMIN_MAIN/order/addContinuedMoney')}",
+		data:{
+			'collect_id':collect_id,
+			'money':money,
+			'remark':remark,
+		},
+		async:true,
+		success:function (data) {
+			if (data["code"] > 0) {
+				showMessage('success', data["message"],"{:__URL('ADMIN_MAIN/order/collectMoneyList')}");
+			}else{
+				showMessage('error', data["message"]);
+			}
+		}
+	});
+}
+//收银添加框显示
+function showCollectContinued(collect_id,realPayment_money){
+	$("#collect_id").val(collect_id);
+	$("#realPayment_money").val(realPayment_money);
+	$("#editGoodsCommissionRate").modal("show");
+}
+//查询
+function searchData(){
+	$(".more-search-container").slideUp();
+	LoadingInfo(1);
+}
+	//加载数据
+	function LoadingInfo(pageIndex) {
+		var start_date = $("#startDate").val();
+		var end_date = $("#endDate").val();
+		var order_no = $("#order_no").val();
+		var nick_name = $("#nick_name").val();
+		var payment_method = $("#payment_method").val();
+		$.ajax({
+			type : "post",
+			url : "{:__URL('ADMIN_MAIN/order/collectMoneyList')}",
+			async : true,
+			data : {
+				"page_index" : pageIndex,
+				"start_date" : start_date, 
+				"end_date" : end_date,
+				"order_no" : order_no,
+				"nick_name" : nick_name,
+				"payment_method" : payment_method,
+			},
+			success : function(data) {
+				$("#page_count").val(data["page_count"]);
+				$("#pageNumber a").remove();
+				var html = '';
+				if (data["data"].length > 0) {
+					for (var i = 0; i < data["data"].length; i++) {
+						html += '<tr align="center" data-i="'+i+'">';
+						html += '<td align="center">';
+						html += '<i class="checkbox-common"><input value="' + data["data"][i]["collect_id"] + '" name="sub" type="checkbox"></i></td>';
+						html += '<td>' + data["data"][i]["order_no"] + '</td>';
+						html += '<td>' + data["data"][i]["goods_name"] + '</td>';
+						html += '<td>' + data["data"][i]["nick_name"] + '</td>';
+						html += '<td>' + data["data"][i]["reserve_phone"] + '</td>';
+						html += '<td>' + data["data"][i]["money"] + '</td>';
+						html += '<td>' + data["data"][i]["meet_money"] + '</td>';
+						var count='';
+						var whatContent = '';
+						if(data["data"][i]["count"]>0){
+							/*whatContent='<div class="whatContent"><div>';
+							count='<div class="what" style="position:relative;"  onclick="showWhat(this,'+data["data"][i]["collect_id"]+');">'+whatContent+'</div>';*/
+							
+						}
+						html += '<td>' + data["data"][i]["realPayment_money"] + count+' </td>';
+						switch(data["data"][i]["payment_method"]){
+								case 0:
+								  var pay_type_name='支付宝'; 
+								break;
+								case 1:
+								  var pay_type_name='微信'; 
+								break;
+								case 2:
+								  var pay_type_name='现金'; 
+								break;
+								case 3:
+								  var pay_type_name='银行卡'; 
+								break;
+								case 4:
+								  var pay_type_name='其他'; 
+								break;
+
+							}
+						html += '<td>' + pay_type_name + '</td>';
+						html += '<td>' + data["data"][i]["remark"] + '</td>';
+						html += '<td>' + timeStampTurnTime(data["data"][i]["create_time"]) + '</td>';
+						html += '<td>';
+
+				        //html += '<a href="javascript:void(0);" onclick="showCollectContinued(' + data["data"][i]["collect_id"] + ','+data["data"][i]["realPayment_money"]+');">金额添加</a>';
+				        html += '&nbsp;<a  href="javascript:void(0);" onclick="details('+ data["data"][i]["collect_id"] +');">详情</a>';
+						html += '</td>';
+						html += '</tr>';
+					}
+				} else {
+					html += '<tr align="center"><td colspan="14">暂无符合条件的数据记录</td></tr>';
+				}
+				
+				$(".style0list tbody").html(html);
+				var totalpage = $("#page_count").val();
+				if (totalpage == 1) {
+					changeClass("all");
+				}
+				initPageData(data["page_count"],data['data'].length,data['total_count']);
+				var $html = pagenumShow(jumpNumber,totalpage,5)
+				$("#pageNumber").append($html);
+			}
+		});
+	}
+	//收银详情
+	function details(id){
+		$.ajax({
+			type : "post",
+			url : "{:__URL('ADMIN_MAIN/order/collectDetail')}",
+			data : { "collect_id" :id },
+			success : function(data) {
+				$("#details").modal("show");
+				if (data) {
+					var html='';
+					html +='<tr>';
+					   html +='<td>订单号</td><td colspan="4">' + data["order_no"] + '</td>';
+					   html +='<td>课程</td><td colspan="4">' + data["goods_name"] + '</td>';
+					html +='</tr>';
+					html +='<tr>';
+					   html +='<td>付款人</td><td colspan="4">' + data["nick_name"] + '</td>';
+					   html +='<td>手机号码</td><td colspan="4">' + data["reserve_phone"] + '</td>';
+					html +='</tr>';
+					html +='<tr>';
+					   html +='<td>金额</td><td colspan="4">' + data["money"] + '</td>';
+					   html +='<td>应付金额</td><td colspan="4">' + data["meet_money"] + '</td>';
+					html +='</tr>';
+					html +='<tr>';
+					   html +='<td>实付金额</td><td colspan="4">' + data["realPayment_money"] + '</td>';
+					   html +='<td>抵扣金额</td><td colspan="4">' + data["coupon_money"] + '</td>';
+					html +='</tr>';
+					switch(data["payment_method"]){
+						case 0:
+						  var pay_type_name='支付宝'; 
+						break;
+						case 1:
+						  var pay_type_name='微信'; 
+						break;
+						case 2:
+						  var pay_type_name='现金'; 
+						break;
+						case 3:
+						  var pay_type_name='银行卡'; 
+						break;
+						case 4:
+						  var pay_type_name='其他'; 
+						break;
+
+					}
+					html +='<tr>';
+					   html +='<td>付款方式</td><td colspan="4">' + pay_type_name + '</td>';
+					   html +='<td>支付帐号</td><td colspan="4">' + data["accountsWx_money"] + '</td>';
+					html +='</tr>';
+					html +='<tr>';
+					   html +='<td>付款日期</td><td colspan="4">' + data["paymentDate"] + '</td>';
+					   html +='<td>备注</td><td colspan="4" title="' + data["remark"] + '">' + data["remark"].substring(0,25) + '</td>';
+					html +='</tr>';
+					html +='<tr>';
+					   html +='<td>添加时间</td><td colspan="4">' + timeStampTurnTime(data["create_time"]) + '</td>';
+					   html +='<td></td><td colspan="4"></td>';
+					html +='</tr>';
+					
+					$(".modal-infp-style table tbody").html(html);
+					$("#details").modal("show");
+				}else{
+				   showTip('查询错误...','error');	
+				}
+			}
+		})
+	}
+	//全选
+	function CheckAll(event){
+		var checked = event.checked;
+		$("#productTbody input[type = 'checkbox']").prop("checked",checked);
+		if(checked) $(".table-class tbody input[type = 'checkbox']").parent().addClass("selected");
+		else $(".table-class tbody input[type = 'checkbox']").parent().removeClass("selected");
+	}
+	// 点击显示更多搜索
+	$(".more-search").on("click", function(e){
+		$(".more-search-container").slideToggle();
+		$(document).one("click", function(){
+	        $(".more-search-container").slideUp();
+	    });
+	    e.stopPropagation();
+	})
+
+	$(".more-search-container").on("click", function(e){
+	    e.stopPropagation();
+	});
+</script>
+
+{/block}

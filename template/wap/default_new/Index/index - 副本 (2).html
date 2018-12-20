@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>美发电子商城</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="stylesheet" href="__TEMP__/{$style}/public/Index/mui/css/mui.min.css">
+    <link rel="stylesheet" href="__TEMP__/{$style}/public/Index/css/fapin.css">
+
+	<link rel="stylesheet" type="text/css" href="__TEMP__/{$style}/public/css/showbox.css">
+	<link rel="stylesheet" href="__TEMP__/{$style}/public/css/layer.css" id="layuicss-skinlayercss">
+	<script type="text/javascript" src="__TEMP__/{$style}/public/js/layer.js"></script>
+	<script src="__TEMP__/{$style}/public/Index/js/jquery-1.8.3.min.js"></script>
+	<script src="__TEMP__/{$style}/public/js/jquery.lazyload.js"></script>
+	<script src="__TEMP__/{$style}/public/js/showBox.js"></script>
+	<script type="text/javascript">
+	var CSS = "__TEMP__/{$style}/public/css";
+	var APPMAIN='APP_MAIN';
+	var UPLOADAVATOR = 'UPLOAD_AVATOR';//存放用户头像
+	var UPLOADCOMMON = 'UPLOAD_COMMON';
+	var SHOPMAIN = "SHOP_MAIN";
+	var UPLOADCOMMENT = '{$Think.const.UPLOAD_COMMENT}';// 存放评论
+	var temp = "__TEMP__/";//外置JS调用
+	var STATIC = "__STATIC__";
+	$(function(){
+		img_lazyload();
+	});
+
+	//图片懒加载
+	function img_lazyload(){
+		$("img.lazy_load").lazyload({
+			threshold : 0,
+			effect : "fadeIn", //淡入效果
+			skip_invisible : false
+		})
+	}
+	</script>
+    <style>
+	body{max-width: 640px;}
+	body .sub-nav.nav-b5 dd i {margin: 3px auto 5px auto;}
+	body .fixed.bottom {bottom: 0;}
+	.mask-layer-loading{position: fixed;width: 100%;height: 100%;z-index: 999999;top: 0;left: 0;text-align: center;display: none;}
+	.mask-layer-loading i,.mask-layer-loading img{text-align: center;color:#000000;font-size:50px;position: relative;top:50%;}
+	.sub-nav.nav-b5 dd{width:25%;font-size:14px;}
+
+	.footer{
+		display:none;
+	}
+	.foot-nav{
+		border:none;
+	}
+	</style>
+</head>
+
+<body>
+<div class="tophei">
+    <div class="r">
+        <a href="{$customservice_config['value']['service_addr']}"><i class="icon icon-kf"></i></a>
+    </div>
+    <div class="search">
+        <i class="icon fdj custom-search-button"></i>
+        <a href="javascript:;"><i class="icon gb"></i></a>
+        <input type="text" placeholder="{:lang('search_goods')}" class="lz-input custom-search-input">
+
+    </div>
+    <div class="mui-scroll-wrapper mui-slider-indicator mui-segmented-control mui-segmented-control-inverted nav">
+        <div class="mui-scroll">
+            {if count($goodsCategoryList) > 0}
+			   {foreach name="$goodsCategoryList" item="cvo" key="ck"}
+		            <a class="mui-control-item {if $ck eq 0}mui-active{/if}" href="{:__URL('APP_MAIN/goods/goodslist&category_id?category_id='.$cvo['category_id'])}">
+		                {$cvo.category_name}
+		            </a>
+	            {/foreach}
+			{/if}
+        </div>
+    </div>
+</div>
+<div class="topcontent clearfix">
+    <div id="sliderx" class="mui-slider">
+        <div class="mui-slider-group mui-slider-loop">
+            <div class="mui-slider-item mui-slider-item-duplicate">
+                <a href="#">
+                    <img src="__TEMP__/{$style}/public/Index/images/temp/banner2.jpg">
+                </a>
+            </div>
+            <!-- 第一张 -->
+            <div class="mui-slider-item">
+                <a href="#">
+                    <img src="__TEMP__/{$style}/public/Index/images/temp/banner1.jpg">
+                </a>
+            </div>
+            <div class="mui-slider-item">
+                <a href="#">
+                    <img src="__TEMP__/{$style}/public/Index/images/temp/banner2.jpg">
+                </a>
+            </div>
+            <div class="mui-slider-item mui-slider-item-duplicate">
+                <a href="#">
+                    <img src="__TEMP__/{$style}/public/Index/images/temp/banner1.jpg">
+                </a>
+            </div>
+        </div>
+        <div class="mui-slider-indicator">
+            <div class="mui-indicator mui-active"></div>
+            <div class="mui-indicator"></div>
+        </div>
+    </div>
+</div>
+<div class="classify clearfix fg-line ">
+    <ul>
+        {if count($navigation_list) > 0}
+			{foreach name="$navigation_list" item="vo"}
+				{if condition='$vo.nav_type eq 0'}
+				<li><a href="{:__URL('APP_MAIN'.$vo.nav_url)}">
+				{else/}
+				<li><a href="{$vo.nav_url}">
+				{/if}
+					<img src="{:__IMG($vo.nav_icon)}"><br>{$vo.nav_title}
+				</a></li>
+			{/foreach}
+		{/if}
+    </ul>
+</div>
+	<!-- 优惠券领取 -->
+	{if condition="count($coupon_list) gt '0'"}
+	{include file='wap/default_new/Index/controlCoupon'/}
+	{/if} 
+		<style>
+      .coupon-container{
+      	    margin: 0px 0 10px 0;
+      }
+	</style>
+<div class="rush-buy fg-line">
+    <div class="fapin-bt">
+        <a href="{:__URL('APP_MAIN/index/discount')}"><img src="__TEMP__/{$style}/public/Index/images/bt1.png"></a>
+    </div>
+    <div class="mui-slider cg">
+        <div class="mui-scroll-wrapper mui-slider-indicator mui-segmented-control mui-segmented-control-inverted">
+            <div class="mui-scroll">
+                {volist name="discount_list" id="vo" key = "k"}
+				
+                <a class="mui-control-item mui-active" href="{:__URL('APP_MAIN/goods/goodsdetail?id='.$vo['goods_id'])}">
+                    <img src="{:__IMG($vo['picture']['pic_cover_small'])}" class="photo-img">
+                    <div class="zhineng">{$vo.goods_name}</div>
+                    <div class="clearfix">
+
+                        <div class="price">￥{$vo.promotion_price}</div>
+                    </div>
+                </a>
+                
+			{/volist}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="rush-buy fg-line">
+    <div class="fapin-bt">
+        <img src="__TEMP__/{$style}/public/Index/images/bt2.png"></a>
+    </div>
+    <div class="hot-buy clearfix">
+        <div class="hot-buy2 l rel">
+            <a href="{:__URL('APP_MAIN/index/topSelling?category_id='.$goodsCategoryList.0.category_id)}">
+                <div class="jt"><i class="icon icon-jt"></i></div>
+                <img src="__TEMP__/{$style}/public/Index/images/temp/ph1.jpg">
+            </a>
+        </div>
+        <div class="hot-buy3 r rel">
+            <div class="hot-buy4 rel">
+                <a href="{:__URL('APP_MAIN/index/topSelling?category_id='.$goodsCategoryList.1.category_id)}">
+                    <div class="jt"><i class="icon icon-jt"></i></div>
+                    <img src="__TEMP__/{$style}/public/Index/images/temp/ph2.jpg">
+                </a>
+            </div>
+            <div class="clearfix">
+                <div class="hot-buy1 l rel">
+                    <a href="{:__URL('APP_MAIN/index/topSelling?category_id='.$goodsCategoryList.2.category_id)}">
+                        <div class="jt"><i class="icon icon-jt"></i></div>
+                        <img src="__TEMP__/{$style}/public/Index/images/temp/ph3.jpg">
+                    </a>
+                </div>
+                <div class="hot-buy1 r rel">
+                    <a href="{:__URL('APP_MAIN/index/topSelling?category_id='.$goodsCategoryList.3.category_id)}">
+                        <div class="jt"><i class="icon icon-jt"></i></div>
+                        <img src="__TEMP__/{$style}/public/Index/images/temp/ph4.jpg">
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="rush-buy fg-line">
+    <div class="fapin-bt">
+        <img src="__TEMP__/{$style}/public/Index/images/bt3.png">
+    </div>
+    {volist name="CategoryGoodsList" id="cate" key = "cat"}
+    {if count($cate.goods) > 0}
+    <div class="rushbuy-bank">
+        <div class="adv-banner"><img src="{:__IMG($cate['category_pic'])}" class="big-banner"></div>
+        <div class="mui-slider cg">
+            <div class="mui-scroll-wrapper mui-slider-indicator mui-segmented-control mui-segmented-control-inverted">
+                <div class="mui-scroll">
+                    {volist name="cate.goods" id="g" key = "gk"}
+                    <a class="mui-control-item mui-active" href="{:__URL('APP_MAIN/goods/goodsdetail?id='.$g['goods_id'])}" >
+                        <div class="photo-bk">
+                            <img src="{:__IMG($g['pic_cover_small'])}" class="photo-img"></div>
+                        <div class="zhineng">{$g.goods_name}111</div>
+                        <div class="clearfix">
+                            <div class="price">￥{$g.promotion_price}</div>
+                        </div>
+                    </a>
+                    {/volist}
+                </div>
+            </div>
+        </div>
+    </div>
+    {/if}
+    {/volist}
+</div>
+<div class="danpin">
+    <div class="fapin-bt">
+        <img src="__TEMP__/{$style}/public/Index/images/bt4.png">
+    </div>
+    <div class="dp-list clearfix">
+        <ul>
+		    {volist name="hot_list.data" id="hvo" key = "hk"}
+	            <li>
+	                <div class="jingsai-lvtu">
+	                    <a href="{:__URL('APP_MAIN/goods/goodsdetail?id='.$hvo['goods_id'])}" class="clearfix">
+	                        <div ><img src="{:__IMG($hvo['pic_cover_small'])}" class="jingsaiimg"></div>
+	                        <div class="zhineng">{$hvo.goods_name}</div>
+	                        <div class="clearfix">
+	                            <div class="price">￥{$hvo.promotion_price}<span class="shanchu">{$hvo.market_price}</span></div>
+	                        </div>
+	                    </a>
+	                </div>
+
+	            </li>
+            {/volist}
+        </ul>
+    </div>
+</div>
+<div class="foot-gap"></div>
+<div class="foot ">
+    <ul>
+        <li>
+            <a href="{:__URL('APP_MAIN')}" class="active">
+                <span class="icon icon-ft1"></span>
+                <div class="mui-media-body">{:lang('home_page')}</div>
+            </a>
+        </li>
+        <li>
+            <a href="{:__URL('APP_MAIN/goods/goodsclassificationlist')}">
+                <span class="icon icon-ft2"></span>
+                <div class="mui-media-body">{:lang('category')}</div>
+            </a>
+        </li>
+        <li>
+            <a href="{:__URL('APP_MAIN/goods/cart')}">
+                <span class="icon icon-ft3"></span>
+                <div class="mui-media-body">{:lang('goods_cart')}</div>
+            </a>
+        </li>
+        <li>
+            <a href="{:__URL('APP_MAIN/member/index')}">
+                <span class="icon icon-ft4"></span>
+                <div class="mui-media-body">{:lang('member_member_center')}</div>
+            </a>
+        </li>
+
+    </ul>
+</div>
+{include file='wap/default_new/urlModel'/}
+<script src="__TEMP__/{$style}/public/js/public_assembly.js"></script>
+<script src="__TEMP__/{$style}/public/Index/mui/js/mui.js"></script>
+<!-- 加载弹出层 -->
+<div class="mask-layer-loading">
+	<img src="__TEMP__/{$style}/public/images/mask_load.gif"/>
+</div>
+
+<script type="text/javascript">
+    mui('body').on('tap', 'a', function () {
+        document.location.href = this.href;
+    })
+</script>
+<script type="text/javascript" charset="utf-8">
+    var gallery = mui('.mui-slider');
+    gallery.slider({
+        interval: 5000//自动轮播周期，若为0则不自动播放，默认为0；
+    });
+</script>
+</body>
+</html>

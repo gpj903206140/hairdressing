@@ -1,0 +1,643 @@
+{extend name="adminblue/base" /}
+{block name="resources"}
+<!-- 编辑商品时，用到的JS、CSS资源 -->
+{include file="adminblue/Course/controlEditCourseCommonResources"}
+{/block}
+{block name="main"}
+<style>
+.goods-nav {
+    background: #f7f7f7 !important;
+}
+.btn-submit {
+    background-color: #f7f7f7 !important;
+}
+</style>
+<div class="space-10"></div>
+<div class="ncsc-form-goods">
+	<nav class="goods-nav">
+		<ul>
+			<li class="selected" data-c="block-basic-setting"><a href="javascript:;">基础设置</a></li>
+			<!-- 如果不是虚拟商品点卡才可编辑商品规格 -->
+			{if condition="$goods_info.goods_type == 0 && $goods_info != ''"}
+			<li data-c="block-goods-sku" style="display: none;"><a href=""></a>商品规格</li>
+			{else/}
+			<li data-c="block-goods-sku"><a href="javascript:;">商品规格</a></li>
+			{/if}
+			<li data-c="block-goods-type"><a href="javascript:;">商品属性</a></li>
+			
+			<li data-c="block-photo-video-setting"><a href="javascript:;">媒体设置</a></li>
+			<li data-c="block-goods-detail-setting"><a href="javascript:;">商品详情</a></li>
+			<li data-c="block-template-setting"><a href="javascript:;">模板设置</a></li>
+		</ul>
+	</nav>
+	<!-- 基础设置 -->
+	<div class="block-basic-setting">
+		
+		<h4>基础信息</h4>
+		<dl>
+			<dt><i class="required">*</i>商品名称：</dt>
+			<dd>
+				<input class="productname input-common long" type="text" id="txtProductTitle" placeholder="请输入商品名称，不能超过60个字符" {if condition="$goods_info"}value="{$goods_info.goods_name}"{/if} oninput='if(value.length>60){value=value.slice(0,60);$(this).next().text("商品名称不能超过60个字符").show();}else{$(this).next().hide();}'/>
+				<span class="help-inline">请填写商品名称</span>
+			</dd>
+		</dl>
+		<dl>
+			<dt><i class="required">*</i>商品分类：</dt>
+			{if condition="$goods_info"}
+			<dd id="tbcNameCategory" data-flag="category" cid="{$goods_info.category_id}" data-attr-id="{$goods_info.goods_attribute_id}" cname="{$goods_info.category_name}" data-goods-id="{$goods_info.goods_id}">
+				<span class="category-text">{$goods_info.category_name}</span>
+			{else/}
+			<dd id="tbcNameCategory" data-flag="category" data-goods-id="0" cid="" data-attr-id="" cname="">
+				<span class="category-text"></span>
+			{/if}
+				<button class="category-button">选择</button>
+				<span><label for="g_name" class="error"><i class="icon-exclamation-sign"></i>商品分类不能为空</label></span>
+				<span class="help-inline">请选择商品分类</span>
+			</dd>
+		</dl>
+		<dl>
+			<dt>扩展分类：</dt>
+			<dd id ="extend_name_category_box">
+				{if condition="$goods_info"}
+					<div class="extend-name-category-box">
+					{if condition ="!empty($goods_info['extend_category'])"}
+					{foreach $goods_info["extend_category"] as $k=>$vo}
+						<div class="extend-name-category" id="extend_name_category{$k}" data-flag="extend_category" data-goods-id="{$goodsid}" cid="{$vo.extend_category_id}" data-attr-id="{$goods_info.goods_attribute_id}" cname="{$vo.extend_category_name}">
+							<span class="category-text" onclick="editCategory(this);">{$vo.extend_category_name}</span>
+							&nbsp;&nbsp;<span class="do-style" onclick="editCategory(this);"><i class="fa fa-edit"></i>&nbsp;编辑</span>&nbsp;&nbsp;
+							<span class="do-style" onclick="removeParentBox(this);"><i class="fa fa-trash-o"></i>&nbsp;删除</span>
+							<span class="help-inline" style="vertical-align: top;">已添加的商品扩展分类不能为空</span>
+						</div>
+					{/foreach}
+					{/if}
+					</div>
+				{else/}
+					<div class="extend-name-category-box"></div>
+				{/if}
+				<div class="clear">
+					<button class="select-button" onclick="addExtentCategoryBox();"><i class="fa fa-plus-square"></i>&nbsp;添加</button>
+				</div>
+			</dd>
+		</dl>
+		{if condition="$goods_info"}
+		<dl>
+			<dt><i class="required">*</i>商品种类：</dt>
+			<dd>
+			<input type="text" value="{if condition='$goods_info.goods_kind==0'}实物商品{else/}预约商品{/if}" disabled>
+			<input type="hidden" value="{$goods_info.goods_kind}" id="goods_kind" name="goods_kind">
+		    </dd>
+		</dl>
+		{else/}
+        <!-- <dl>
+        			<dt><i class="required">*</i>商品种类：</dt>
+        			<dd>
+        			<select name="goods_kind" id="goods_kind" class="select-common">
+        				<option value="0">实物商品</option>
+        				<option value="1">预约商品</option>
+        			</select>
+        		    </dd>
+        		</dl> -->
+        <input type="hidden" value="0" id="goods_kind" name="goods_kind">
+		{/if}
+		<dl>
+			<dt><i class="required">*</i>是否可删除：</dt>
+			<dd>
+				<div class="controls">
+				        {if condition="$goods_info"}
+						<label class="radio inline normal">
+							<i class="radio-common {if condition="$goods_info.allow_delete eq 1"}selected{/if}">
+								<input type="radio" name="allow_delete" id="allow_delete" {if condition="$goods_info.allow_delete eq 1"}checked{/if} value="1">
+							</i>
+							<span>是</span>
+						</label>
+						<label class="radio inline normal">
+							<i class="radio-common {if condition="$goods_info.allow_delete eq 0"}selected{/if}">
+								<input type="radio" name="allow_delete" id="allow_delete" value="0" {if condition="$goods_info.allow_delete eq 0"}checked{/if}>
+							</i>
+							<span>否</span>
+						</label>
+						{else/}
+						<label class="radio inline normal">
+							<i class="radio-common selected">
+								<input type="radio" name="allow_delete" id="allow_delete" checked="checked" value="1">
+							</i>
+							<span>是</span>
+						</label>
+						<label class="radio inline normal">
+							<i class="radio-common">
+								<input type="radio" name="allow_delete" id="allow_delete" value="0">
+							</i>
+							<span>否</span>
+						</label>
+						{/if}
+						
+										<span class="help-inline">请选择库存是否显示</span>
+				</div>
+			</dd>
+		</dl>
+		
+		<dl>
+			<dt>商品促销语：</dt>
+			<dd>
+				<input class="productname input-common long" type="text" id="txtIntroduction" placeholder="请输入促销语，不能超过100个字符" {if condition="$goods_info"}value="{$goods_info.introduction}"{/if} oninput='if(value.length>100){value=value.slice(0,100);$(this).next().text("促销语不能超过100个字符").show();}else{$(this).next().hide();}'/>
+				<span class="help-inline">请输入商品促销语，不能超过100个字符</span>
+			</dd>
+		</dl>
+		<dl>
+			<dt>关键词：</dt>
+			<dd>
+				<input class="productname input-common" type="text" id="txtKeyWords" placeholder="商品关键词用于SEO搜索" {if condition="$goods_info"}value="{$goods_info.keywords}"{/if} oninput='if(value.length>40){value=value.slice(0,40);$(this).next().text("商品关键词不能超过40个字符").show();}'/>
+				<span class="help-inline">请输入商品促销语，不能超过40个字符</span>
+			</dd>
+		</dl>
+		<dl>
+			<dt>商品标签：</dt>
+			<dd>
+				<div class="group-text-check-box">
+					<div class="controls product-category-position">
+						{if condition = "!empty($group_list)"}
+							{if condition="$goods_info['group_id_array'] neq ''"}
+								<select class="select-common" multiple id="goods_group" size="1">
+									<option value="0" disabled>请选择商品标签</option>
+									{foreach $group_list as $k=>$v}
+										{in name="$v.group_id" value="$goods_info['group_id_array']"}
+										<option value="{$v.group_id}" selected>{$v.group_name}</option>
+										{else/}
+										<option value="{$v.group_id}">{$v.group_name}</option>
+										{/in}
+									{/foreach}
+								</select>
+							{else/}
+								<select class="select-common" multiple id="goods_group" size="1">
+									<option value="0" disabled>请选择商品标签</option>	
+									{foreach $group_list as $k=>$v}
+										<option value="{$v.group_id}">{$v.group_name}</option>
+									{/foreach}
+								</select>
+							{/if}
+						{else /}
+							<span class="span-error" style="display:block;">暂无可选的商品标签</span>
+						{/if}
+					</div>
+				</div>
+			</dd>
+		</dl>
+		
+		<dl>
+			<dt>基础销量：</dt>
+			<dd>
+				<input type="number" class="span1 input-common harf" id="BasicSales" placeholder="0" {if condition="$goods_info"}value="{$goods_info.sales}"{/if} 
+				/><em class="unit">件</em>
+				<span class="help-inline">基础销量必须是数字，且不能为负数</span>
+			</dd>
+		</dl>
+		<dl>
+			<dt>基础点击数：</dt>
+			<dd>
+				<input type="number" class="span1 input-common harf" id="BasicPraise" placeholder="0" {if condition="$goods_info"}value="{$goods_info.clicks}"{/if} 
+				/><em class="unit">次</em>
+				<span class="help-inline">基础点击数必须是数字，且不能为负数</span>
+			</dd>
+		</dl>
+		<dl>
+			<dt>基础分享数：</dt>
+			<dd>
+				<input type="number" class="span1 input-common harf" id="BasicShare" placeholder="0" {if condition="$goods_info"}value="{$goods_info.shares}"{/if} 
+				/><em class="unit">次</em>
+				<span class="help-inline">基础分享数必须是数字，且不能为负数</span>
+			</dd>
+		</dl>
+        
+		<dl>
+			<dt><i class="required">*</i>是否上架：</dt>
+			<dd>
+				<div class="controls">
+					{if condition="$goods_info"}
+						{if condition = "$goods_info.state eq 1"}
+						<label class="radio inline normal">
+							<i class="radio-common selected">
+								<input type="radio" name="shelves" value="1" checked="checked" />
+							</i>
+							<span>立刻上架</span>
+						</label>
+						<label class="radio inline normal">
+							<i class="radio-common">
+								<input type="radio" name="shelves" value="0" />
+							</i>
+							<span>放入仓库</span>
+						</label>
+						{else /}
+						<label class="radio inline normal">
+							<i class="radio-common">
+								<input type="radio" name="shelves" value="1" />
+							</i>
+							<span>立刻上架</span>
+						</label>
+						<label class="radio inline normal">
+							<i class="radio-common selected">
+								<input type="radio" name="shelves" value="0" checked="checked" />
+							</i>
+							<span>放入仓库</span>
+						</label>
+						{/if}
+					{else/}
+						<label class="radio inline normal">
+							<i class="radio-common selected">
+								<input type="radio" name="shelves" value="1" checked="checked" />
+							</i>
+							<span>立刻上架</span>
+						</label>
+						<label class="radio inline normal">
+							<i class="radio-common">
+								<input type="radio" name="shelves" value="0" />
+							</i>
+							<span>放入仓库</span>
+						</label>
+					{/if}
+				</div>
+			</dd>
+		</dl>
+		
+		<h4>购买信息</h4>
+		
+		<dl>
+			<dt>市场价格：</dt>
+			<dd>
+				<input class="goods_price input-common harf" type="number" id="txtProductMarketPrice" {if condition="$goods_info"}value="{$goods_info.market_price}"{/if} min="0" placeholder="0.00" 
+				/><em class="unit">元</em>
+				<span class="help-inline">商品市场价格必须是数字，且不能为负数</span>
+			</dd>
+		</dl>
+		<dl>
+			<dt><i class="required">*</i>销售价格：</dt>
+			<dd>
+				<input class="goods_price input-common harf" type="number" id="txtProductSalePrice" {if condition="$goods_info"}value="{$goods_info.price}"{/if} min="0" placeholder="0.00" 
+				/><em class="unit">元</em>
+				<span class="help-inline">商品销售价不能为空，且不能为负数</span>
+			</dd>
+		</dl>
+		
+	</div>
+	<!-- 商品规格 -->
+	<div class="block-goods-sku">
+		<nav >
+			<button class="btn-common-white js-open-edit-sku-popup">编辑规格</button>
+<!-- 			<button class="btn-common-white js-batch-edit-sku">批量修改</button> -->
+			<button class="btn-common-white js-clear-goods-sku">清空规格</button>
+		</nav>
+		<div style="padding:10px;line-height: 30px;display: none;">
+			<table class="goods-sku js-goods-sku"></table>
+		</div>
+		
+		<div class="volume-set-sku-info">
+			<span>批量设置：</span>
+			<a href="javascript:;" data-tag="sku-price">销售价格</a>
+			<a href="javascript:;" data-tag="market-price">市场价格</a>
+			<a href="javascript:;" data-tag="cost-price">成本价格</a>
+			<a href="javascript:;" data-tag="stock-num">库存</a>
+			<input type="text" class="input-common middle" />
+			<button class="btn-common">确定</button>
+			<button class="btn-common-cancle">取消</button>
+		</div>
+		
+		<div class="goods-sku-list">
+			<table class="table-class">
+				<colgroup>
+					<col width="50%">
+					<col width="10%">
+					<col width="10%">
+					<col width="10%">
+					<col width="10%">
+					<col width="10%">
+				</colgroup>
+				<thead>
+					<tr>
+						<th align="left">商品规格</th>
+						<th>
+							<span>销售价格</span>
+<!-- 							<input type="text" class="input-common short" /> -->
+<!-- 							<a href="javascript:;" style="float:right;">编辑</a> -->
+						</th>
+						<th>
+							<span>市场价格</span>
+<!-- 							<a href="javascript:;" style="float:right;">编辑</a> -->
+						</th>
+						<th>
+							<span>成本价格</span>
+<!-- 							<a href="javascript:;" style="float:right;">编辑</a> -->
+						</th>
+						<th>
+							<span>库存</span>
+<!-- 							<a href="javascript:;" style="float:right;">编辑</a> -->
+						</th>
+						<th>
+							<span>商家编码</span>
+<!-- 							<a href="javascript:;" style="float:right;">编辑</a> -->
+						</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+		</div>
+		
+	</div>
+	
+	<div class="block-goods-type">
+		
+		<h4>基础信息</h4>
+		
+		<dl>
+			<dt>合作机构：</dt>
+			<dd>
+				<select id="mechanism_id" class="">
+					<option value="0">请选择合作机构</option>
+					{foreach name="mechanism_list" item="mechanism"}
+						<option value="{$mechanism.mechanism_id}" selected="selected">{$mechanism.mechanism_name}</option>
+					{/foreach}
+				</select>
+				<span class="help-inline">请选合作机构</span>
+			</dd>
+		</dl>
+		<dl>
+			<dt>机构老师：</dt>
+			<dd>
+				<select id="teacher_id" class="">
+					<option value="0">请选择机构老师</option>
+					
+				</select>
+				<span class="help-inline">请选机构老师</span>
+			</dd>
+		</dl>
+		
+	</div>
+	
+	<!-- 图片视频设置 -->
+	<div class="block-photo-video-setting">
+		
+		<div class="goods-photos">
+			<h4>商品图片</h4>
+			<dl>
+				<dt>图片上传：</dt>
+				<dd>
+<!-- 			（第一张图片将作为商品主图，支持同时上传多张图片,多张图片之间可随意调整位置；支持jpg、gif、png格式上传或从图片空间中选择，建议使用尺寸800x800像素以上、大小不超过1M的正方形图片，上传后的图片将会自动保存在图片空间的默认分类中。） -->
+					
+					<div id="goods_picture_box" class="controls">
+						<div class="goodspic-uplaod">
+							<div class='img-box' style="min-height:160px;">
+								{if condition="$goods_info"}
+									{if condition="count($goods_info['img_temp_array']) gt 0" }
+										{foreach $goods_info["img_temp_array"]  as $vo}
+											<div class="upload-thumb draggable-element">
+												<img src="{:__IMG($vo['pic_cover'])}" />
+												<input type="hidden" class="upload_img_id" value="{$vo['pic_id']}" />
+												<div class="black-bg hide">
+													<div class="off-box">&times;</div>
+												</div>
+											</div>
+										{/foreach}
+									{else /}
+										<div class="upload-thumb" id="default_uploadimg">
+											<img src="ADMIN_IMG/album/default_goods_image_240.gif" />
+										</div>
+									{/if}
+								{else/}
+								<div class="upload-thumb" id="default_uploadimg">
+									<img src="ADMIN_IMG/album/default_goods_image_240.gif">
+								</div>
+								{/if}
+							</div>
+							<div class="clear"></div>
+							<span class="img-error">最少需要一张图片作为商品主图</span>
+							<p class="hint">第一张图片将作为商品主图,支持同时上传多张图片,多张图片之间可随意调整位置；支持jpg、gif、png格式上传或从图片空间中选择，建议使用尺寸800x800像素以上、大小不超过1M的正方形图片，上传后的图片将会自动保存在图片空间的默认分类中。</p>
+							<div class="handle" style="margin-top: 5px;">
+								<div class="ncsc-upload-btn" style="margin-left:0;">
+									<a href="javascript:void(0);">
+										<span>
+											<input style="cursor:pointer;font-size:0;" type="file" id="fileupload" hidefocus="true" class="input-file" name="file_upload"multiple="multiple" />
+										</span>
+										<p>图片上传</p>
+									</a>
+								</div>
+								<a class="ncsc-btn mt5" id="img_box" nctype="show_image" href="javascript:void(0);">从图片空间选择</a>
+							</div>
+						</div>
+					</div>
+					<span class="help-inline">最少需要一张图片作为商品主图</span>
+				</dd>
+			</dl>
+		</div>
+		
+		<div class="goods-video">
+			<h4>展示视频</h4>
+			<dl>
+				<dt>视频上传：</dt>
+				<dd style="padding:0;">
+					<div class="goodspic-uplaod" style="overflow: hidden;position:relative;">
+				
+						<div class="video-thumb">
+							{if condition="$goods_info"}
+								<video id="my-video" class="video-js vjs-big-play-centered" controls 
+									{if condition="empty($goods_info['goods_video_address'])"} poster="__STATIC__/blue/img/goods_video_upload_bg.png" {else/} poster="" {/if}
+									 src="{$goods_info['goods_video_address']}">
+									<p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that</p>
+								</video>
+								<span class="del-video {if condition='empty($goods_info.goods_video_address)'} hide {/if}" onclick="del_video(this)"></span>
+							{else/}
+								<video id="my-video" class="video-js vjs-big-play-centered" controls poster="__STATIC__/blue/img/goods_video_upload_bg.png" preload="auto">
+									<p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that</p>
+								</video>
+								<span class="del-video hide" onclick="del_video()"></span>
+							{/if}
+						</div>
+						<input class="input-file" name="file_upload" id="videoupload" type="file" onchange="fileUpload_video(this);" title="视频上传" style="position: absolute;left: 0;width: 290px;height: 140px;opacity: 0;cursor: pointer;z-index:10;" />
+					</div>
+				</dd>
+			</dl>
+			
+			<dl>
+				<dt>输入网址：</dt>
+				<dd>
+					<input type="text" id="video_url" class="input-common" style="width: 290px !important;" placeholder="在此输入外链视频地址" {if condition="$goods_info"}value="{$goods_info.goods_video_address}"{/if} />
+					<p class="hint">
+						<span>展示视频<i class="important-note">支持手动输入外链视频地址</i>或者<i class="important-note">上传本地视频</i></span>
+					</p>
+				</dd>
+			</dl>
+		</div>
+		
+		<div class="goods-sku-picture">
+			<h4>规格图片</h4>
+			<dl class="sku-picture-dl">
+				<dt>规格名列表：</dt>
+				<dd>
+					<div class="sku-picture-div"></div>
+				</dd>
+			</dl>
+			<dl class="sku-picture-dl-box">
+				<dt>规格值列表：</dt>
+				<dd>
+					<div class="sku-picture-box"></div>
+				</dd>
+			</dl>
+		</div>
+		{include file="adminblue/Goods/fileAlbumImg"/}
+	</div>
+	
+	<!-- 详情设置 -->
+	<div class="block-goods-detail-setting">
+	
+		<div class="controls" id="discripContainer">
+			<textarea id="tareaProductDiscrip" name="discripArea" style="height: 500px; width: 800px; display: none;"></textarea>
+			<script id="editor" type="text/plain" style="width: 100%; height: 500px;"></script>
+			<span class="help-inline">请填写商品描述</span>
+		</div>
+	</div>
+	
+	<div class="block-template-setting">
+	
+		<!-- 模板设置 -->
+		<h4>模板设置</h4>
+		<!-- <dl>
+			<dt>电脑端：</dt>
+			<dd>
+				{$template_url['pc_template_url']}&nbsp;<input type="text" class="input-common harf" name="" id="pc_custom_template" value="{$goods_info.pc_custom_template}" style="width: 80px;" onkeyup="value=value.replace(/[^\w\.\/]/ig,'')">&nbsp;.html
+				<p class="hint">用户自定义模板必须存放在{$template_url['pc_template_url']}下，模板名只能由英文组成</p>
+			</dd>
+		</dl> -->
+		<dl>
+			<dt>手机端：</dt>
+			<dd>
+				{$template_url['wap_template_url']}&nbsp;<input type="text" class="input-common harf" name="" id="wap_custom_template" value="{$goods_info.wap_custom_template}" style="width: 80px;" onkeyup="value=value.replace(/[^\w\.\/]/ig,'')">&nbsp;.html
+				<p class="hint">用户自定义模板必须存放在{$template_url['wap_template_url']}下，模板名只能由英文组成</p>
+			</dd>
+		</dl>
+	</div>
+	
+	<div class="js-mask-category" style="position: fixed; width: 100%; height: 100%; top: 0px; left: 0px; right: 0px; bottom: 0px; z-index: 90; display: none; background: rgba(0, 0, 0, 0);"></div>
+	
+</div>
+
+<div class="edit-sku-popup-mask-layer"></div>
+<div class="edit-sku-popup">
+	<header>
+		<h3>选择规格</h3>
+		<span>×</span>
+	</header>
+	<div class="edit-sku-popup-body">
+		<aside>
+			<p>选择规格 [可多选]</p>
+			<div class="js-attr-block">
+				<select id="search_attr_id" class="select-common attr-search" onchange="getAttrSearchSelected(this);">
+					<option value="0" selected>全部</option>
+					{foreach name="goods_attribute_list" item="attribute"}
+						<option value="{$attribute.attr_id}">{$attribute.attr_name}</option>
+					{/foreach}
+				</select>
+			</div>
+			<ul class="js-sku-list-popup">
+				<li class="add-sku">
+					<input type="text" class="input-common" placeholder="输入新规格名称">
+					<i class="fa fa-plus"></i>
+					<strong>添加新规格</strong>
+				</li>
+			</ul>
+		</aside>
+		<article>
+			<p>选择规格值 [可多选]</p>
+			<div>
+				
+				<p class="empty-info">请选择左侧规格列表</p>
+				
+				<div class="sku-value-list">
+					<label><input class="margin-small-right" id="checkAll" type="checkbox">全选</label>
+					<div class="add-sku-value-input">
+						<input type="text" class="input-common" placeholder="输入规格值名称(回车保存)" />
+						<button class="btn-common">确定</button>
+					</div>
+					<ul></ul>
+				</div>
+				
+			</div>
+		</article>
+	</div>
+	<div class="edit-sku-batch-info">
+	<!-- 编辑规格价格、库存、商家编码信息 -->
+		<table class="table-class">
+			<tr>
+				<th>销售价格</th>
+				<th>市场价格</th>
+				<th>成本价格</th>
+				<th>库存</th>
+			</tr>
+			<tr>
+				<td>
+					<input type="text" class="input-common js-sku-price middle" placeholder="销售价格" />
+				</td>
+				<td>
+					<input type="text" class="input-common js-market-price middle" placeholder="市场价格" />
+				</td>
+				<td>
+					<input type="text" class="input-common js-cost-price middle" placeholder="成本价格" />
+				</td>
+				<td>
+					<input type="text" class="input-common js-stock-num middle" placeholder="库存" />
+				</td>
+			</tr>
+		</table>
+	</div>
+	<footer>
+		<span class="box-spec-bottom">注意：改变规格会删除原有的规格数据，并生成新的规格数据。</span>
+		<button class="btn-common btn-big btn-top">生成</button>
+		<button class="btn-common-cancle btn-big btn-bottom">取消</button>
+	</footer>
+</div>
+
+<div class="point-card-inventory-management-popup">
+	<div class="point-card-inventory-management-body">
+	</div>
+	<footer></footer>
+</div>
+
+<div style="height: 50px;" class="h50"></div>
+<div class="btn-submit ncsc-form-goods" style="text-align: left;">
+	<dl>
+		<dt></dt>
+		<dd style="padding: 0;">
+			<button class="btn-common" id="btnSave" type="button" onClick="SubmitProductInfo(0,'ADMIN_MAIN','SHOP_MAIN')">保存</button>
+			<button class="btn-common" id="btnSavePreview" type="button" onClick="SubmitProductInfo(1,'ADMIN_MAIN','SHOP_MAIN')">保存并预览</button>
+		</dd>
+	</dl>
+</div>
+<script>
+$(function(){
+	//选择合作机构找到机构下的老师
+	$("#mechanism_id").change(function(){
+		var id=$(this).val();
+		var url="{:__URL('ADMIN_MAIN/Course/getTeacher')}&mechanism_id="+id;
+		$.get(url,function(result){
+			var myjson='';
+			eval('myjson='+result+'');
+			var html='';
+			for(var i=0;i<myjson.length;i++ ){
+                 html+='<option value="'+myjson[i]['teacher_id']+'">'+myjson[i]['teacher_name']+'</option>';
+			}
+			$("#teacher_id").append(html);
+		})
+	})
+	var goods_kind="{$goods_info.goods_kind}";
+	if(goods_kind==1){
+		$(".type_hide").hide();
+	}
+})
+
+$("#goods_kind").change(function(){
+	var val=$(this).val();
+	if(val==0){
+		$(".type_hide").show();
+	}else if(val==1){
+		$(".type_hide").hide();
+	}
+})
+</script>
+{include file="adminblue/Course/controlEditCourseCommonScript"}
+{/block}

@@ -1,0 +1,93 @@
+{extend name="wap/default_new/base" /}
+{block name="resources"}
+<link rel="stylesheet" type="text/css" href="__TEMP__/{$style}/public/css/common-v4.4.css">
+<link rel="stylesheet" type="text/css" href="__TEMP__/{$style}/public/css/member_address.css">
+<style>
+.addr-box {
+	padding-top: 0px;
+	text-align: center;
+}
+
+.addr-tip {
+	font-size: 14px;
+	color: #8f8f8f;
+	margin-top: 10px;
+}
+
+.btn-save {
+	margin-top: 40px;
+}
+
+.team {
+	margin-top: 45px;
+}
+
+.team-item {
+	padding: 10px;
+	height: 70px;
+	border-bottom: 1px solid #E2E1E1;
+	position: relative;
+}
+
+.team-item img {
+	vertical-align: middle;
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+	margin-right: 10px;
+	margin-top: 10px;
+}
+
+.team-info {
+	position: absolute;
+	top: 20%;
+	display: inline-block;
+}
+
+.team-info strong {
+	font-weight: normal;
+	color: #333333;
+	font-size: 14px;
+}
+
+.team-info time {
+	color: #B0B0B0;
+	font-size: 12px;
+}
+.team-info .role_name{
+	font-size: 14px;
+	color: #EE4349;
+}
+.team-info .role_user{
+	font-size: 12px;
+	color: #B0B0B0;
+}
+</style>
+{/block}
+{block name="main"}
+<input type="hidden" id="ref_url" value="{$pre_url}">
+<input type="hidden" value="{$flag}" id="hidden_flag" />
+<section class="head">
+	<a class="head_back" href="javascript:window.history.go(-1);"><i class="icon-back"></i></a>
+	<div class="head-title">{:lang('distribution_application_promoters')}</div>
+</section>
+
+<article class="team">
+    {volist name="row" id="item"}
+	<div class="team-item">
+				
+				{if condition="$item['user_headimg'] eq ''"}
+					<img src="{:__IMG($default_headimg)}" />
+				{else/}
+					<img src="{:__IMG($item['user_headimg'])}">
+				{/if}
+				<div class="team-info">
+			<strong>{$item.nick_name}</strong>
+			<strong class="role_name">({:lang('distribution_promoters')})</strong><br>
+						<time>注册时间：{$item.reg_time|date='Y-m-d H:i:s',###}</time>
+		</div>
+	</div>
+	{/volist}
+	</article>
+{/block}
+{block name="bottom"}{/block}

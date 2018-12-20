@@ -1,0 +1,114 @@
+{extend name="shop/blue/deskBase" /}
+{block name="commonMain"}
+<div class="banner ny">
+    <div class="flexslider">
+        <ul class="slides">
+            <li><img src="__TEMP__/{$style}/public/FrontDesk/images/temp/mr.jpg"></li>
+
+        </ul>
+    </div>
+</div>
+<div class="index-content inside clearfix">
+    <div class="mr-left">
+        <div class="meirong">
+            <div class="bt">
+                <span class="r">当前位置：<a href="{:__URL('SHOP_MAIN/frontDesk/index')}"> 首页</a> > 美容</span>
+                <h2>美容</h2>
+            </div>
+            <div class="nr">
+                {if condition="$Relevant_list[0]['summary'] neq ''"}
+                <div class="clearfix">
+                    <div class="l"><img src="{:__IMG($Relevant_list[0]['image'])}" class="mt"></div>
+                    <div class="mrwz">
+                        <p>
+                           {$Relevant_list[0]['summary']}</p>
+                    </div>
+                </div>
+                {/if}
+                <div class="mr-item clearfix">
+                    <ul>
+                        <li><a href="{:__URL('SHOP_MAIN/frontDesk/cosmetology', 'category=1')}">眼部整形</a></li>
+                        <li><a href="{:__URL('SHOP_MAIN/frontDesk/cosmetology', 'category=2')}">鼻部整形</a></li>
+                        <li><a href="{:__URL('SHOP_MAIN/frontDesk/cosmetology', 'category=3')}">面部精雕</a></li>
+                        <li><a href="{:__URL('SHOP_MAIN/frontDesk/cosmetology', 'category=4')}">美肤中心</a></li>
+                        <li><a href="{:__URL('SHOP_MAIN/frontDesk/cosmetology', 'category=5')}">胸部整形</a></li>
+                        <li><a href="{:__URL('SHOP_MAIN/frontDesk/cosmetology', 'category=6')}">面部年轻化</a></li>
+                        <li><a href="{:__URL('SHOP_MAIN/frontDesk/cosmetology', 'category=7')}">身材管理</a></li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+        <div>
+            <div class="bt">
+                <h2><a href="{:__URL('SHOP_MAIN/frontDesk/expertList', 'category=11')}">整形团队</a></h2>
+            </div>
+            <div class="mr-td click">
+                <ul>
+                    {foreach name="expert_list" item="val"}
+                    <li>
+                        <div class="bk">
+                            <a href="{:__URL('SHOP_MAIN/frontDesk/articleDetails', 'article_id='.$val.article_id.'&category=11')}" data-id="{$val.article_id}">
+                                <img src="{:__IMG($val['image'])}" class="sztd"> </a>
+                            <h2>{$val["title"]}</h2>
+                            <p>作为“亚洲连锁”的整形美容机构，姿博会拥有来自世界各地的整形专家。</p>
+                            <a href="tel:{$val['phone']}" class="hs-btn">点击咨询</a>
+                        </div>
+                    </li>
+                    {/foreach}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="mr-right">
+        <div>
+            <div class="bt">
+                <span class="r"><a href="{:__URL('SHOP_MAIN/frontDesk/articleList', 'category='.$category)}" class="green"> 更多</a></span>
+                <h2>相关项目<span>Related items</span></h2>
+            </div>
+            <div class="item-list click">
+                <ul>
+                    {foreach name="Relevant_list" item ="vo"}
+                    <li>
+                        <a href="{:__URL('SHOP_MAIN/frontDesk/articleDetails', 'article_id='.$vo.article_id.'&category='.$category)}" class="clearfix" data-id="{$vo.article_id}">
+                            <div class="l"><img src="{:__IMG($vo['image'])}" class="mtsmall"></div>
+                            <div class="mrmc">
+                                {$vo["title"]}
+                            </div>
+                        </a>
+                    </li>
+                    {/foreach}
+                </ul>
+
+            </div>
+        </div>
+        <div>
+            <div class="bt">
+                <span class="r"><a href="{:__URL('SHOP_MAIN/frontDesk/articleList', 'category=8')}" class="green"> 更多</a></span>
+                <h2>美丽资讯<span>News</span></h2>
+            </div>
+            <div class="list click">
+                <ul>
+                    {foreach name="article_list" item ="v"}
+                    <li><span class="date r">{$v["create_time"]|date='Y-m-d',###}</span><a href="{:__URL('SHOP_MAIN/frontDesk/articleDetails', 'article_id='.$v.article_id.'&category=8')}" data-id="{$v.article_id}">{$v["title"]}</a></li>
+                    {/foreach}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script>
+//文章点击数
+$("body").on('click',".click li a",function(){
+    var href=this.href;
+    var article_id=$(this).attr('data-id');
+    var url="{:__URL('APP_MAIN/Goods/addClick')}&article_id="+article_id;
+    $.get(url,function(data){
+         window.location.href=href;
+    })
+    return false;
+})
+</script>
+{/block}
+{/block}

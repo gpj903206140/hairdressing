@@ -1,0 +1,321 @@
+{extend name="adminblue/base" /}
+{block name="resources"/}
+<script type="text/javascript" src="__STATIC__/My97DatePicker/WdatePicker.js"></script>
+<link href="__STATIC__/blue/css/order/ns_orderlist.css" rel="stylesheet" type="text/css" />
+<style>
+.mytable.select td{padding-bottom:0;}
+.mytable.select #more_search{display: block;}
+.table-class tbody td a {margin-left: 0;}
+.to-fixed{position: fixed;width: 85.5%;top: 50px;box-shadow: 0 2px 6px 0 rgba(0,0,0,.3);z-index: 5;}
+.mytable td{padding:10px 0;}
+.btn-common-white{line-height: 20px;outline: none;background: white}
+.ns-main{margin-top: 0;}
+.seller_memo{background: #FFF9DF!important;color: #D09B4C;}
+
+.set-style dl dd {
+     width: 55%; 
+}
+.table-class tbody td {
+    border-right: none;
+}
+
+.panel-table tbody td {
+    border-right: 1px solid #E3E3E3;
+}
+.table-class tr td {
+    border-bottom: 1px solid #e5e5e5;
+}
+</style>
+{/block}
+<!-- {1block name="thirdmenu"}{/block} -->
+<!-- {1block name="warm_prompt"}{/block} -->
+<!-- {1block name="right_tab_tip"}{/block} -->
+{block name="main"}
+<div class="ns-main">
+			
+<table class="mytable">
+	<tbody><tr>
+		<th style="line-height:33px;">
+			下单时间：
+			<input type="text" id="startDate" class="input-common middle" placeholder="请选择开始日期" onclick="WdatePicker()">
+			&nbsp;-&nbsp;
+			<input type="text" id="endDate" placeholder="请选择结束日期" class="input-common middle" onclick="WdatePicker()">
+			<!-- 更多搜索 -->
+			<button class="btn-common-white more-search"><i class="fa fa-chevron-down"></i></button>
+			<div class="more-search-container">
+				<dl>
+					<dt>买家名称：</dt>
+					<dd>
+						<input id="userName" class="input-common middle" type="text" value="">
+					</dd>
+				</dl>
+				<dl>
+					<dt>订单编号：</dt>
+					<dd>
+						<input id="orderNo" class="input-common middle" type="text" value="">
+					</dd>
+				</dl>
+				<dl>
+					<dt>订单状态：</dt>
+					<dd>
+						<div class="selectric-wrapper selectric-select-common selectric-middle" style="width: 150px;">
+						      <select id="order_status" class="select-common middle" tabindex="-1">
+									<option value="">全部</option>
+									<option value="0">待付款</option>
+									<option value="1">待发货</option>
+									<option value="2">待收货</option>
+									<option value="3">已收货</option>
+									<option value="4">交易成功</option>
+									<option value="5">已关闭</option>
+									<option value="-1">退款中</option>
+									<option value="-2">已退款</option>
+						      </select>
+						  </div>
+					</dd>
+				</dl>
+				<dl>
+					<dt></dt>
+					<dd>
+						<button onclick="searchData()" class="btn-common">完成</button>
+					</dd>
+				</dl>
+			</div>					
+			<button onclick="searchData()" value="搜索" class="btn-common">搜索</button>
+		</th>		
+	</tr>
+</tbody></table>
+
+<div class="mod-table">
+	<div class="mod-table-head">
+		<div class="con style0list">
+			<table class="table-class">
+				<colgroup>
+					<col style="width: 20%;">
+					<col style="width: 15%;">
+					<col style="width: 10%;">
+					<col style="width: 10%;">
+					<col style="width: 11%;">
+					<col style="width: 17%;">
+					<col style="width: 17%;">
+
+				</colgroup>
+				<thead>
+					<tr>
+						<th>订单号</th>
+						<th>订单金额</th>
+						<th>订单状态</th>
+						<th>佣金</th>
+						<th>买家</th>					
+						<th>创建时间</th>						
+						<th>完成时间</th>
+					</tr>
+				</thead>
+				<colgroup>
+					<col style="width: 20%;">
+					<col style="width: 15%;">
+					<col style="width: 10%;">
+					<col style="width: 10%;">
+					<col style="width: 11%;">
+					<col style="width: 17%;">
+					<col style="width: 17%;">
+				</colgroup>
+				<tbody></tbody>
+			</table>
+	</div>
+</div>
+
+<input type="hidden" id="page_count" value="5">
+<input type="hidden" id="page_size" value="14">
+
+</div>
+<script type="text/javascript">	
+	//查询
+	function searchData(){
+		$(".more-search-container").slideUp();
+		LoadingInfo(1);
+	}
+	//加载数据
+	function LoadingInfo(pageIndex) {
+		var start_date = $("#startDate").val();
+		var end_date = $("#endDate").val();
+		var user_name = $("#userName").val();
+		var order_no = $("#orderNo").val();
+		var order_status = $("#order_status").val();
+		$.ajax({
+			type : "post",
+			url : "{:__URL('ADMIN_MAIN/distributionnew/distributionLevelList')}",
+			async : true,
+			data : {
+				"page_index" : pageIndex, "start_date" : start_date, "end_date" : end_date, "user_name":user_name, "order_no":order_no, "order_status" : order_status
+			},
+			success : function(data) {
+				//alert(JSON.stringify(data));
+				$("#page_count").val(data["page_count"]);
+				$("#pageNumber a").remove();
+				var html = '';
+				if (data["data"].length > 0) {
+					for (var i = 0; i < data["data"].length; i++) {
+                        if(data["data"][i]["order_status"]==10){
+							var bg='<img src="ADMIN_IMG/yuimg.png" width="12" height="12" style="position:absolute;left: 30px;margin-top:3px;">';
+						}else{
+							var bg='';
+						}
+						html += '<tr align="center"data-show ="1"style="cursor:pointer;" onclick=showOrHideAccordion("accordiondata'+i+'",this);>';
+						html += '<td style="position:relative;" >' + data["data"][i]["order_no"] + bg+'</td>';
+						html += '<td>' + data["data"][i]["order_money"] + '</td>';
+						if(data["data"][i]["order_status"]==10){
+							var goods_typename='预约';
+							var bg='<img src="ADMIN_IMG/what.png" widt="20" height="20">';
+							if(data["data"][i]["pay_status"]==10){
+								var pay_status='已完成';
+
+							}else if(data["data"][i]["pay_status"]==-10){
+								var pay_status='已关闭';
+
+							}else{
+								var pay_status='未完成';
+							}
+                            html += '<td>' + pay_status+'</td>';
+						}else{
+							var bg='';
+							var goods_typename='';
+							html += '<td>' + data["data"][i]["status_name"] + '</td>';
+						}
+						
+						html += '<td>' + data["data"][i]["commission"] + '</td>';
+						html += '<td>' + data["data"][i]["user_name"] + '</td>';
+						html += '<td>' + timeStampTurnTime(data["data"][i]["create_time"]) + '</td>';
+						html += '<td>' + timeStampTurnTime(data["data"][i]["finish_time"]) + '</td>';
+						html += '</tr>';
+						html +='<tr class="collapse" style="display:none;" id="accordiondata'+i+'">';
+						html +='<td colspan="7" style="padding:10px;background-color:#E0E0E0;" >';	
+						html +='<table class="panel-table table-class" ><colgroup>';
+						html +='<col style="width: 35%;">';
+						html +='<col style="width: 15%;">';
+						html +='<col style="width: 10%;">';
+						html +='<col style="width: 10%;">';
+						html +='<col style="width: 12%;">';
+						html +='<col style="width: 10%;">';
+						html +='<col style="width: 8%;">';			
+						html +='</colgroup>';					
+						html +='<tbody>';
+						//html +="<tr><td  colspan='8' style='border-left: 1px solid transparent;height:10px;padding:0px;border-right: 1px solid transparent;'></td></tr>";
+						html += '<tr class="title-tr">';
+						html += '<td>'+goods_typename+'商品</td>';
+						html += '<td>商品清单</td>';
+						html += '<td>商品利润</td>';
+						html += '<td>商品分销比率</td>';
+						html += '<td>推广员佣金比例</td>';
+						html += '<td>佣金金额</td>';
+						html += '<td>收益人</td>';
+						html += '</tr>';
+						
+						
+						//循环订单项
+						for(var j = 0; j < data["data"][i]["order_item_list"].length; j++){
+							var commission_distribution_item = data["data"][i]["order_item_list"][j]["commission_distribution_list"];
+							var row = 1;
+							if(commission_distribution_item!=undefined&&commission_distribution_item.length >0){
+								row = commission_distribution_item.length+1
+							}
+							html += '<tr calss="no-rightborder"><td style="border-right:0;"rowspan="'+row+'">';
+							//html += '<div class="product-img"><img src="/'+data["data"][i]["order_item_list"][j]["picture"]['pic_cover_micro']+'"></div>';
+							var pic_cover_micro = data["data"][i]["order_item_list"][j]["picture"]['pic_cover_micro']
+							html += '<div class="product-img"><img src="'+__IMG(pic_cover_micro)+'"></div>';
+							
+							html += '<div class="product-infor">';
+							html += '<a class="name" href="'+__URL('/wap/Goods/goodsDetail?id='+data["data"][i]["order_item_list"][j]["goods_id"])+'" target="_blank">'+data["data"][i]["order_item_list"][j]["goods_name"]+'</a>';
+							html += '<p class="specification"><span>'+data["data"][i]["order_item_list"][j]["sku_name"]+'</span></p></div>';
+							html += '</div></td>';
+							html += '<td style="border-left:0px solid #fff;border-right:1px solid #E3E3E3;"rowspan="'+row+'">';//商品信息与商品清单的分割线
+							//html += '<div class="cell" style="display: inline-block;"><span>'+data["data"][i]["order_item_list"][t]["goods_name"]+'</span></div>';
+							html += '<div class="cell" style="display: inline-block;"><span>'+data["data"][i]["order_item_list"][j]["price"]+'元</span></div>';
+							if(data["data"][i]["order_status"]==10){
+                                html += '<div class="cell" style="display: inline-block;float:right">人数: '+data["data"][i]["order_item_list"][j]["num"]+'</div>';
+							}else{
+                                html += '<div class="cell" style="display: inline-block;float:right">'+data["data"][i]["order_item_list"][j]["num"]+'件</div>';
+							}
+							
+							if(data["data"][i]["order_item_list"][j]['adjust_money'] != 0){
+								html += '<div class="cell" style="display: inline-block;"><span>(调价：'+data["data"][i]["order_item_list"][j]["adjust_money"]+'元)</span></div>';
+							}
+// 							if((data["data"][i]["order_item_list"][j]['refund_status'] != 0) && (data["data"][i]["order_item_list"][j]['refund_operation'] != ''))
+							if(commission_distribution_item!=undefined&&commission_distribution_item.length >0){
+								for(t = 0; t< commission_distribution_item.length;t++){
+									html +='</tr>';
+									html +='<tr calss="no-rightborder">';
+									html +='<td>'+parseFloat(commission_distribution_item[t]["profit"]).toFixed(2)+'</td>';
+									html +='<td>'+parseFloat(commission_distribution_item[t]["distribution_commission_rate"]).toFixed(2)+'%</td>';
+									html +='<td>'+parseFloat(commission_distribution_item[t]["commission_rate"]).toFixed(2)+'%</td>';
+									html +='<td>'+parseFloat(commission_distribution_item[t]["commission_money"]).toFixed(2)+'</td>';
+									//html +='<td>'+commission_distribution_item[t]['user']["user_name"]+'('+'姓名:'+commission_distribution_item[t]['user']["nick_name"]+'<br/>'+'编号:'+commission_distribution_item[t]['user']["number"]+')'+'</td>';
+									if(commission_distribution_item[t]['user']){
+										if(commission_distribution_item[t]['user']["number"]!=''){
+                                            var number='编号:'+commission_distribution_item[t]['user']["number"]+'';
+										}else{
+                                            var number='非推广人员';
+										}
+										html +='<td>'+commission_distribution_item[t]['user']["user_name"]+'('+'姓名:'+commission_distribution_item[t]['user']["nick_name"]+''+'&nbsp;&nbsp;'+number+')'+'</td>';
+									}else{
+										html +='<td></td>';
+									}
+								}	
+							}else{
+								html +='<td>0.00</td>';
+								html +='<td>0.00%</td>';	
+								html +='<td>0.00%</td>';
+								html +='<td>0.00</td>';	
+								html +='<td></td>';	
+							}					
+							html += '</tr>';						
+						}						
+						html +='</tbody></table>';
+						html +='</td>';
+						html +='</tr>'					
+					}
+				} else {
+					html += '<tr align="center"><td colspan="7">暂无符合条件的数据记录</td></tr>';
+				}
+				$(".style0list tbody").html(html);
+				var totalpage = $("#page_count").val();
+				if (totalpage == 1) {
+					changeClass("all");
+				}
+				initPageData(data["page_count"],data['data'].length,data['total_count']);
+				var $html = pagenumShow(jumpNumber,totalpage,5)
+				$("#pageNumber").append($html);
+			}
+		});
+	}	
+	//全选
+	function CheckAll(event){
+		var checked = event.checked;
+		$(".style0list tbody input[type = 'checkbox']").prop("checked",checked);
+	}
+	
+	function showOrHideAccordion(accordion_id,event){		
+		if($(event).data("show") == 1){			
+			$(event).data("show",0);
+			$('#'+accordion_id).show();
+		}else{
+			$(event).data("show",1);
+			$('#'+accordion_id).hide();
+		} 	
+		
+	}
+	
+	// 点击显示更多搜索
+	$(".more-search").on("click", function(e){
+		$(".more-search-container").slideToggle();
+		$(document).one("click", function(){
+	        $(".more-search-container").slideUp();
+	    });
+	    e.stopPropagation();
+	})
+
+	$(".more-search-container").on("click", function(e){
+	    e.stopPropagation();
+	});
+
+</script>
+{/block}

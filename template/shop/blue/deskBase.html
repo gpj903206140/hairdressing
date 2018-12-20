@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>杭州姿博生物科技有限公司</title>
+    <meta name="keywords" content="杭州姿博生物科技有限公司"/>
+    <meta name="description" content="杭州姿博生物科技有限公司"/>
+    <link rel="shortcut  icon" type="image/x-icon" href="__TEMP__/{$style}/public/images/favicon.ico" media="screen"/>
+    <link href="__TEMP__/{$style}/public/FrontDesk/css/zbh.css" rel="stylesheet" type="text/css"/>
+    <script src="__TEMP__/{$style}/public/FrontDesk/js/jquery-1.11.2.min.js" type="text/javascript"></script>
+    <script type="text/javascript" src="__TEMP__/{$style}/public/FrontDesk/js/jquery.flexslider-min.js"></script>
+
+</head>
+<body class="white">
+<div class="white">
+    <div class="dingbf clearfix ">
+        <div class="logo"><a href="/"><img src="__TEMP__/{$style}/public/FrontDesk/images/sy_03.jpg"/></a></div>
+        <div class="nav">
+            <ul>
+                <li class="sel"><a href="{:__URL('SHOP_MAIN/frontDesk/index')}">企业资讯</a></li>
+                <li><a href="#">精准体检</a></li>
+                <li><a href="#">免疫细胞</a></li>
+                <li><a href="{:__URL('SHOP_MAIN/frontDesk/cosmetology')}">医学美容</a></li>
+                <li><a href="#">养生精品</a></li>
+                <li><a href="#">健康财富</a></li>
+                <li><a href="{:__URL('SHOP_MAIN/frontDesk/articleDetails', 'article_id='.$call_list.article_id.'&category=10')}">联系我们</a></li>
+                <li><a href="{:__URL('SHOP_MAIN/frontDesk/help')}">帮助中心</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+{block name="commonMain"}
+	
+{/block}
+
+<div class="foot white">
+    地址：{$website.web_address}&nbsp;&nbsp; {$website.web_icp}&nbsp;&nbsp;{:lang('technical_support')}
+</div>
+<div class="swt-right-index" id="swt-right-index">
+    <ul>
+        <li class="swt-right-index1" style="right: 0px;">
+            <a title="点击这里给我发消息" href="tencent://message/?uin={$config_list.value.qq_service_addr}&Site=-&Menu=yes" class="" target="_blank">
+            </a>
+        </li>
+        <li class="swt-right-index2" style="right: 0px;">
+            <a  href="tel:{$website.web_phone}" class="" target="_blank">
+            </a>
+        </li><!-- {$website.web_weixin} -->
+        <li class="swt-right-index3 QQG" style="right: 0px;">
+            <a title="点击这里给我发消息" href="tencent://message/?uin={$website.web_qq}&Site=-&Menu=yes" class="" target="_blank">
+            </a>
+        </li>
+        <li class="swt-right-index4" style="right: 0px;">
+            <a href="javascript:();" class=""> <img src="{:__IMG($web_info['web_qrcode'])}" alt="{:lang('official_wechat')}" height="130" width="130"></a>
+        </li>
+        <li class="swt-right-index5" style="right: 0px;">
+            <a href="#" target="_blank" class=""></a>
+        </li>
+        <li class="swt-right-index6" style="right: 0px;	cursor: pointer;">
+            <a onclick="pageScroll()"></a>
+        </li>
+    </ul>
+</div>
+<script src="__TEMP__/{$style}/public/FrontDesk/js/sst.js"></script>
+
+</body>
+</html>

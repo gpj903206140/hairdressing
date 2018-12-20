@@ -1,0 +1,385 @@
+{extend name="wap/default_new/base" /}
+{block name="resources"}
+<style>
+.share_img{position:fixed;top:0;right:0;z-index:99999;display:none;background:#000;opacity:0.8;filter:alpha(opacity=80);width:100%;height:100%;text-align:right;}
+.share_img p{color:#fff;line-height:30px;font-size:16px;}
+</style>
+{/block}
+{block name="goodsHead"}
+
+{/block}
+
+{block name="main"}
+<!-- 资讯中心 -->
+    <style>
+      .detail{
+      	 width:94%;
+      	 padding:5px 3%;
+      	 float:left;
+      	 background:#fff;
+      	 margin-top:45px;
+      }
+      .detail h3{
+      	 width:100%;
+      	 line-height:25px;
+      	 padding:10px 0 0px 0;
+      	 font-size:18px;
+      	 color:#333;
+      }
+      .detail p.time{
+      	width:100%;
+      	 line-height:22px;
+      	 float:left;
+      	 color:#c5c5c5;
+      	 font-size:14px;
+      	 border-bottom:1px solid #ccc;
+      	 padding:15px 0;
+      	 margin-bottom:15px;
+      }
+      .content{
+      	 width:100%;
+      	 line-height:22px;
+      	 float:left;
+      	 color:#666;
+      	 font-size:14px;
+      }
+      /*评论样式*/
+      .comment_show{
+         width:94%;
+         padding:10px 3%;
+         background:#fff;
+         margin-top:10px;
+         float:left;
+         margin-bottom:130px;
+      }
+      .comment_show h3{
+        width:100%;
+        height:35px;
+        line-height:35px;
+        color:#333;
+        border-bottom:1px solid #ebebeb;
+      }
+      .comment_show dl{
+        width:94%;
+        margin:0 3%;
+        padding:10px 0%;
+        float:left;
+        margin-bottom:0;
+        border-bottom:1px solid #ccc;
+      }
+      .comment_show dl dt{
+        width:10%;
+        float:left;
+        margin-right:4%;
+      }
+      .comment_show dl dt img{
+        width:35px;
+        height:35px;
+        float:left;
+        border-radius:50%;
+      }
+      .comment_show dl dd{
+        width:86%;
+        line-height:22px;
+        float:left;
+        color:#666;
+        font-size:13px;
+      }
+      .comment_show dl dd.title{
+        margin-bottom:6px;
+        font-size:13px;
+        color:#333; 
+        margin-top:5px;
+      }
+      .comment_show dl dd.title p{
+        float:right;
+      }
+      .comment_show dl dd.title p span.create_time{
+        font-size:12px;
+        color:#ccc;
+      }
+      .comment_show dl dd.title p span.zan{
+        height:20px;
+        display:inline-block;
+        text-align:right;
+        margin-left:5px;
+        font-size:13px;
+        color:#ccc;
+      }
+      .comment_show dl dd.title p span.zan a.zan_num{
+        color:#ccc;
+      }
+      .comment_show dl dd.title p span.zan img{
+        width:18px;
+        height:18px;
+      }
+      .comment_show dl dd.ddConetnt{
+        /*overflow:hidden; 
+        text-overflow:ellipsis;
+        display:-webkit-box; 
+        -webkit-box-orient:vertical;
+        -webkit-line-clamp:2; */
+      }
+      .no_content{
+        width:100%;
+        height:60px;
+        line-height:70px;
+        color:#ccc;
+        font-size:16px;
+        text-align:center;
+      }
+      .floor-right-nav {
+        float: right;
+        font-size: 12px;
+        color: #b5b5b5;
+        font-weight: 400;
+    }
+    </style>
+    <!--topbar end-->
+    <div class="main myorder">
+    <section class="head">
+    <a class="head_back" id="backoutapp" href="javascript:window.history.go(-1)"><i class="icon-back"></i></a>
+		<div class="head-title">资讯中心</div>
+		
+	</section>
+    <div class="floor">
+		<section class="members_goodspic">
+			<div class="detail">
+               <h3>{$cmsDetail.title}</h3>
+               <p class="time">{$cmsDetail.create_time|date='Y-m-d H : i : s',###} &nbsp;&nbsp;&nbsp;&nbsp;点击数: {$cmsDetail.click}</p>
+               <div class="content">{$cmsDetail.content}</div>
+			</div>
+		</section>
+	</div>	
+    </div>
+    <div class="comment_show" {if condition="$cmsDetail.comment_flag eq 0"}style="margin-bottom:70px;"{/if}>
+        <h3>用户评论
+        <a class="floor-right-nav" href="{:__URL('APP_MAIN/Goods/commentList')}&article_id={$cmsDetail.article_id}">更多评论</a>
+        </h3>
+        <div class="content_list">
+           {volist name="list.data" id="item" empty="<p class='no_content'>还没有评论....</p>"}
+             <dl>
+               {if condition="$item.headimg eq ''"}
+               <dt><img src="{:__IMG($default_headimg)}" /></dt>
+               {else/}
+               <dt><img src="{:__IMG($item.headimg)}"/></dt>
+               {/if}
+               <dd class="title">{$item.nick_name}<p><span class="create_time">{$item.create_time|date="Y-m-d H:i:s",###}</span><span class="zan"><a class="zan_num">{$item.zan_num}</a> 
+               {if condition="$item.count gt 0"}
+               <a href="{:__URL('APP_MAIN/Goods/updatezan')}&comment_id={$item.comment_id}" class="updatezan" data-zan="2"><img src="__TEMP__/{$style}/public/images/zan2.png"></a>
+               {else/}
+               <a href="{:__URL('APP_MAIN/Goods/updatezan')}&comment_id={$item.comment_id}" class="updatezan" data-zan="1"><img src="__TEMP__/{$style}/public/images/zan1.png"></a>
+               {/if}
+               </span></p></dd>
+               <dd class="ddConetnt">{$item.content}</dd>
+               <p></p>
+             </dl>
+             {/volist}
+        </div>
+    </div>
+    {if condition="$cmsDetail.comment_flag eq 1"}
+    <style>
+        .comment{
+        	width:94%;
+        	height:35px;
+        	padding:10px 3%;
+        	background:#fff;
+        	position: fixed;
+        	bottom:68px;
+        	left:0;
+        }
+        .licontent{
+        	width:68%;
+        	float:left;
+        	height:35px;
+        }
+        .inputCon{
+        	width:65%;
+        	height:35px;
+        	line-height:35px;
+        	border:1px solid #ccc;
+        	font-size:14px;
+        	color:#8e8e8e;
+        	padding:0 3%;
+        	float:left;
+        	border-radius:7px 0 0 7px;
+        	border-right:none;
+        }
+        .inputRelease{
+        	width:24%;
+        	height:37px;
+        	line-height:37px;
+        	background:#e53870;
+        	font-size:15px;
+        	color:#ccc;
+        	float:left;
+        	border-radius:0 7px 7px 0;
+        	border:none;
+        	color:#fff;
+        	border-right:none;
+        }
+        .share,.collection{
+        	width:50%;
+        	height:35px;
+        	line-height:65px;
+        	color:#999;
+        	font-size:12px;
+        	float:left;
+        	text-align:right;
+        	float:left;
+        }
+        .share{
+        	background:url("__TEMP__/{$style}/public/images/fenxian.png") no-repeat right 0px;
+        	background-size:22px 22px;
+        }
+        .collection{
+        	background:url("__TEMP__/{$style}/public/images/soucan.png") no-repeat right 0px;
+        	background-size:22px 22px;
+        }
+        .collection2{
+        	background:url("__TEMP__/{$style}/public/images/yisc.png") no-repeat right 0px;
+        	background-size:22px 22px;
+        }
+        .licon{
+        	width:30%;
+        	float:right;
+        }
+    </style>
+    <div class="comment">
+       <ul>
+         <li class="licontent">
+            <input type="text" placeholder="说点什么吧!" class="inputCon">
+            <input type="button" value="评论" class="inputRelease" onclick="comment({$cmsDetail.article_id});">
+         </li>
+         <div class="licon">
+         <li class="share" onclick="document.getElementById('share_img').style.display='block';">分享</li>
+         <li class="collection {if condition='$datatype neq null'}collection2{/if}" onclick="comment({$cmsDetail.article_id},1);" data-type="{if condition='$datatype eq null'}0{else/}1{/if}">收藏</li>
+         </div>
+       </ul>
+    </div>
+    {/if}
+    <!-- 分享弹框 -->
+	<div id="share_img" class="share_img" onclick="document.getElementById('share_img').style.display='none';">
+	    <p><img class="arrow" src="__TEMP__/{$style}/public/images/goods_share.png"></p>
+	    <p style="margin-top:30px; margin-right:50px;">点击右上角</p>
+	    <p style="margin-right:50px;">将此商品分享给好友</p>
+	</div>
+    <script>
+    //点赞
+    $("body").on("click",".updatezan",function(){
+         var uid="{$userCon.uid}";
+         if(uid==null||!uid){
+            layer.msg('你还未登录,请先登录!');
+            return false;
+         }
+         var obj=$(this);
+         var zan_num=$(this).siblings(".zan_num");
+         var zan_val=$(this).siblings(".zan_num").html();
+         var type=obj.attr('data-zan');
+         var url=this.href;
+         $.get(url,function(data){
+            if(data['code']>0){
+              layer.msg(data['message']);
+              if(type==1){
+                 obj.attr('data-zan',2);
+                 obj.find("img").attr('src','__TEMP__/{$style}/public/images/zan2.png');
+                 zan_num.html(zan_val*1+1);
+              }else if(type==2){
+                 obj.attr('data-zan',1);
+                 obj.find("img").attr('src','__TEMP__/{$style}/public/images/zan1.png');
+                 zan_num.html(zan_val*1-1);
+              }
+            }else{
+              layer.msg(data['message']);
+            }
+         })
+         return false;
+    })
+    //0 评论  1 收藏
+    var is_load = true;//防止重复提交
+    function comment(article_id,type=0){
+      var uid="{$userCon.uid}";
+      if(uid==null||!uid){
+        layer.msg('你还未登录,请先登录!');
+        return false;
+      }
+    	if(type==0){
+    		var content=$(".inputCon").val();
+	    	if(content==''){
+	    		layer.msg('提交的评论不能为空');
+	    		return false;
+	    	}
+	    	if(content.length>200){
+				  layer.msg('评论字数不能多于200个字');
+				  return false;
+			  }
+        var show="{$cmsDetail.comment_examine}";
+        if(show==0){
+            var is_show = 1;
+        }else if(show==1){
+            var is_show = 0;
+        }
+			var message='评论';
+    	}else if(type==1){
+    		var content='';
+    		var message='收藏';
+    		var collection=$(".collection");
+    		var datatype = collection.attr('data-type');
+        var is_show = 0;
+    	}
+		if(is_load){
+			is_load = false;
+			$.ajax({
+				type:"post",
+				url : "{:__URL('APP_MAIN/Goods/articleDetail')}",
+				data : {
+					'article_id':article_id,
+					'content':content,
+					'type':type,
+					'datatype':datatype,
+          'is_show':is_show
+				},
+				success : function(data){
+					if(data['code']>0){
+						layer.msg(data['message']);
+						if(type==0){
+							if(show==0){
+                  $(".inputCon").val("");
+                  var html='';
+                  html='<dl>';
+                   var headimg="{$userCon.user_headimg}";
+                   if(headimg==''){
+                       html+='<dt><img src="{:__IMG($default_headimg)}" /></dt>';
+                   }else{
+                       html+='<dt><img src="{:__IMG($userCon.user_headimg)}" /></dt>';
+                   }
+                   html+='<dd class="title">{$userCon.nick_name}<p><span class="create_time">'+timeStampTurnTime(data['create_time'])+'</span><span class="zan"><a class="zan_num">0</a>'; 
+                   html+='<a href="{:__URL('APP_MAIN/Goods/updatezan')}&comment_id='+data['code']+'" class="updatezan" data-zan="1"><img src="__TEMP__/{$style}/public/images/zan1.png"></a>';
+                   html+='</span></p></dd>';
+                   html+='<dd class="ddConetnt">'+content+'</dd>';
+                   html+='<p></p>';
+                   html+='</dl>';
+                   $(".content_list").prepend(html);
+                }else{
+                  layer.msg('评论已提交,正等待后台审核...');
+              }
+              $(".inputCon").val("");
+						}else if(type==1){
+                if(datatype==0){
+                  collection.attr('data-type',1);
+                  collection.addClass('collection2');
+                }else if(datatype==1){
+                  collection.attr('data-type',0);
+                  collection.removeClass('collection2');
+                }
+            }
+					}else{
+						layer.msg('用户'+message+'失败');
+					}
+					is_load = true;
+			    }
+		    });	
+	    }
+	}
+    </script>
+{/block}

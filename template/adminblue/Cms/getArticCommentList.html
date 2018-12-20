@@ -1,0 +1,211 @@
+{extend name="adminblue/base" /}
+{block name="resources"/}{/block}
+{block name="main"}
+<div class="ns-main">
+			
+<table class="mytable">
+	<tbody><tr>
+	    <th width="50%" style="text-align: left;">
+			<button class="btn-common-delete" onclick="batchDelete()">批量删除</button>
+		</th>
+		<th>
+			用户名称：<input id="userName" class="input-common middle" type="text" value="">
+			<!-- 手机号：<input id="userTel" class="input-common middle" type="text" value=""> -->
+			<button onclick="searchData()" value="搜索" class="btn-common">搜索</button>
+		</th>		
+	</tr>
+</tbody></table>
+<div class="mod-table">
+	<div class="mod-table-head">
+		<div class="con style0list">
+			<table class="table-class">
+				<colgroup>
+				    <col style="width: 2%">
+					<col style="width: 10%;">
+					<col style="width: 50%;">
+					<col style="width: 8%;">
+					<col style="width: 10%;">
+					<col style="width: 5%;">
+					<col style="width: 5%;">
+				</colgroup>
+				<thead>
+					<tr>	
+					    <th><i class="checkbox-common"><input id="ckall" type="checkbox" onClick="CheckAll(this)"></i></th>					
+						<th>昵称</th>					
+						<th>评论内容</th>
+						<th>点赞</th>					
+						<th>评论时间</th>
+						<th>审核</th>
+						<th>操作</th>
+					</tr>
+				</thead>
+
+				<tbody>
+				    
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+
+
+
+
+<!-- 修改用户上级（Modal）结束 -->
+
+<input type="hidden" id="page_count" value="1">
+<input type="hidden" id="page_size" value="7">
+
+<script type="text/javascript">	
+    //评论审核
+	$("body").on("click",".commentShow",function(){
+	    var url=this.href;
+	    $.get(url,function(data){
+	        if (data["code"] > 0) {
+				showMessage('success', data["message"],"");
+				window.location.reload(0);
+			}else{
+				showMessage('error', data["message"]);
+			}	
+	    })
+	    return false;
+	})
+    //查询
+	function searchData(){
+		$(".more-search-container").slideUp();
+		LoadingInfo(1);
+	}
+	//加载数据
+	function LoadingInfo(pageIndex) {
+		var user_name = $("#userName").val();
+		var article_id="{$article_id}";
+		$.ajax({
+			type : "post",
+			url : "{:__URL('ADMIN_MAIN/cms/getArticCommentList')}",
+			async : true,
+			data : {
+				"pageIndex" : pageIndex,
+				"search_text":user_name,
+				'article_id':article_id
+			},
+			success : function(data) {
+				$("#page_count").val(data["page_count"]);
+				$("#pageNumber a").remove();
+				var html = '';
+				if (data["data"].length > 0) {
+					for (var i = 0; i < data["data"].length; i++) {
+						html += '<tr align="center">';	
+					    html += '<td><i class="checkbox-common"><input name="sub" type="checkbox" value="'+ data['data'][i]['comment_id']+'" ></i></td>';
+						html += '<td>' + data["data"][i]["nick_name"] + '</td>';
+						html += '<td>' + data["data"][i]["content"] + '</td>';
+						html += '<td>' + data["data"][i]["zan_num"] + '</td>';
+						html += '<td>' + timeStampTurnTime(data["data"][i]["create_time"]) + '</td>';
+						if(data["data"][i]["is_show"]==0){
+							var src_commend = "ADMIN_IMG/close.png";
+						}else if(data["data"][i]["is_show"]==1){
+							var src_commend = "ADMIN_IMG/start.png";
+						}
+					
+					    html += '<td align="center"><a href="'+__URL('ADMIN_MAIN/cms/commentShow?id='+ data['data'][i]['comment_id']+'&state='+data["data"][i]["is_show"])+'" class="commentShow"><img src="'+src_commend+'" width="15" height="15"></a></td>';
+						html += '<td  align="center">';
+						html += '<a href="javascript:void(0);" onclick="deleteBox(' + data["data"][i]["comment_id"] + ');">删除</a><br>';
+						html += '</td>';						
+						html += '</tr>';
+					}
+				} else {
+					html += '<tr align="center"><td colspan="12">暂无符合条件的数据记录</td></tr>';
+				}
+				
+				$(".style0list tbody").html(html);
+				var totalpage = $("#page_count").val();
+				if (totalpage == 1) {
+					changeClass("all");
+				}
+				initPageData(data["page_count"],data['data'].length,data['total_count']);
+				var $html = pagenumShow(jumpNumber,totalpage,5)
+				$("#pageNumber").append($html);
+			}
+		});
+	}
+	//批量删除
+	function batchDelete() {
+		var comment_id = new Array();
+		$(".table-class tbody input[type='checkbox']:checked").each(function() {
+			if (!isNaN($(this).val())) {
+				comment_id.push($(this).val());
+			}
+		});
+
+		if(comment_id.length ==0){
+			$( "#dialog" ).dialog({
+				buttons: {
+					"确定,#0059d6,#fff": function() {
+						$(this).dialog('close');
+					}
+				},
+				contentText:"请选择需要操作的记录",
+				title:"消息提醒",
+			});
+			return false;
+		}else{
+			$( "#dialog" ).dialog({				
+            buttons: {
+	                "确定,#62c462": function() {
+	                	deleteComment(comment_id);
+	                    $(this).dialog('close');
+	                },
+	                "取消,#e57373": function() {
+	                    $(this).dialog('close');
+	                }
+	            },
+	            contentText:"确定删除吗",
+	            title:"消息提醒",
+	        });
+		}
+		
+	}
+	//删除提示
+	function deleteBox(comment_id){
+		$( "#dialog" ).dialog({				
+            buttons: {
+                "确定,#62c462": function() {
+                	deleteComment(comment_id);
+                    $(this).dialog('close');
+                },
+                "取消,#e57373": function() {
+                    $(this).dialog('close');
+                }
+            },
+            contentText:"确定删除吗",
+            title:"消息提醒",
+        });
+	}
+	//删除
+	function deleteComment(comment_id){
+		var article_id="{$article_id}";
+		$.ajax({
+			type:"post",
+			url:"{:__URL('ADMIN_MAIN/cms/deleteArticCommentList')}",
+			data:{
+				'comment_id':comment_id,
+				'article_id':article_id
+			},
+			async:true,
+			success:function (data) {
+				if (data["code"] > 0) {
+					showMessage('success', data["message"],"{:__URL('ADMIN_MAIN/cms/getArticCommentList')}&id="+article_id+"");
+				}else{
+					showMessage('error', data["message"]);
+				}	
+			}
+		});
+	}
+	//全选
+	function CheckAll(event){
+		var checked = event.checked;
+		$(".table-class tbody input[type = 'checkbox']").prop("checked",checked);
+		if(checked) $(".table-class tbody input[type = 'checkbox']").parent().addClass("selected");
+		else $(".table-class tbody input[type = 'checkbox']").parent().removeClass("selected");
+	}	
+</script>
+{/block}

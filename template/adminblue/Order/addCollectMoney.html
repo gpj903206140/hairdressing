@@ -1,0 +1,440 @@
+{extend name="adminblue/base" /}
+
+{block name="resources"/}
+<link href="__STATIC__/blue/css/order/ns_orderlist.css" rel="stylesheet" type="text/css" />
+<style>
+.mytable.select td{padding-bottom:0;}
+.mytable.select #more_search{display: block;}
+.table-class tbody td a {margin-left: 0;}
+.to-fixed{position: fixed;width: 85.5%;top: 50px;box-shadow: 0 2px 6px 0 rgba(0,0,0,.3);z-index: 5;}
+.mytable td{padding:10px 0;}
+.btn-common-white{line-height: 20px;outline: none;background: white}
+.ns-main{margin-top: 0;}
+.seller_memo{background: #FFF9DF!important;color: #D09B4C;}
+</style>
+<!-- 编辑商品时，用到的JS、CSS资源 -->
+{include file="adminblue/Goods/controlEditGoodsCommonResources"}
+{/block}
+<script type="text/javascript" src="__STATIC__/My97DatePicker/WdatePicker.js"></script>
+<style>
+.error{padding:5px 0 0;}
+</style>
+{/block}
+{block name="main"}
+<div class="space-10"></div>
+<div class="set-style">
+	<dl class="order_nos">
+		<dt>预约订单号:</dt>
+		<dd>
+			<p><input name="" id="order_no" type="text" value="{$data.order_no}" class="input-common"><input id="order_id" type="hidden" value="{$data.order_id}"></p>	
+			<p class="error">请输入预约订单号</p>
+		</dd>
+	</dl>
+	<dl class="order_nos">
+		<dt>预约商品:</dt>
+		<dd>
+			<p><input name="" id="goods_name" type="text" value="{$data.goods_name}" class="input-common"><input id="goods_id" type="hidden" value="{$data.goods_id}"></p>	
+			<p class="error">请输入预约商品</p>
+		</dd>
+	</dl>
+	<dl>
+		<dt>付款人:</dt>
+		<dd class="buyer">
+			<p>
+			  <input id="nick_name" type="text" value="{$data.nick_name}" class="input-common">
+			  <input id="uid" type="hidden" value="{$data.buyer_id}">
+			  {if condition="$data.level_name neq ''"}
+			  <input id="goods_discount" type="hidden" value="{$data.goods_discount}">
+			  {else/}
+			  <input id="goods_discount" type="hidden" value="1">
+			  {/if}
+			</p>	
+			{if condition="$data.level_name neq ''"}
+			<p class="error" style="display:block;">会员等级: {$data.level_name}-可享受折扣: {$data.goods_discount}%</p>
+			{else/}
+			<p class="error"></p>
+			{/if}
+		</dd>
+	</dl>
+	<dl>
+		<dt>预留手机号:</dt>
+		<dd>
+			<p>
+			  <input id="reserve_phone" type="text" value="{$data.receiver_mobile}" class="input-common">
+			</p>	
+			<p class="error"></p>
+		</dd>
+	</dl>
+	<dl class="meet">
+		<dt>金额:</dt>
+		<dd>
+			<p><input name="" id="money" type="text" value="" class="input-common" onkeyup="javascript:CheckInputIntFloat(this);" placeholder=""></p>	
+			<p class="error">请输入金额</p>
+		</dd>
+	</dl>
+	<dl class="meet">
+		<dt>应付金额:</dt>
+		<dd>
+			<p><input name="" id="meet_money" type="number" value="" class="input-common" onkeyup="javascript:CheckInputIntFloat(this);"></p>	
+			<p class="error">请输入应付金额</p>
+		</dd>
+	</dl>
+	<dl>
+			<dt><i class="required">*</i>使用优惠券: </dt>
+			<dd data-flag="category" data-goods-id="0" cid="" data-attr-id="" cname="">
+				<span class="category-text" id="coupon_name"></span>
+				<input type="hidden" value="" id="coupon_id">
+				<input type="hidden" value="" id="coupon_money">
+				<input type="hidden" value="" id="at_leasts">
+				<button class="category-button" id="clip_Coupons">选择</button>
+				<span class="help-inline" style="width: 30px;height: 30px;background: #FB9336;color: #fff; display: block;position: absolute;left: 410px;border-radius:3px;cursor:pointer;" onClick="del_coupon();">清除</span>
+			</dd>
+		</dl>
+	<dl>
+		<dt>实付金额:</dt>
+		<dd>
+			<p><input name="" id="realPayment_money" type="number" value="" class="input-common" onkeyup="javascript:CheckInputIntFloat(this);"></p>	
+			<p class="error">请输入实付金额</p>
+		</dd>
+	</dl>
+	<dl>
+		<dt>付款方式:</dt>
+		<dd>
+			<p>
+			<select class="input-common" id="payment_method">
+			   <option value="0">支付宝</option>
+			   <option value="1">微信</option>
+			   <option value="2">现金</option>
+			   <option value="3">银行卡</option>
+			   <option value="4">其他</option>
+			</select>
+			</p>	
+			<p class="error">请输入升级条件</p>
+		</dd>
+	</dl>
+	<dl>
+		<dt>支付帐号:</dt>
+		<dd>
+			<p><input name="" id="accountsWx_money" type="text" value="" class="input-common" placeholder="非必填"></p>	
+			<p class="error">请输入微信支付帐号</p>
+		</dd>
+	</dl>
+	<dl>
+		<dt>备注：</dt>
+		<dd>
+		  <textarea id="remark" class="textarea-common"></textarea>
+		</dd>
+	</dl>
+	<dl>
+		<dt>付款日期:</dt>
+		<dd>
+			<p><input type="text" id="paymentDate" class="input-common middle" placeholder="请选择日期" onclick="WdatePicker()"></p>	
+			<p class="error">请输入付款日期</p>
+		</dd>
+	</dl>
+	<dl>
+		<dt></dt>
+		<dd>
+		<button class="btn-common btn-big" onclick="addCollectMoney();">提交</button>
+		</dd>
+	</dl>
+</div>
+<!--我的团队显示 -->
+
+<div class="modal" id="couponsShow" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="width:60%;left:35%;display:none;">
+
+<div class="modal-dialog">
+	<div class="modal-content">
+		<div class="modal-header">
+			<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+			<h3 class="modal-title" id="myModalLabel">优惠券 	</h3>
+		</div>
+		<div class="modal-body" style="min-height: 360px;">
+			<div class="modal-infp-style" style="height: 400px; overflow: auto;">
+				<table class="modal-tab table-class">
+					<thead>
+						<tr align="center">
+						    <th>
+								<i class="checkbox-common">
+									<input type="checkbox" onclick="CheckAll(this)" id="check">
+								</i>
+							</th>
+							<th>优惠券名称</th>
+							<th>面额</th>
+							<th>使用限制</th>
+							<th>开始时间</th>
+							<th>结束时间</th>
+							<th>领取时间</th>
+						</tr>
+					</thead>
+					<colgroup>
+						<col style="width: 2%;">
+						<col style="width: 15%;">
+						<col style="width: 10%;">
+						<col style="width: 10%;">
+						<col style="width: 25%;">
+						<col style="width: 25%;">
+						<col style="width: 25%;">
+					</colgroup>
+					<tbody id="my_team_list"></tbody>
+				</table>
+			</div>
+		</div>
+		
+		<input type="hidden" value="" id="hidden_promoter_id">
+		<div class="modal-footer">
+		    <button type="button" class="btn-common coupon_btn" data-dismiss="modal">确定</button>
+			<button type="button" class="btn-common-cancle btn-big" data-dismiss="modal">关闭</button>
+		</div>
+	</div>
+</div>
+</div>
+<script>
+//添加收银
+var flag = false;//防止重复提交
+function addCollectMoney(){
+	var meet_money=$("#meet_money").val();
+	if(meet_money==''){
+		$(".meet").find(".error").show();
+        return false;
+	}
+	var realPayment_money=$("#realPayment_money").val();
+	if(realPayment_money==''){
+		$("#realPayment_money").parents("p").siblings(".error").show();
+        return false;
+	}
+	var paymentDate=$("#paymentDate").val();
+	if(paymentDate==''){
+		$("#paymentDate").parents("p").siblings(".error").show();
+        return false;
+	}
+	var order_id = $("#order_id").val();
+	var goods_id = $("#goods_id").val();
+	var goods_name = $("#goods_name").val();
+	var reserve_phone = $("#reserve_phone").val();
+	var order_no = $("#order_no").val();
+	var uid = $("#uid").val();
+	var nick_name = $("#nick_name").val();
+	var money = $("#money").val();
+	var meet_money = $("#meet_money").val();
+    var coupon_name = $("#coupon_name").html();
+	var coupon_id = $("#coupon_id").val();
+	var at_leasts = $("#at_leasts").val();
+	var coupon_money = $("#coupon_money").val();
+	var realPayment_money = $("#realPayment_money").val();
+	var payment_method = $("#payment_method").val();
+	var accountsWx_money = $("#accountsWx_money").val();
+	var remark = $("#remark").val();
+	var paymentDate = $("#paymentDate").val();
+	if(flag){
+		return;
+	}
+	flag = true;
+	$.ajax({
+		type:"post",
+		url:"{:__URL('ADMIN_MAIN/order/addCollectMoney')}",
+		data:{
+			'order_id':order_id,
+			'goods_id':goods_id,
+			'goods_name':goods_name,
+			'reserve_phone':reserve_phone,
+			'order_no':order_no,
+			'uid':uid,
+			'nick_name':nick_name,
+			'money':money,
+			'meet_money':meet_money,
+			'coupon_name':coupon_name,
+			'coupon_id':coupon_id,
+			'at_leasts':at_leasts,
+			'coupon_money':coupon_money,
+			'realPayment_money':realPayment_money,
+			'payment_method':payment_method,
+			'accountsWx_money':accountsWx_money,
+			'remark':remark,
+			'paymentDate':paymentDate,			
+		},
+		async:true,
+		success:function (data) {
+			if(data==2){
+                showMessage('error', '同样的订单只能录入1次!');
+			}else{
+				if (data==1) {
+					showMessage('success', '操作成功',"{:__URL('ADMIN_MAIN/order/collectMoneyList')}");
+				}else if (data==2){
+					showMessage('error', '操作失败');
+					flag = false;
+				}	
+			}
+			
+		}
+	});
+}
+//查询并显示优惠券
+$("#clip_Coupons").click(function(){
+	/*var order_no=$("#order_no").val();
+	if(order_no==''){
+		$(".order_nos").find(".error").show();
+        return false;
+	}
+	
+	if(order_no!=''&&!uid){
+		showMessage('error', '订单号不存在!');
+        return false;
+	}*/
+	var uid=$("#uid").val();
+	var meet_money=$("#meet_money").val();
+	if(meet_money==''){
+		$(".meet").find(".error").show();
+        return false;
+	}
+	$.ajax({
+		type : "post",
+		url : "{:__URL('ADMIN_MAIN/order/getCoupon_user')}",
+		data : {
+			"uid" : uid
+		},
+		success : function(data) {
+			if(data==0){
+				showMessage('error', '没有可使用的优惠券!');
+			}else{
+				if (data.length > 0) {
+					$("#my_team_list").html("");
+					for (var i = 0; i < data.length; i++) {
+						var html = '';
+						if(data[i]["at_least"]==0){
+							var at_least='不限制';
+						}else{
+							var at_least='满'+ data[i]["at_least"]+'元可使用';
+						}
+                        html += '<tr align="center">';
+                        html += '<td><i class="checkbox-common"><input name="sub" type="checkbox" value="'+ data[i]["coupon_id"]+'"></i></td>';
+                        html += '<td class="coupon_name">'+ data[i]["coupon_name"]+'</td>';
+                        html += '<td class="coupon_money" coupon_money="'+data[i]["money"]+'">'+ data[i]["money"]+'</td>';
+                        html += '<td class="at_least" data-least="'+data[i]["at_least"]+'">'+at_least+'</td>';
+                        html += '<td>'+ timeStampTurnTime(data[i]["start_time"])+'</td>';
+                        html += '<td>'+ timeStampTurnTime(data[i]["end_time"])+'</td>';
+                        html += '<td>'+ timeStampTurnTime(data[i]["fetch_time"])+'</td>';
+                        html += '</tr>';
+                        $("#my_team_list").append(html);
+                        $("#couponsShow").show();
+                    }
+
+			    }
+			}
+		}
+	});
+	//$("#couponsShow").show();
+})
+//关闭优惠券弹出框
+$(".close,.btn-common-cancle").click(function(){
+	$(".modal").hide();
+})
+//清除优惠券
+function del_coupon(){
+	var coupon_id=$("#coupon_id").val();
+	if(coupon_id>0){
+        var coupon_money=$("#coupon_money").val();
+        var realPayment_money=$("#realPayment_money").val();
+        $("#coupon_name").html("");
+        $("#coupon_id").val("");
+        $("#coupon_money").val("");
+        $("#at_leasts").val("");
+        getmeet_money();
+	}else{
+		layer.msg('还没有选择优惠券');
+	}
+	return false;
+}
+//选择优惠券
+$(".coupon_btn").click(function(){
+   var meet_money=$("#meet_money").val();
+   var at_least=$("#my_team_list i.selected").eq(0).parents("td").siblings("td.at_least").attr('data-least');
+   var coupon_money=$("#my_team_list i.selected").eq(0).parents("td").siblings("td.coupon_money").attr('coupon_money');
+   if(meet_money*1<at_least*1){
+   	  showMessage('error', '消费金额不足!');
+   	  return false;
+   }
+   var goods_discount=$("#goods_discount").val();
+   var id=$("#my_team_list i.selected").eq(0).find("input").val();
+   var name=$("#my_team_list i.selected").eq(0).parents("td").siblings("td.coupon_name").html();
+   $("#coupon_id").val(id);
+   $("#at_leasts").val(at_least);
+   $("#coupon_money").val(coupon_money);
+   $("#coupon_name").html(name);
+   var $money = (meet_money)-coupon_money*1;
+   if($money<0){
+   	  $money = 0;
+   }
+   
+   $("#realPayment_money").val($money);
+   $(".modal").hide();
+})
+//通过预约订单号查询订单和买家
+$("#order_no").blur(function(){
+	var order_no = $(this).val();
+	/*if(!order_no){
+        $(this).parents("dl").find(".error").show();
+        return false;
+	}else{
+		$(this).parents("dl").find(".error").hide();
+	}*/
+	$.ajax({
+		type:"post",
+		url:"{:__URL('ADMIN_MAIN/order/getOrderNo_user')}",
+		data:{
+			'order_no':order_no,
+		},
+		async:true,
+		success:function (data) {
+			if(data==0){
+				layer.msg('没有找到对应的订单商品!');
+				/*$("#uid").val("");
+				$("#nick_name").val("");
+				$("#order_id").val("");
+				$("#goods_id").val("");
+				$("#order_name").val("");*/
+			}else{
+				$("#uid").val(data['buyer_id']);
+				$("#nick_name").val(data['nick_name']);
+				$("#order_id").val(data['order_id']);
+				$("#goods_id").val(data['goods_id']);
+				$("#goods_name").val(data['goods_name']);
+				$("#reserve_phone").val(data['receiver_mobile']);
+				var level='';
+				if(data['level_name']!=''){
+                   var level='会员等级: '+data['level_name']+'-可享受折扣: '+data['goods_discount']+'%';
+                   $(".buyer p.error").html(level);
+                   $(".buyer p.error").show();
+				}else{
+				   $(".buyer p.error").html(level);
+                   $(".buyer p.error").hide();
+				}
+			}
+		}
+	});
+})
+//把应付金额给实付金额
+$("#money").blur(function(){
+	getmeet_money();
+})
+function getmeet_money(){
+	var money = $("#money").val();
+	var goods_discount=$("#goods_discount").val();
+	var coupon_money = $("#coupon_money").val();
+	var cmoney = (money*goods_discount)-coupon_money*1;
+	var mmoney = (money*goods_discount);
+	if(cmoney<0){
+		cmoney=0;
+	}
+	$("#meet_money").val(mmoney);
+	$("#realPayment_money").val(cmoney);
+}
+//全选
+function CheckAll(event){
+	var checked = event.checked;
+	$("#productTbody input[type = 'checkbox']").prop("checked",checked);
+	if(checked) $(".table-class tbody input[type = 'checkbox']").parent().addClass("selected");
+	else $(".table-class tbody input[type = 'checkbox']").parent().removeClass("selected");
+}
+</script>
+{/block}

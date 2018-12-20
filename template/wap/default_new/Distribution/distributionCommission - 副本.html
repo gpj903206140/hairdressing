@@ -1,0 +1,284 @@
+{extend name="wap/default_new/base" /}
+{block name="resources"}
+<link rel="stylesheet" type="text/css" href="__TEMP__/{$style}/public/css/common-v4.4.css">
+<link rel="stylesheet" type="text/css" href="__TEMP__/{$style}/public/css/member_address.css">
+
+    <!-- <link rel="stylesheet" type="text/css" href="__TEMP__/{$style}/public/css/foundation.css">-->
+    <link rel="stylesheet" type="text/css" href="__TEMP__/{$style}/public/css/person-v4.4.css"> 
+    <link rel="stylesheet" type="text/css" href="__TEMP__/{$style}/public/css/my_order_list.css">
+<style>
+.addr-box {
+	padding-top: 0px;
+	text-align: center;
+}
+
+.addr-tip {
+	font-size: 14px;
+	color: #8f8f8f;
+	margin-top: 10px;
+}
+
+.btn-save {
+	margin-top: 40px;
+}
+
+.team {
+	margin-top: 45px;
+}
+
+.team-item {
+	padding: 10px;
+	height: 70px;
+	border-bottom: 1px solid #E2E1E1;
+	position: relative;
+}
+
+.team-item img {
+	vertical-align: middle;
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+	margin-right: 10px;
+	margin-top: 10px;
+}
+
+.team-info {
+	position: absolute;
+	top: 20%;
+	display: inline-block;
+}
+
+.team-info strong {
+	font-weight: normal;
+	color: #333333;
+	font-size: 14px;
+}
+
+.team-info time {
+	color: #B0B0B0;
+	font-size: 12px;
+}
+.team-info .role_name{
+	font-size: 14px;
+	color: #EE4349;
+}
+.team-info .role_user{
+	font-size: 12px;
+	color: #B0B0B0;
+}
+
+
+tr {
+    overflow: hidden;
+    border-bottom: 1px solid #ddd;
+    float: left;
+    width: 100%;
+    background: #FFFFFF;
+}
+tr td:last-child {
+    width: 100%;
+}
+tr td {
+    padding: 0.5625rem 0.625rem ;
+    font-size: 0.875rem;
+    color: #222222;
+	  float: left;
+}
+
+tr td:last-child p {
+    line-height: 22px;
+    margin-bottom: 0px;
+    width: 95%;
+    font-size: 16px;
+}
+tr td:last-child p:last-child {
+    float: left;
+    color: #666666;
+    font-size: 12px;
+}
+tr td:last-child .text-name {
+    float: left;
+    color: #2d2d2d;
+    font-size: 14px;
+}
+tr td:last-child .text-money {
+    float: right;
+    font-size: 14px;
+    color: #FF7C56;
+}
+tr td:last-child .text-2{
+    color: #909090;
+    font-size: 14px;
+}
+
+.disorder-none .icon-none {
+    display: block;
+    width: 115px;
+    height: 110px;
+    margin: 60px auto 15px auto;
+    background:url(/template/wap/default_new/public/images/money_cry.png) no-repeat;
+    background-size: 100px 100px;
+}
+.disorder-none{width:100%;text-align:center;}
+.tabs-content {
+    margin-top: 43px;
+	margin-bottom: 10px;
+}
+table tr:nth-of-type(even) {
+    background: #FFFFFF;
+}
+</style>
+{/block}
+{block name="main"}
+<input type="hidden" id="ref_url" value="{$pre_url}">
+<input type="hidden" value="{$flag}" id="hidden_flag" />
+<section class="head">
+	<a class="head_back" onclick="window.history.go(-1)" href="javascript:void(0)"><i class="icon-back"></i></a>
+	<div class="head-title">{:lang('distribution_detailed')}</div>
+</section>
+
+<div class="tabs-content">
+  <div class="content_01" style="overflow:hidden;"></div>
+    <div id="withdraw" > 
+    <!-- <table width="100%">
+    	    <tbody> 
+    	        <tr>
+    	            <td>
+    					<p><span class="text-name"></span><span class="text-money">¥2.60</span></p>
+    					<p><span class="text-2">2018-07-10 15:23:00</span></p>
+    			    </td>
+    			</tr>
+    	    </tbody>
+    	</table> -->
+	<div class="tabs-content" style="margin-top:0px;">
+			<div class="content active" id="list_content" style="padding:0;">
+			  <!-- {volist name="data.data" id="item"}
+			   <div class="list-myorder" style="margin: 0 0 1px 0;">
+			      <div class="ordernumber" style="height:auto;overflow:hidden;line-height:22px;">
+			          <span class="order-num" style="font-size: 12px;">购买人:{$item.buyer_name}/{$item.num}&nbsp;&nbsp;{$item.order_no}</span><span class="order-date" style="font-size: 12px;">{$item.add_time}</span></div><ul class="ul-product">
+			               <li>
+			                   <a href="__URL('APP_MAIN/order/orderdetail?id={$item.goods_id})">
+			                   <a href="{:__URL('APP_MAIN/goods/goodsdetail?id='.$item['goods_id'])}">
+			                        <span class="pic">
+			                        {if condition="$item.pic_cover_micro eq ''"}
+			  										<img src="{:__IMG($default_headimg)}" />
+			  									{else/}
+			  										<img src="{:__IMG($item.pic_cover_micro)}">
+			  									{/if}
+			                        </span>
+			  				                   <div class="text">
+			  				                       <span class="pro-name" style="font-size: 12px;">{$item.goods_name}</span>
+			  				                       <div class="pro-pric" style="margin-top: 5px;">
+			  				                           <a><span style="font-size: 12px;">价格:</span><b style="font-size:12px;font-weight:normal;">￥{$item.price}</b></a>/
+			  				                           <a><span style="font-size: 12px;">利润:</span><b style="font-size:12px;font-weight:normal;">￥{$item.profit}</b></a>
+			  				                           <a style="float:right"><span style="font-size: 12px;"></span><b style="font-size:12px;font-weight:normal;">{$item.distribution_commission_rate}%</b></a>
+			  				                       </div>
+			  				                       <div class="pro-pric" style="margin-top: 0px;">
+			  				                           <a><span style="font-size: 12px;">佣金:</span><b style="font-size:12px;font-weight:normal;">￥{$item.commission_money}/{$item.commission_rate}% </b></a>
+			  				                           <a style="float:right"><span style="font-size: 12px;">受益人:</span><b style="font-size:12px;font-weight:normal;">{$item.receiptor_name}</b></a>
+			  				                       </div>
+			  				                   </div>
+			                    </a>
+			                   <div class="" style="width:100%;float:left;color:#999999;margin-top: 5px;font-size: 12px;padding-top:5px;">
+			                   </div>
+			               </li>
+			          </ul>
+			    </div> 
+			  			{/volist} -->
+			</div>
+		</div>
+  	  <!-- <div class="nothing-data" align="center" style="margin-top: 43px;margin-bottom: 10px;
+height: 150px;padding-top: 150px;">
+  	  		<img src="__TEMP__/{$style}/public/images/wap_nodata.png" style="margin-bottom: 10px;width: 33%;">
+  	  		<div>您还没有佣金！</div>
+  	  	  </div> -->
+     
+  </div>
+</div>
+<!-- 总页数 -->
+<input type="hidden" id="page_count" value="{$data.page_count}">
+<!-- 当前页数 -->
+<input type="hidden" id="page" value="1">
+{/block}
+{block name="bottom"}{/block}
+{block name="javascript"}
+<script type="text/javascript">
+$(function(){
+	getCommissionlist(1);
+})
+var is_load = true;//防止重复加载
+function getCommissionlist(page){
+	$("#page").val(page);
+	if(is_load){
+		is_load = false;
+		$.ajax({
+			type:"post",
+			url : "{:__URL('APP_MAIN/Distribution/distributionCommissionList')}",
+			data : {
+				"page" : page,
+				"type":1
+			},
+			success : function(data){
+				$("#page_count").val(data['page_count']);//总页数
+				if(data['data'].length >0){
+					var list_html="";
+				    for(var i=0;i<data['data'].length;i++){
+				    	list_html += '<div class="list-myorder" style="margin: 0 0 1px 0;">';
+			            list_html += '<div class="ordernumber" style="height:auto;overflow:hidden;line-height:22px;">';
+			            list_html += '<span class="order-num" style="font-size: 12px;">购买人:'+data['data'][i]['buyer_name']+'/'+data['data'][i]['num']+'&nbsp;&nbsp;'+data['data'][i]['order_no']+'</span><span class="order-date" style="font-size: 12px;">'+data['data'][i]['add_time']+'</span></div><ul class="ul-product">';
+			            list_html += '<li>';
+			            list_html += '<a href="{:__URL("APP_MAIN/goods/goodsdetail?id='+data['data'][i]['goods_id']+'")}">';
+			            if(data['data'][i]['pic_cover_micro']!=''&&data['data'][i]['pic_cover_micro']!=undefined){
+			            	var img='<img src="{:__IMG("'+data['data'][i]['pic_cover_micro']+'")}">';
+			            }else{
+			            	var img='<img src="{:__IMG($default_headimg)}" />';
+			            }
+			            list_html += '<span class="pic">'+img+'</span>';
+				        list_html += '<div class="text">';
+				        list_html += '<span class="pro-name" style="font-size: 12px;">'+data['data'][i]['goods_name']+'</span>';
+				        list_html += '<div class="pro-pric" style="margin-top: 5px;">';
+				        list_html += '<a><span style="font-size: 12px;">价格:</span><b style="font-size:12px;font-weight:normal;">￥'+data['data'][i]['price']+'</b></a>/';
+				        list_html += '<a><span style="font-size: 12px;">利润:</span><b style="font-size:12px;font-weight:normal;">￥'+data['data'][i]['profit']+'</b></a>';
+				        list_html += '<a style="float:right"><span style="font-size: 12px;"></span><b style="font-size:12px;font-weight:normal;">'+data['data'][i]['distribution_commission_rate']+'%</b></a>';
+				        list_html += '</div>';
+				        list_html += '<div class="pro-pric" style="margin-top: 0px;">';
+				        list_html += '<a><span style="font-size: 12px;">佣金:</span><b style="font-size:12px;font-weight:normal;">￥'+data['data'][i]['commission_money']+'/'+data['data'][i]['commission_rate']+'% </b></a>';
+				        list_html += '<a style="float:right"><span style="font-size: 12px;">受益人:</span><b style="font-size:12px;font-weight:normal;">'+data['data'][i]['receiptor_name']+'</b></a>';
+				        list_html += '</div></div></a><div class="" style="width:100%;float:left;color:#999999;margin-top: 5px;font-size: 12px;padding-top:5px;"></div></li></ul></div></div>';
+					}
+				}
+				is_load = true;
+				$('#list_content').append(list_html+list_html+list_html);
+				/*img_lazyload();	
+				var	goods_img_height = parseInt($('.goods_img').height());
+				$(".data_info").height(goods_img_height);*/
+			}
+		});	
+	}
+}
+
+window.onresize = function(){
+	/*var	goods_img_height = parseInt($('.goods_img').height());
+	$(".data_info").height(goods_img_height);*/
+}
+
+//滑动到底部加载
+$(window).scroll(function(){
+	var totalheight = parseFloat($(window).height()) + parseFloat($(window).scrollTop());
+	var content_box_height = parseFloat($("#list_content").height()); 
+	if(totalheight - content_box_height >= 0){
+		if(is_load){
+			var page = parseInt($("#page").val()) + 1;//页数
+			var total_page_count = $("#page_count").val(); // 总页数
+			if(page > total_page_count){
+				return false;
+			}else{
+				getCommissionlist(page);
+			}
+		}
+		
+	}
+})
+</script>
+
+{/block}

@@ -1,0 +1,156 @@
+{extend name="wap/default_new/base" /}
+{block name="resources"}
+<link rel="stylesheet" type="text/css" href="__TEMP__/{$style}/public/css/common-v4.4.css">
+<link rel="stylesheet" type="text/css" href="__TEMP__/{$style}/public/css/member_address.css">
+<style>
+.bro-spare .number-big{display:block;margin:0;font-size:40px;color:#fff;text-shadow:1px 2px 0 rgb(78,153,35);}
+.bro-spare .field-2{margin:10px 0 15px 0;font-size:14px;color:#fff;}
+.maneylist{margin:5px 15px;padding:0; list-style:none;}
+.maneylist-li{position:relative;padding:10px 0;background:#fff;border-bottom:1px solid #eee;}
+.maneylist-li:first-child{border-top:0;}
+.maneylist-li .maneylist-line{padding-bottom:10px;}
+.maneylist-li a{position:relative;display:block;color:#333;}
+.maneylist-li a:active{background:#f1f1f1;}
+.maneylist-li a:before,
+.maneylist-li a:after{content:".";height:0;display:block;visibility:hidden;clear:both;}
+.maneylist-li .icon-money-circle{display:inline-block;margin-top:-3px;margin-right:5px;width:15px;height:15px;border-radius:50%;line-height:15px;font-size:20px;color:#f8af75;border:1px solid #f8af75;text-align:center; vertical-align:middle;}
+.maneylist-li .text{vertical-align:middle}
+.maneylist-li .money-number{float:right;margin:5px 15px 0 0;padding:0 5px;border-radius:10px;height:20px;line-height:20px;color:red;font-size:14px;vertical-align:middle;}
+.moenyamount-info{overflow:hidden;margin-right:30px;}
+.moenyamount-info .text{font-size:18px;color:#333;}
+.moenyamount-info small{display:block;font-size:14px;color:#999;}
+.maneylist .maneylist-li .arrow{position:absolute;right:0;top:50%;margin-top:-5px;}
+.money-source{padding-top:5px;background:#fff;border:0;color:#666;}
+
+.money-source-li {background: none;}
+.bro-spare .field-2 {margin: 0;width: 33.33%;text-align: center;padding-top:10px;}
+.bro-spare {border: 0;padding: 20px 15px 5px 15px;}
+.bro-spare .number-big {text-shadow: 1px 2px 0 #8B2A2C;font-size:38px;}
+.xiajip{padding: 8px;margin-bottom: 0;border-bottom: 1px solid #eee;}
+.xiajispanleft{font-size: 14px;padding: 3px;line-height: 20px;border-radius-left: 20px;border-top-left-radius: 5px; border-top-right-radius: 5px;color:#000000;}
+.xiajispanright{float:right;line-height: 28px;margin-right: 19px;color:#000000;}
+.maneylist-li a { font-size: 12px;}
+button, .button {height: 40px; line-height: 40px;font-size: 16px;}
+.maneylist-li .money-number{margin: 0px;margin-right:30px;}
+.a-borkerage-detail{background:#F63000;border:1px solid #F63000;padding:3px 5px;float:right;height:30px;line-height:23px;margin-top:7px;}
+.a-borkerage-detail_2{background:#F63000;border:1px solid #F63000;padding:3px 5px;float:right;height:30px;line-height:23px;margin-top:7px;color:#fff;}
+.tip_head{width:56%;margin:auto;text-align: center;}
+.tip_bottom .lf{float:left;}
+.tip_bottom .rg{float:right;}
+.tip_bottom{border-top: 1px solid #E9B7AF;margin-top:10px;}
+.module-icon{margin-right: 3px;margin-top: 3px;}
+.maneylist .maneylist-li .arrow{right:10px;}
+.gd i.shareholder {background-position: -9px -37px;}
+.gd i {
+    margin-right: 3px;
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    background: url(__TEMP__/{$style}/public/images/distribution_center_ico.png) no-repeat;
+    float: left;
+}
+.module-icon.extension {background-position: -6px -72px;  }
+.module-icon {
+    margin-right: 3px;
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    background: url(__TEMP__/{$style}/public/images/member_index_ico.png) no-repeat;
+    float: left;
+    margin-top: 3px;
+}
+.maneylist { margin: 0px 33px ;}
+.blank{height:10px;background:#eee;}
+.bro-extract-btn{background:#eee;padding: 20px 15px;margin-top:0;}
+.maneylist-li p {
+    font-size: 12px;
+	 position: relative;
+    display: block;
+    color: #333;
+	margin-bottom: 0; 
+}
+.a-borkerage{color: #333;float:right;}
+.button.red {background: #FF4040;border: 1px solid #FF4040;}
+.maneylist { margin: 0 0 0 15px;}
+.maneylist-li{padding:10px 0 10px 15px;}
+.maneylist-li .text {color:#000000;}
+.maneylist-li .money-number{color:#FF7962;}
+
+.bro-extract-btn a.button {
+    width: 100%;
+    height: 35px;
+    line-height: 35px;
+    padding: 0;
+    border-radius: 3px;
+    font-size: 18px;
+    font-family: "微软雅黑","Helvetica Neue", "Helvetica", Helvetica, Arial, sans-serif;
+    color:#fff;
+    display:inline-block;
+    text-align:center;
+}
+.button.red {
+    background: #FF4040;
+    border: 1px solid #FF4040;
+}
+</style>
+{/block}
+{block name="main"}
+<input type="hidden" id="ref_url" value="{$pre_url}">
+<input type="hidden" value="{$flag}" id="hidden_flag" />
+<section class="head">
+	<a class="head_back" href="javascript:window.history.go(-1);"><i class="icon-back"></i></a>
+	<div class="head-title" style="position: relative;">{:lang('distribution_my_commission')} <a class="a-borkerage" href="{:__URL('APP_MAIN/Distribution/detailed')}" style="position: absolute;right: 10px;">{:lang('distribution_detailed')}</a></div>
+	
+</section>
+
+<div class="bro-spare" style="overflow:hidden;background:linear-gradient(#5cb7f9, #006ab6 ) ; margin-top: 0px;">
+	<div class="tip_head">
+		<p class="tip-txt"><i class="icon-money"></i>{:lang('distribution_present_balance')}</p>
+		<span class="number-big">¥{$userCon.can_commission}</span>
+	</div>
+	<div class="tip_bottom">
+		<p class="field-2 lf">{:lang('distribution_accumulated_commission')}<br><big>￥{$grandTotal}</big></p>
+		<p class="field-2 lf">{:lang('distribution_amount_audited')}<br><big>￥{$commission_money}</big></p>
+		<p class="field-2 rg">{:lang('distribution_already_presented')}<br><big>￥{$userCon.stop_commission}</big></p>
+	</div>
+</div>
+
+
+<!--推广员--> 
+<div style="background:#fff;">
+<p class="xiajip"><span class="xiajispanleft"><i class=" module-icon extension"></i>{:lang('distribution_promoters')}</span><span class="xiajispanright"></span></p>
+<ul class="maneylist">
+	<li class="maneylist-li">
+		<a class="a-personal" href="{:__URL('APP_MAIN/Distribution/distributionCommission')}">
+		 	 <span class="text">{:lang('distribution_distribution_commission')}</span> <span class="money-number">¥{$userCon.can_commission}<i class="arrow"></i></span>
+		</a> 
+	</li>
+			
+</ul>
+</div>
+<div class="blank"></div>
+
+<div class="bro-extract-btn">
+	<a href="{:__URL('APP_MAIN/Distribution/distributionToWithdraw')}" class="button red">{:lang('distribution_application_presentation')}</a>
+</div>
+
+
+	<!-- 微信登录弹出绑定手机号遮罩层 -->
+	
+	
+	<input type="hidden" value="20" id="uid">
+	<!-- 加载弹出层 -->
+	<div class="mask-layer-loading">
+		<img src="/template/wap/default_new/public/images/mask_load.gif">
+	</div>
+	
+<script type="text/javascript">
+/* 	$(document).ready(function() {
+		$(".a-borkerage-detail").click(function() {
+			$(this).removeClass();
+			$(this).addClass('a-borkerage-detail_2');
+		})
+	}) */
+ </script> 
+{/block}
+{block name="bottom"}{/block}

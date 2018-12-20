@@ -1,0 +1,132 @@
+{extend name="adminblue/base" /}
+{block name="resources"/}{/block}
+{block name="main"}
+<div class="ns-main">
+			
+<table class="mytable">
+	<tbody><tr>
+		<th>
+			用户名称：<input id="userName" class="input-common middle" type="text" value="">
+			<!-- 手机号：<input id="userTel" class="input-common middle" type="text" value=""> -->
+			<button onclick="searchData()" value="搜索" class="btn-common">搜索</button>
+		</th>		
+	</tr>
+</tbody></table>
+<div class="mod-table">
+	<div class="mod-table-head">
+		<div class="con style0list">
+			<table class="table-class">
+				<colgroup>
+					<col style="width: 8%;">
+					<col style="width: 8%;">
+					<col style="width: 8%;">
+					<col style="width: 8%;">
+					<col style="width: 8%;">
+					<col style="width: 8%;">
+					<col style="width: 8%;">
+					<col style="width: 8%;">
+					<col style="width: 8%;">
+					<col style="width: 8%;">
+					<col style="width: 8%;">
+					<col style="width: 24%;">
+				</colgroup>
+				<thead>
+					<tr>						
+						<th>用户名称</th>					
+						<th>是否是推广员</th>
+						<!-- <th>是否是股东</th>
+											<th>是否是代理</th>	 -->					
+						<th>总佣金</th>
+						<th>可提现佣金</th>
+						<th>已提现佣金</th>
+						<th>分销佣金</th>
+						<!-- <th>股东分红</th>
+						<th>股东全球分红</th>
+						<th>区域代理佣金</th> -->
+						<th>操作</th>
+						<!-- <th>股东团队分红</th>
+						<th>推广员团队分红</th>
+						<th>渠道代理分红</th> -->
+					</tr>
+				</thead>
+
+				<tbody>
+				    
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>
+
+
+
+
+<!-- 修改用户上级（Modal）结束 -->
+
+<input type="hidden" id="page_count" value="1">
+<input type="hidden" id="page_size" value="7">
+
+<script type="text/javascript">	
+    //查询
+	function searchData(){
+		$(".more-search-container").slideUp();
+		LoadingInfo(1);
+	}
+	//加载数据
+	function LoadingInfo(pageIndex) {
+		var user_name = $("#userName").val();
+		var user_phone = $("#userTel").val();
+		var role = $("#role").val();
+		$.ajax({
+			type : "post",
+			url : "{:__URL('ADMIN_MAIN/Distributionnew/commissionList')}",
+			async : true,
+			data : {
+				"page_index" : pageIndex,
+				"user_name":user_name,
+				"user_phone":user_phone,
+				"role":role
+			},
+			success : function(data) {
+				$("#page_count").val(data["page_count"]);
+				$("#pageNumber a").remove();
+				var html = '';
+				if (data["data"].length > 0) {
+					for (var i = 0; i < data["data"].length; i++) {
+						if(data["data"][i]["is_promoters"] ==1){
+							var is_promoter = "<i class='fa fa-check text-success text-active'></i>";						
+						}else{
+							var is_promoter = "<i class='fa fa-times'></i>";		
+						}
+						
+						html += '<tr align="center">';	
+						html += '<td>' + data["data"][i]["nick_name"] + '</td>';
+						html += '<td>' + is_promoter + '</td>';
+						html += '<td class="color-red">' + parseFloat(data["data"][i]["total_commission"]).toFixed(2) + '</td>';
+						html += '<td class="color-green">' + parseFloat(data["data"][i]["can_commission"]).toFixed(2) + '</td>';
+						html += '<td class="color-blue">' + parseFloat(data["data"][i]["stop_commission"]).toFixed(2) + '</td>';
+						html += '<td>' + parseFloat(data["data"][i]["total_commission"]-data["data"][i]["stop_commission"]).toFixed(2) + '</td>';
+						
+						html += '<td  align="center">';
+						html += '<a href="'+__URL('ADMIN_MAIN/distributionnew/accountDetails&uid='+data["data"][i]["uid"])+'">账户详情</a>';
+						html += '<a href="'+__URL('ADMIN_MAIN/distributionnew/commissions?type_id=1&uid='+data["data"][i]["uid"])+'">分销佣金</a><br>';
+						html += '</td>';						
+						html += '</tr>';
+					}
+				} else {
+					html += '<tr align="center"><td colspan="12">暂无符合条件的数据记录</td></tr>';
+				}
+				
+				$(".style0list tbody").html(html);
+				var totalpage = $("#page_count").val();
+				if (totalpage == 1) {
+					changeClass("all");
+				}
+				initPageData(data["page_count"],data['data'].length,data['total_count']);
+				var $html = pagenumShow(jumpNumber,totalpage,5)
+				$("#pageNumber").append($html);
+			}
+		});
+	}	
+</script>
+{/block}

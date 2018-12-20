@@ -1,0 +1,33 @@
+{extend name="shop/blue/deskBase" /}
+{block name="commonMain"}
+<div class="banner ny">
+    <div class="flexslider">
+        <ul class="slides">
+            <li><img src="__TEMP__/{$style}/public/FrontDesk/images/temp/mr.jpg"></li>
+
+        </ul>
+    </div>
+</div>
+<div class="index-content inside clearfix">
+
+    <div class="meirong">
+        <div class="bt">
+            <span class="r">当前位置：<a href="{:__URL('SHOP_MAIN/frontDesk/index')}"> 首页</a> > {$category_name}</span>
+            <h2>{$category_name}</h2>
+        </div>
+        <div class="zxxq">
+            <h2>{$info['title']}</h2>
+            {if condition="$category lt 9"}
+            <h3>来源：{$info.source} 时间：{$info.create_time|date="Y-m-d H:i:s",###}</h3>
+            {/if}
+            <div class="nr">
+            {$info['content']}
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+{/block}
+{/block}

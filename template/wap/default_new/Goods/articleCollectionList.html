@@ -1,0 +1,272 @@
+{extend name="wap/default_new/articleBase" /}
+{block name="resources"}
+<!--组件依赖css begin-->
+<link rel="stylesheet" type="text/css" href="http://localhost__TEMP__/{$style}/public/Zepto/css/widget/navigator/navigator.css" />
+<link rel="stylesheet" type="text/css" href="__TEMP__/{$style}/public/Zepto/css/widget/navigator/navigator.iscroll.css" />
+<link rel="stylesheet" type="text/css" href="__TEMP__/{$style}/public/Zepto/css/widget/navigator/navigator.default.css" /><!--皮肤文件，若不使用该皮肤，可以不加载-->
+<link rel="stylesheet" type="text/css" href="__TEMP__/{$style}/public/Zepto/css/widget/navigator/navigator.iscroll.default.css" /><!--皮肤文件，若不使用该皮肤，可以不加载-->
+<!--组件依赖css end-->
+<!--组件依赖js begin-->
+<script type="text/javascript" src="__TEMP__/{$style}/public/Zepto/js/zepto.js"></script>
+<script type="text/javascript" src="__TEMP__/{$style}/public/Zepto/js/zepto.extend.js"></script>
+<script type="text/javascript" src="__TEMP__/{$style}/public/Zepto/js/zepto.ui.js"></script>
+<script type="text/javascript" src="__TEMP__/{$style}/public/Zepto/js/zepto.iscroll.js"></script>
+<script type="text/javascript" src="__TEMP__/{$style}/public/Zepto/js/widget/navigator.js"></script>
+<script type="text/javascript" src="__TEMP__/{$style}/public/Zepto/js/widget/navigator.iscroll.js"></script>
+<!--组件依赖js end-->
+<style type="text/css">
+    #nav-smartSetup {width: 540px; margin: 0 auto}
+    li {list-style: none}
+</style>
+{/block}
+{block name="goodsHead"}
+
+{/block}
+
+{block name="main"}
+<!-- 资讯中心 -->
+    <style>
+      .floor{
+      	width:100%;
+      	/*float:left;
+      	background:#fff;*/
+      	margin-top:4px;
+      }
+      .members_goodspic{
+      	width:100%;
+      	background:#fff;
+      }
+      .floor dl{
+      	width:94%;
+      	margin:0 3%;
+      	padding:10px 0%;
+      	/*float:left;*/
+      	height:82px;
+      	margin-bottom:0;
+      	border-bottom:1px solid #ccc;
+      }
+      .floor dl dt{
+      	width:25%;
+      	height:80px;
+      	float:left;
+      	margin-right:4%;
+      }
+      .floor dl dt img{
+      	width:100%;
+      	height:80px;
+      	float:left;
+      }
+      .floor dl dd{
+      	width:71%;
+      	line-height:22px;
+      	float:left;
+      	color:#c5c5c5;
+      	font-size:13px;
+      }
+      .floor dl dd.title{
+      	margin-bottom:6px;
+      	overflow:hidden; 
+        text-overflow:ellipsis;
+        display:-webkit-box; 
+        -webkit-box-orient:vertical;
+        -webkit-line-clamp:2; 
+        margin-top:5px;
+        min-height: 46px;
+      }
+      .floor dl dd.title a{
+      	width:100%;
+      	height:50px;
+      	color:#333;
+      	font-size:17px;
+      }
+      .foot-nav{
+      	margin-top:0;
+      }
+
+
+      /**-----tlt 0430 editFORhead begin-----**/
+		.heads {
+			/*position: fixed;
+			top: 0;
+			left: 0;
+			right: 0;*/
+			height: 44px;
+			z-index: 1000;
+			border-bottom: solid 1px #e2e2e2;
+			background: #f7f7f7;
+		}
+
+		.heads .head_back, .heads .icon-home, .heads .head-cart {
+			position: absolute;
+			top: 0;
+			width: 32px;
+			height: 44px;
+			line-height: 44px;
+			color: #333;
+			text-align: center;
+			z-index: 999999;
+		}
+
+		.heads .head_back {
+			left: 0px;
+			font-size: 28px;
+		}
+
+		.heads .icon-home {
+			right: 50px;
+			font-size: 38px;
+		}
+
+		.heads .head-cart {
+			right: 10px;
+			font-size: 38px;
+		}
+
+		.heads .tip-number {
+			position: absolute;
+			top: 3px;
+			right: -3px;
+			padding: 1px;
+			min-width: 15px;
+			height: 15px;
+			line-height: 15px;
+			border-radius: 8px;
+			background: red;
+			color: #fff;
+			font-size: 12px;
+			text-align: center;
+		}
+
+		.ui-navigator .ui-navigator-list li a.cur, .ui-navigator .ui-navigator-fix.cur {
+		    background: #fff;
+		    color:#e53870;
+		}
+    </style>
+    <!--topbar end-->
+    <div class="main myorder">
+    <section class="heads">
+    <a class="head_back" id="backoutapp" href="javascript:window.history.go(-1)"><i class="icon-back"></i></a>
+		<div class="head-title">文章收藏</div>
+	</section>
+	<!-- 代码开始 -->
+<div id="nav-smartSetup" style="background:#e53870;border:none;">
+    <ul>
+        <li><a href="javascript:;" onClick="getarticlelist(1);" class="cur">全部</a></li>
+        {volist name="class" id="item"}
+        <li><a href="javascript:;" onClick="getarticlelist(1,{$item.class_id});">{$item.name}</a></li>
+        {/volist}
+        <!-- <li><a href="#">国内</a></li>
+        <li><a href="#">国际</a></li>
+        <li><a href="#">军事</a></li>
+        <li><a href="#">社会</a></li>
+        <li><a href="#">娱乐</a></li>
+        <li><a href="#">女人</a></li>
+        <li><a href="#">体育</a></li>
+        <li><a href="#">科技</a></li>
+        <li><a href="#">互联网</a></li>
+        <li><a href="#">教育</a></li>
+        <li><a class="cur" href="#">财经</a></li>
+        <li><a href="#">房产</a></li>
+        		<li><a href="#">汽车</a></li> -->
+    </ul>
+</div>
+
+<script type="text/javascript">
+    (function () {
+        $('#nav-smartSetup').navigator();
+    })();
+</script>
+<!-- 代码结束 -->
+    <div class="floor">
+		<section class="members_goodspic tablelist-append">
+
+
+		</section>
+	</div>	
+        
+		<input type="hidden" id="page_count"><!-- 总页数 -->
+		<input type="hidden" id="page" value="1"><!-- 当前页数 -->
+    </div>
+    <div class="foot-nav">
+	<!-- <div class="nav">
+		{empty name="$uid"}
+		<a href="{:__URL('APP_MAIN/login/index')}">{:lang("login")}</a>
+		<a href="{:__URL('APP_MAIN/login/register')}">{:lang("register")}</a>
+		{/empty}
+		<a href="javascript:;" onclick="locationShop();">{:lang("pc_version")}</a>
+		<a href="{:__URL('APP_MAIN/member/index')}">{:lang("member_member_center")}</a>
+	</div> -->
+	{include file="wap/default_new/controlCopyRight" /}
+</div>
+    <script>
+        //文章点击数
+        $("body").on('click',".floor dl dd.title a",function(){
+            var href=this.href;
+            var article_id=$(this).attr('data-id');
+            var url="{:__URL('APP_MAIN/Goods/addClick')}&article_id="+article_id;
+            $.get(url,function(data){
+                 window.location.href=href;
+            })
+            return false;
+        })
+        $(function(){
+			getarticlelist(1);
+		})
+		var is_load = true;//防止重复加载
+		function getarticlelist(page,class_id=0){
+			$("#page").val(page);
+			if(is_load){
+				is_load = false;
+				$.ajax({
+					type:"post",
+					url : "{:__URL('APP_MAIN/Goods/articleCollectionList')}",
+					data : {
+						"page" : page,
+						'class_id':class_id
+					},
+					success : function(data){
+						$("#page_count").val(data['page_count']);//总页数
+					    if(page == 1){
+						    var list_html = "";
+						}else if(page > 1){
+							var list_html = $('.tablelist-append').html();
+						}
+						if(data['data'].length >0){
+							for(var i=0;i<data['data'].length;i++){
+								var item=data['data'][i];
+								list_html += '<dl>';
+								list_html +='<dt><img src="'+__IMG(item.image)+'"></dt>';
+								list_html += '<dd class="title"><a href="'+__URL('APP_MAIN/goods/articleDetail')+'&article_id='+item.article_id+'" data-id="'+item.article_id+'">'+item.title+'</a></dd>';
+								list_html += '<dd>时间: '+timeStampTurnTime(item.create_time)+'&nbsp;&nbsp;点击数: '+item.click+'</dd>';
+								list_html += '<p></p>';
+								list_html += '</dl>';
+									
+							}
+						}
+						is_load = true;
+						$('.tablelist-append').html(list_html);
+						//img_lazyload();	
+				}
+			});	
+		}
+	}
+
+		//滑动到底部加载
+		$(window).scroll(function(){
+			var totalheight = parseFloat($(window).height()) + parseFloat($(window).scrollTop());
+			var content_box_height = parseFloat($(".tablelist-append").height()); 
+			if(totalheight - content_box_height >= 100){
+				if(is_load){
+					var page = parseInt($("#page").val()) + 1;//页数
+					var total_page_count = $("#page_count").val(); // 总页数
+					if(page > total_page_count){
+						return false;
+					}else{
+						getarticlelist(page);
+					}
+				}
+				
+			}
+		})
+    </script>
+{/block}

@@ -1,0 +1,144 @@
+{extend name="adminblue/base" /}
+{block name="resources"/}
+<script type="text/javascript" src="__STATIC__/My97DatePicker/WdatePicker.js"></script>
+<link href="__STATIC__/blue/css/order/ns_orderlist.css" rel="stylesheet" type="text/css" />
+<style>
+.mytable.select td{padding-bottom:0;}
+.mytable.select #more_search{display: block;}
+.table-class tbody td a {margin-left: 0;}
+.to-fixed{position: fixed;width: 85.5%;top: 50px;box-shadow: 0 2px 6px 0 rgba(0,0,0,.3);z-index: 5;}
+.mytable td{padding:10px 0;}
+.btn-common-white{line-height: 20px;outline: none;background: white}
+.ns-main{margin-top: 0;}
+.seller_memo{background: #FFF9DF!important;color: #D09B4C;}
+</style>
+{/block}
+<!-- {1block name="thirdmenu"}{/block} -->
+<!-- {1block name="warm_prompt"}{/block} -->
+<!-- {1block name="right_tab_tip"}{/block} -->
+{block name="main"}
+<nav class="ns-third-menu" style="margin:0">
+	<ul>
+		<li class="selected" onclick='location.href=__URL("ADMIN_MAIN/distributionnew/commissions")'>分销佣金明细</li>
+	</ul>
+</nav>
+<input type="hidden" id="order_id" />
+<input type="hidden" id="print_select_ids" />
+<input type="hidden" id="order_status" value="{$status}" />
+<div style="margin-top:10px;">	
+	<style>
+       .status-success {
+		    display: inline-block;
+		    color: #FFF;
+		    padding-left: 5px;
+		    padding-right: 5px;
+		    padding-bottom: 3px;
+		    padding-top: 3px;
+		    background-color: #5be15b;
+		}
+		.table-class tbody td {
+		    border-right: none;
+		}
+	</style>
+<div class="mod-table">
+	<div class="mod-table-head">
+		<div class="con style0list">
+	       <table class="table-class">
+				<colgroup>
+					<col style="width: 10%;">
+					<!-- <col style="width: 9%;"> -->
+					<col style="width: 10%;">
+					<col style="width: 10%;">
+					<col style="width: 10%;">
+					<col style="width: 10%;">
+					<col style="width: 11%;">
+					<col style="width: 10%;">
+					<col style="width: 11%;">
+					<col style="width: 19%;">
+				</colgroup>
+				<thead>
+					<tr>
+						<th>用户名称</th>						
+						<!-- <th>金额类型</th> -->
+						<th>商品卖价</th>
+						<th>商品成本</th>								
+						<th>商品利润</th>
+						<th>商品分销比率</th>
+						<th>推广员分佣比率</th>
+						<th>佣金金额</th>								
+						<th>发放状态</th>						
+						<th>时间</th>
+					</tr>
+				</thead>
+
+				<tbody>
+				</tbody>
+			</table>
+         </div>
+	</div>
+</div>
+
+<script type="text/javascript">	
+	//查询
+	function searchData(){
+		LoadingInfo(1);
+	}
+	//加载数据
+	function LoadingInfo(pageIndex) {
+		$.ajax({
+			type : "post",
+			url : "{:__URL('ADMIN_MAIN/Distributionnew/commissions')}",
+			async : true,
+			data : {"page_index" : pageIndex, "type_id":{$type_id}, "uid":{$uid}},
+			success : function(data) {
+// 				 alert(JSON.stringify(data));
+				$("#page_count").val(data["page_count"]);
+				$("#total_count").val(data["total_count"]);
+				$("#pageNumber a").remove();
+				var html = '';
+				
+				if (data["data"].length > 0) {
+					
+					for (var i = 0; i < data["data"].length; i++) {
+						html += '<tr align="center">';	
+						html += '<td>' + data["data"][i]['user']["nick_name"]+ '<br> ' + data["data"][i]['user']["number"]+ '</td>';									
+						//html += '<td>' + data["data"][i]["type_name"]+ '</td>';
+						
+						html += '<td>' + data["data"][i]["price"]+ '</td>';
+						html += '<td>' + data["data"][i]["cost_price"]+ '</td>';						
+						html += '<td>' + data["data"][i]["profit"]+ '</td>';	
+						html += '<td>' + data["data"][i]["distribution_commission_rate"]+ ' %</td>';	
+						html += '<td>' + data["data"][i]["commission_rate"]+ ' %</td>';					
+						html += '<td>' + parseFloat(data["data"][i]["commission_money"]).toFixed(2) + '</td>';
+						
+						if(data["data"][i]["is_issue"] == 1)
+						{
+							html += '<td>已发放</td>';
+						}
+						else
+						{
+							html += '<td>已发放</td>';
+						}
+						
+						
+						html += '<td>' + timeStampTurnTime(data["data"][i]["add_time"]) + '</td>';					
+						html += '</tr>';
+					}	
+				} else {
+					html += '<tr align="center"><td colspan="10">暂无符合条件的数据记录</td></tr>';
+				}
+				
+				$(".style0list tbody").html(html);
+				var totalpage = $("#page_count").val();
+				if (totalpage == 1) {
+					changeClass("all");
+				}
+				initPageData(data["page_count"],data['data'].length,data['total_count']);
+				var $html = pagenumShow(jumpNumber,totalpage,5)
+				$("#pageNumber").append($html);
+			}
+		});
+	}	
+
+</script>
+{/block}

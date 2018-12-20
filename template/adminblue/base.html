@@ -1,0 +1,703 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	<meta name="renderer" content="webkit" />
+	<meta http-equiv="X-UA-COMPATIBLE" content="IE=edge,chrome=1"/>
+	{if $frist_menu.module_name=='首页'}
+	<title>{$title_name} - 商家管理</title>
+	{else /}
+		<title>{$title_name} - {$frist_menu.module_name}管理</title>
+	{/if}
+	<link rel="shortcut icon" type="image/x-icon" href="ADMIN_IMG/admin_icon.ico" media="screen"/>
+	<link rel="stylesheet" type="text/css" href="__STATIC__/blue/bootstrap/css/bootstrap.css" />
+	<link rel="stylesheet" type="text/css" href="__STATIC__/blue/css/ns_blue_common.css" />
+	<link rel="stylesheet" type="text/css" href="__STATIC__/font-awesome/css/font-awesome.min.css" />
+	<link rel="stylesheet" type="text/css" href="__STATIC__/simple-switch/css/simple.switch.three.css" />
+	<link rel="stylesheet" type="text/css" href="ADMIN_CSS/selectric.css" />
+	<style>
+	.Switch_FlatRadius.On span.switch-open{background-color: #126AE4;border-color: #126AE4;}
+	#copyright_meta a{color:#333;}
+	</style>
+	<script src="__STATIC__/js/jquery-1.8.1.min.js"></script>
+	<script src="__STATIC__/blue/bootstrap/js/bootstrap.js"></script>
+	<script src="__STATIC__/bootstrap/js/bootstrapSwitch.js"></script>
+	<script src="__STATIC__/simple-switch/js/simple.switch.js"></script>
+	<script src="__STATIC__/js/jquery.unobtrusive-ajax.min.js"></script>
+	<script src="__STATIC__/js/common.js"></script>
+	<script src="__STATIC__/js/seller.js"></script>
+	<script src="__STATIC__/js/load_task.js"></script>
+	<script src="__STATIC__/js/load_bottom.js" type="text/javascript"></script>
+	<script src="ADMIN_JS/layer/layer.js"></script>
+	<script src="ADMIN_JS/jquery-ui.min.js"></script>
+	<script src="ADMIN_JS/ns_tool.js"></script>
+	<script src="ADMIN_JS/jquery.selectric.js"></script>
+	<link rel="stylesheet" type="text/css" href="__STATIC__/blue/css/ns_table_style.css">
+	<style>
+       .ns-base-header {
+		    background: #006ab6;
+		}
+		.ns-logo {
+		    height: 50px;
+		    width: 139px;
+		    line-height: 50px;
+		    cursor: pointer;
+		    background: #006ab6 url(__STATIC__/blue/img/top_logo.png) no-repeat;
+		    /*background: #006ab6 url({$website.logo}) no-repeat;*/
+		    background-size: 65%;
+		    background-position: center;
+		}
+		.ns-base-header .ns-search .nav-menu {
+		    background: #006ab6;
+		}
+		.ns-base-aside {
+		    background: rgb(18, 18, 26);
+		}
+		.ns-base-aside nav li{
+		    color: #fff;
+		}
+		.ns-base-aside nav li:hover {
+		    background: #006ab6;
+		    color: #fff;
+		}
+		.ns-base-aside nav li.selected,.ns-base-header nav ul li.selected {
+		    background: #12e4a0;
+		    color: #fff;
+		}
+		.ns-base-aside nav li{
+            margin:0;
+		}
+		.shortcut-menu {
+		    background: #0ebb83;
+		    color: #fff;
+		    border-color: #fff;
+		}
+		.shortcut-menu:hover {
+		    background: #12e4a0;
+		    color: #fff;
+		    border-color: #fff;
+		}
+		.ns-base-aside nav li {
+		    
+		}
+		.ns-base-aside .ns-main-block h3 {
+		    /*background: #49b3ff;
+		    color: #fff;*/
+		}
+		.module_img{
+			width:18px;
+			margin-right:5px;
+		}
+		.modal-header {
+		    /*background: -webkit-gradient(linear,0 0,0 100%,from(#fdfcfc),to(#e8e8e8));*/
+		    background: #f7f7f7;
+		}
+		#set_shortcut_menu .modal-body::-webkit-scrollbar-thumb{
+			background: none;
+		}
+		.modal-header h3 {
+		    color: #666;
+		}
+		.menu-box li h4 {
+		    background: #f7f7f7;
+		    color:#666;
+		}
+		.shortcut-menuspan {
+		    display: inline-block;
+		    width: 12px;
+		    height: 12px;
+		    background-image: url(__STATIC__/blue/img/menu_add_off.png);
+		    background-size: 100% 100%;
+		    vertical-align: -2px;
+		    margin-left: 10px;
+		    margin-right: 4px;
+		    float: right;
+		    margin-top: 12px;
+		}
+		.shortcut-menu{
+            position:absolute;
+            left:90px;
+            top:103px;
+            width:auto;
+            height:auto;
+            background:none;
+            border:none;
+		}
+		.shortcut-menu:hover{
+            background:none;
+		}
+		.ns-main .statistical {
+		    overflow: hidden;
+		    background: none;
+		    margin-bottom: 5px;
+		}
+		.ns-main .statistical ul li{
+		    width: 13.98%;
+		    padding: 10px 1%;
+		    background: #fff;
+		    margin-left: 0.8%;
+		    height: 80px;
+		    border-radius: 3px;
+		}
+		.ns-main .statistical ul li:first-child {
+		    margin-left: 0%;
+		}
+		.ns-main .statistical ul li:after {
+		    content: '';
+		    border-right:none;
+		    display: block;
+		    float: right;
+		    height: 80px;
+		}
+		#goods-prompts .goods-state ul li {
+		    float: left;
+		    width: 17.6%;
+		    height:80px;
+		    margin-top:0;
+		    background: #12e4a0;
+		    margin-left:2%;
+		}
+		#goods-prompts .goods-state ul li a span,#goods-prompts .goods-state ul li a strong{
+			color:#fff;
+		}
+		
+		#goods-prompts .goods-state ul li.goods-promptli2{
+			background: #006ab6;
+		}
+		#goods-prompts .goods-state ul li.goods-promptli3{
+			background: #cc50ff;
+		}
+		#goods-prompts .goods-state ul li.goods-promptli4{
+			background: #ff9800;
+		}
+		#goods-prompts .goods-state ul li.goods-promptli5{
+			background: #03a9f4;
+		}
+		#goods-prompts .goods-state.a-line {
+		    padding: 0 0 20px;
+		}
+		.ns-main .i-circular{
+			display:none;
+		}
+		.ns-main .goods-prompt h3, .merchants-help h3, .sales h3, .sales-ranking h3, .charts h3, .system-config h3 {
+		    border-bottom: 1px solid #dedede;
+		    margin-bottom: 10px;
+		}
+		#merchants-uses ul li {
+		    position: relative;
+		    background: #b198dc;
+		    width: 10%;
+		    margin-left: 23%;
+		    height:76px;
+		    line-height:60px;
+		}
+		#merchants-uses ul li.merchants-usesli2 {
+		    background: #34c0e3;
+		}
+		#merchants-uses ul li.merchants-usesli3 {
+		    background: #03a9f4;
+		}
+		#merchants-uses ul li:first-child {
+		    margin-left: 4%;
+		}
+		.merchants-use li a img{
+			width:30px;
+			height:30px;
+			margin-top:20px;
+
+		}
+		#merchants-uses ul li span {
+		    margin-top: 10px;
+		    position: absolute;
+		    right: -70px;
+		    top: 0;
+		}
+		#merchants-uses ul li.merchants-usesli3 span {
+		    position: absolute;
+		    right: -80px;
+		    top: 0;
+		}
+		#goods-stateStrong ul li a{
+			position:relative;
+		}
+		#goods-stateStrong ul li {
+		    margin-top: 10px;
+		}
+		#goods-stateStrong ul li a strong{
+			width:80px;
+			height:80px;
+			background:url(__STATIC__/blue/img/order1.png)no-repeat center;
+			background-size:40px 40px;
+			background-position:57%;
+			text-align:right;
+			font-size:14px;
+			color:#f76c6c;
+		}
+		#goods-stateStrong ul li a strong.daifahuo{
+			background:url(__STATIC__/blue/img/order2.png)no-repeat center;
+			background-size:40px 40px;
+			background-position: 57%;
+			color:#29dfee;
+		}
+		#goods-stateStrong ul li a strong.yifahuo{
+			background:url(__STATIC__/blue/img/order3.png)no-repeat center;
+			background-size:40px 40px;
+			color:#4bc554;
+		}
+		#goods-stateStrong ul li a strong.yishouhuo{
+			background:url(__STATIC__/blue/img/order4.png)no-repeat center;
+			background-size:40px 40px;
+			background-position: 57%;
+			color:#1296db;
+		}
+		#goods-stateStrong ul li a strong.yiwancheng{
+			background:url(__STATIC__/blue/img/order5.png)no-repeat center;
+			background-size:40px 40px;
+			background-position: 57%;
+			color:#ffa200;
+		}
+		#goods-stateStrong ul li a strong.yiguanbi{
+			background:url(__STATIC__/blue/img/order6.png)no-repeat center;
+			background-size:40px 40px;
+			background-position: 57%;
+			color:#dd9e58;
+		}
+		#goods-stateStrong ul li a strong.tuikuanzhong{
+			background:url(__STATIC__/blue/img/order7.png)no-repeat center;
+			background-size:40px 40px;
+			background-position: 57%;
+			color:#ffbd03;
+		}
+		.ns-main .sales h3{
+			margin-bottom:30px;
+		}
+		.ns-main .sales {
+		    height: 213px;
+		}
+		#sales-rankings h3 {
+		    margin-bottom:10px;
+		}
+		.sales-ranking table tbody tr:first-child {
+		    background: #12e4a0;
+		    color:#fff;
+		}
+        .ns-base-article .ns-base-section{
+        	/*background:#f7f7f7;*/
+        }
+		.table-class tr th {
+		    /* background-color: #fafafa; */
+		    border-top: 1px solid #ebecec;
+		    border-bottom: 1px solid #ebecec;
+		    background: #f7f7f7 !important;
+		}
+		.ns-main .sales,.ns-main .merchants-help,.ns-main .sales-ranking {
+		    width: 38.3%;
+		    float: left;
+		}
+	</style>
+	{include file="adminblue/controlCommonVariable" }
+	{block name="resources"/}{/block}
+	</head>
+<body>
+{include file="adminblue/urlModel"}
+<article class="ns-base-article">
+
+	<header class="ns-base-header">
+		<div class="ns-logo" onclick="location.href='{:__URL('ADMIN_MAIN')}';"></div>
+		<div class="ns-search">
+			<div class="nav-menu js-nav">
+				<img src="__STATIC__/blue/img/nav_menu.png" title="导航管理" />
+			</div>
+			<div class="ns-navigation-management">
+				<div class="ns-navigation-title">
+					<h4>导航管理</h4>
+					<span>x</span>
+				</div>
+				<div style="height:40px;"></div>
+				{foreach name="nav_list" item="nav"}
+				<dl>
+					<dt>{$nav.data.module_name}</dt>
+					{foreach name="nav['sub_menu']" item="nav_sub"}
+					<dd>
+						<a href="{:__URL('ADMIN_MAIN/'.$nav_sub['url'])}">{$nav_sub.module_name}</a>
+					</dd>
+					{/foreach}
+				</dl>
+				{/foreach}
+			</div>
+			<div class="ns-search-block">
+				<i class="fa fa-search" title="搜索"></i>
+				<span>搜索</span>
+				<div class="mask-layer-search">
+					<input type="text" id="search_goods" placeholder="搜索" />
+					<a href="javascript:search();"><img src="__STATIC__/blue/img/enter.png"/></a>
+				</div>
+			</div>
+		</div>
+		<nav>
+			<ul>
+				{foreach name="headlist" item="per"}
+				{if condition="strtoupper($per['module_id']) eq $headid"}
+				<li class="selected" onclick="location.href='{:__URL('ADMIN_MAIN/'.$per['url'])}';">
+					<span>{$per.module_name}</span>
+					{if condition="$per['module_id'] eq 10000"}
+						<span class="is-upgrade"></span>
+					{/if}
+				</li>
+				
+				{else/}
+				<li onclick="location.href='{:__URL('ADMIN_MAIN/'.$per['url'])}';">
+					<span>{$per.module_name}</span>
+					{if condition="$per['module_id'] eq 10000"}
+						<span class="is-upgrade"></span>
+					{/if}
+				</li>
+				{/if}
+				{/foreach}
+			</ul>
+		</nav>
+		<div class="ns-base-tool">
+			<!-- <i class="i-home"  title="前台首页"><a href="{:__URL('SHOP_MAIN')}" target="_blank"></a></i> -->
+			<i class="i-home"  title="前台首页"><a href="{:__URL('SHOP_MAIN/frontDesk/index')}" target="_blank"></a></i>
+			<i class="i-close" title="退出登录"><a href="{:__URL('ADMIN_MAIN/login/logout')}"></a></i>
+			<i class="ns-vertical-bar"></i>
+			<div class="ns-help">
+				<div class="logo">
+				{if condition="$user_headimg neq ''"}
+				<img src="{:__IMG($user_headimg)}"/>
+				{else /}
+				<img src="__STATIC__/blue/img/user_admin_blue.png" width="30" >
+				{/if}
+				</div>
+				<span>{$user_name}</span>
+				<i class="fa fa-angle-down"></i>
+				<ul>
+					<li>
+						<img src="__STATIC__/blue/img/add_favorites.png" />
+						<a href="#edit-password" data-toggle="modal" title="修改密码">修改密码</a>
+					</li>
+					<li title="清理缓存" onclick="delcache()">
+						<img src="__STATIC__/blue/img/clear_the_cache.png"/>
+						<a href="javascript:;">清理缓存</a>
+					</li>
+					<li title="加入收藏" onclick="addFavorite()">
+						<img src="__STATIC__/blue/img/add_favorites.png" />
+						<a href="javascript:;">加入收藏</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</header>
+	
+	<aside class="ns-base-aside">
+		<div class="ns-main-block">
+			
+			<h3 style="margin-top:50px;">
+				{foreach name="headlist" item="per"}
+				{if condition="strtoupper($per['module_id']) eq $headid"}
+					<span class="{$per.module_name}">{$per.module_name}</span>
+					<i class="fa fa-caret-down"></i>
+				{/if}
+				{/foreach}
+			</h3>
+			
+			<nav>
+				<ul>
+					{foreach name="leftlist" item="leftitem"}
+					{if condition="strtoupper($leftitem['module_id']) eq $second_menu_id"}
+					<li class="selected" onclick="location.href='{:__URL('ADMIN_MAIN/'.$leftitem['url'])}';" title="{$leftitem.module_name}"><img src="NAV_IMG/{$leftitem.module_picture}" class="module_img">{$leftitem.module_name}</li>
+					{else/}
+					<li onclick="location.href='{:__URL('ADMIN_MAIN/'.$leftitem['url'])}';" title="{$leftitem.module_name}"><img src="NAV_IMG/{$leftitem.module_picture}" class="module_img">{$leftitem.module_name}</li>
+					{/if}
+					{/foreach}
+					<!-- 快捷菜单列表 -->
+					{if condition="$is_show_shortcut_menu eq 1"}
+					{volist name="shortcut_menu_list" id="menu"}
+					{if condition="$menu.module_name neq ''"}
+					<li onclick="location.href='{:__URL('ADMIN_MAIN/'.$menu['url'])}';" title="{$menu.module_name}"><img src="NAV_IMG/{$menu.module_picture}" class="module_img">{$menu.module_name}</li>
+					{/if}
+					{/volist}
+					{/if}
+				</ul>
+				<!-- 快捷菜单设置按钮 -->
+				{if condition="$is_show_shortcut_menu eq 1"}
+				<!-- <div class="shortcut-menu" onclick="show_shortcut_menu()">
+					<span></span>
+					常用功能
+				</div> -->
+				<div class="shortcut-menu" onclick="show_shortcut_menu()">
+					<span></span>
+					
+				</div>
+				{/if}
+			</nav>
+			
+			<div style="height:50px;"></div>
+			
+			<div id="bottom_copyright">
+				<footer>
+					<img id="copyright_logo"/>
+<!-- 					<p> -->
+<!-- 						<span id="copyright_desc"></span> -->
+<!-- 						<br/> -->
+<!-- 						<a id="copyright_companyname" style="color: #333" target="_blank"></a> -->
+<!-- 						<br/> -->
+<!-- 						<span id="copyright_meta"></span> -->
+<!-- 					</p> -->
+				</footer>
+			</div>
+		</div>
+	</aside>
+	
+	<section class="ns-base-section">
+		
+		{block name="ns_notice"}{/block}
+		
+		<div style="position:relative;margin:0;">
+			<!-- 面包屑导航 -->
+			{if condition="!isset($is_index)"}
+			<div class="breadcrumb-nav">
+				<a href="{:__URL('ADMIN_MAIN')}">{$title_name}</a>
+				{if condition="$frist_menu.module_name != ''"}
+					<i class="fa fa-angle-right"></i>
+					<a href="{:__URL('ADMIN_MAIN/'.$frist_menu['url'])}">{$frist_menu.module_name}</a>
+				{/if}
+				{if condition="$secend_menu.module_name != ''"}
+					<i class="fa fa-angle-right"></i>
+					<!-- 需要加跳转链接用这个：ADMIN_MAIN/{$secend_menu.url} -->
+					<a href="javascript:;" style="color:#999;">{$secend_menu.module_name}</a>
+				{/if}
+			</div>
+			{/if}
+			<!-- 三级导航菜单 -->
+			{block name="thirdmenu"}
+				{if count($child_menu_list) > 1}
+				<nav class="ns-third-menu">
+					<ul>
+					{foreach name="child_menu_list" item="child_menu" key="k" }
+						{eq name="child_menu['active']" value="1"}
+							<li class="selected" onclick="location.href='{:__URL('ADMIN_MAIN/'.$child_menu['url'])}';">{$child_menu.menu_name}</li>
+						{else/}
+							<li onclick="location.href='{:__URL('ADMIN_MAIN/'.$child_menu['url'])}';">{$child_menu.menu_name}</li>
+						{/eq}
+					{/foreach}
+					</ul>
+				</nav>
+				{/if}
+			{/block}
+			<div class="right-side-operation">
+				<ul>
+					{block name="right_tab"}{/block}
+					{block name="right_tab_tip"}
+<!-- 					{if condition="$warm_prompt_is_show == 'show'"}style="display:none;"{/if} style="display:block;" -->
+					<!-- <li>
+						<a class="js-open-warmp-prompt" href="javascript:;" data-menu-desc=''><i class="fa fa-question-circle"></i>&nbsp;提示</a>
+						<div class="popover">
+							<div class="arrow"></div>
+							<div class="popover-content">
+								<div>
+									{if condition="$secend_menu.desc"}
+									<h4>操作提示</h4>
+									<p>{$secend_menu.desc}</p>
+									<hr/>
+									{/if}
+									<h4>功能提示</h4>
+									<p class="function-prompts">{block name="alert_info"}{/block}</p>
+								</div>
+							</div>
+						</div>
+					</li> -->
+					{/block}
+				</ul>
+			</div>
+		</div>
+		
+		<!-- 操作提示 -->
+		{block name="warm_prompt"}
+<!-- 		{if condition="$warm_prompt_is_show == 'hidden'"}style="display:none;"{/if} -->
+		<div class="ns-warm-prompt" style="display:none;">
+			<div class="alert alert-info">
+				<button type="button" class="close">&times;</button>
+				<h4>
+<!-- 					{1block name="alert_info"} -->
+<!-- 					<i class="fa fa-info-circle"></i> -->
+<!-- 					<span class="operating-hints">操作提示</span> -->
+<!-- 						{if condition="$secend_menu.desc"} -->
+<!-- 						<span>{$secend_menu.desc}</span> -->
+<!-- 						{/if} -->
+<!-- 					{1/block} -->
+				</h4>
+			</div>
+		</div>
+		{/block}
+		
+		<div class="ns-main">
+			{block name="main"}{/block}
+			{include file="adminblue/pageCommon"}
+		</div>
+		
+	</section>
+	
+</article>
+
+<!-- 公共的操作提示弹出框 common-success：成功，common-warning：警告，common-error：错误，-->
+<div class="common-tip-message js-common-tip">
+	<div class="tip-container">
+		<span class="inner"></span>
+	</div>
+</div>
+
+<!--修改密码弹出框 -->
+<div id="edit-password" class="modal hide fade" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true" style="width:562px;top:50%;margin-top:-180.5px;">
+	<div class="modal-header">
+		<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+		<h3>修改密码</h3>
+	</div>
+	<div class="modal-body">
+		<form class="form-horizontal">
+			<div class="control-group">
+				<label class="control-label" for="pwd0" style="width: 160px;"><span class="color-red">*</span>原密码</label>
+				<div class="controls" style="margin-left: 180px;">
+					<input type="password" id="pwd0" placeholder="请输入原密码" class="input-common" />
+					<span class="help-block"></span>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="pwd1" style="width: 160px;"><span class="color-red">*</span>新密码</label>
+				<div class="controls" style="margin-left: 180px;">
+					<input type="password" id="pwd1" placeholder="请输入新密码" class="input-common" />
+					<span class="help-block"></span>
+				</div>
+			</div>
+			<div class="control-group">
+				<label class="control-label" for="pwd2" style="width: 160px;"><span class="color-red">*</span>再次输入密码</label>
+				<div class="controls" style="margin-left: 180px;">
+					<input type="password" id="pwd2" placeholder="请输入确认密码" class="input-common" />
+					<span class="help-block"></span>
+				</div>
+			</div>
+			<div style="text-align: center; height: 20px;" id="show"></div>
+		</form>
+	</div>
+	<div class="modal-footer">
+		<button class="btn-common btn-big" onclick="submitPassword()" style="display:inline-block;">保存</button>
+		<button class="btn-common-cancle btn-big" data-dismiss="modal" aria-hidden="true">关闭</button>
+	</div>
+</div>
+
+{include file="adminblue/openDialog" /}
+<script src="ADMIN_JS/ns_common_base.js"></script>
+<script src="__STATIC__/blue/js/ns_common_blue.js"></script>
+<script>
+	window.onload = function(){
+
+	}
+$(function(){
+	
+	$(".ns-third-menu ul .btn-more").toggle(
+		function(){
+			$(".ns-third-menu ul").animate({height:"84px"},300);
+		},
+		function(){
+			$(".ns-third-menu ul").animate({height:"42px"},300);
+		}
+	);
+	
+	//公共下拉框
+	$('.select-common').selectric();
+	
+	//公共复选框点击切换样式
+	$(".checkbox-common").live("click",function(){
+		var checkbox = $(this).children("input");
+		if(checkbox.is(":checked")) $(this).addClass("selected");
+		else $(this).removeClass("selected");
+	});
+	
+	//鼠标浮上查看预览上传的图片
+	$(".upload-btn-common>img,#preview_adv").live("mouseover",function(){
+		var curr = $(this);
+		var src = curr.attr("data-src");
+		if(src){
+			//alert(src);
+			var contents = '<img src="'+src+'" style="width: 100px;height: auto;display:block;margin:0 auto;">';
+			//鼠标每次浮上图片时，要销毁之前的事件绑定
+			curr.popover("destroy");
+			
+			//重新配置弹出框内容
+			curr.popover({ content : contents });
+
+			//显示
+			curr.popover("show");
+		}
+	});
+	
+	//鼠标离开隐藏预览上传的图片
+	$(".upload-btn-common>img,#preview_adv").live("mouseout",function(){
+		var curr = $(this);
+		//隐藏
+		if($(".popover.top").is(":visible") && curr.attr("data-src")) curr.popover("hide");
+	});
+
+	//公共单选框点击切换样式
+	$(".radio-common").live("click",function(){
+		var radio = $(this).children("input");
+		var name = radio.attr("name");
+		if(radio.is(":checked")){
+			$(".radio-common>input[type='radio'][name='" + name + "']").parent().removeClass("selected");
+			$(this).addClass("selected");
+		}else{
+			$(this).removeClass("selected");
+		}
+	});
+
+	//顶部导航管理显示隐藏
+	$(".ns-navigation-title>span").click(function(){
+		$(".ns-navigation-management").slideUp(400);
+	});
+	
+	$(".js-nav").toggle(function(){
+		$(".ns-navigation-management").slideDown(400);
+	},function(){
+		$(".ns-navigation-management").slideUp(400);
+	});
+	
+	//搜索展开
+	$(".ns-search-block").hover(function(){
+		if($(this).children(".mask-layer-search").is(":hidden")) $(this).children(".mask-layer-search").fadeIn(300);
+	},function(){
+		if($(this).children(".mask-layer-search").is(":visible")) $(this).children(".mask-layer-search").fadeOut(300);
+	});
+	
+	$(".ns-base-tool .ns-help").hover(function(){
+		if($(this).children("ul").is(":hidden")) $(this).children("ul").fadeIn(250);
+	},function(){
+		if($(this).children("ul").is(":visible")) $(this).children("ul").fadeOut(250);
+	});
+	
+});
+
+function addFavorite() {
+	var url = window.location;
+	var title = document.title;
+	var ua = navigator.userAgent.toLowerCase();
+	if (ua.indexOf("360se") > -1) {
+		alert("由于360浏览器功能限制，请按 Ctrl+D 手动收藏！");
+	}else if (ua.indexOf("msie 8") > -1) {
+		window.external.AddToFavoritesBar(url, title); //IE8
+	}
+	else if (document.all) {
+		try{
+			window.external.addFavorite(url, title);
+		}catch(e){
+			alert('您的浏览器不支持,请按 Ctrl+D 手动收藏!');
+		}
+	}else if (window.sidebar) {
+		window.sidebar.addPanel(title, url, "");
+	}else {
+		alert('您的浏览器不支持,请按 Ctrl+D 手动收藏!');
+	}
+}
+
+</script>
+{block name="script"}{/block}
+</body>
+</html>

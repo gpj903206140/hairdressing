@@ -1,0 +1,130 @@
+{extend name="wap/default_new/base" /}
+{block name="resources"}
+<style>
+.share_img{position:fixed;top:0;right:0;z-index:99999;display:none;background:#000;opacity:0.8;filter:alpha(opacity=80);width:100%;height:100%;text-align:right;}
+.share_img p{color:#fff;line-height:30px;font-size:16px;}
+</style>
+{/block}
+{block name="goodsHead"}
+
+{/block}
+
+{block name="main"}
+<!-- 帮助中心 -->
+    <style>
+      .head-title {
+      	 display:relative;
+      }
+      .head-title span{
+      	 width:40px;
+      	 height:44px;
+      	 display:block;
+      	 position:absolute;
+      	 right:0;
+      	 top:0;
+      	 background:url(__TEMP__/{$style}/public/images/help_class.png) no-repeat 10px 10px;
+      	 background-size:20px 20px;
+      }
+      .detail{
+      	 width:94%;
+      	 padding:5px 3% 15px 3%;
+      	 float:left;
+      	 background:#fff;
+      	 margin-top:45px;
+      }
+      .detail h3{
+      	 width:100%;
+      	 line-height:25px;
+      	 padding:10px 0 15px 0;
+      	 font-size:18px;
+      	 color:#333;
+      	 text-align:center;
+      	 display:relative;
+      }
+      .detail p.time{
+      	width:100%;
+      	 line-height:22px;
+      	 float:left;
+      	 color:#c5c5c5;
+      	 font-size:14px;
+      	 border-bottom:1px solid #ccc;
+      	 padding:15px 0;
+      	 margin-bottom:15px;
+      }
+      .content{
+      	 width:100%;
+      	 line-height:22px;
+      	 float:left;
+      	 color:#666;
+      	 font-size:14px;
+      }
+     
+      
+      .help_class{
+      	width:150px;
+      	position:absolute;
+      	right:0%;
+      	top:44px;
+      	float:left;
+      	text-align:left;
+      	display:none;
+      }
+      .help_class li h4{
+       width:90%;
+       height:35px;
+       line-height:35px;
+       font-size:15px;
+       color:#333;
+       background:#eaeaea;
+       padding:0 5%;
+   }
+   .help_class li h4 span{
+       width:25px;
+       height:35px;
+       background: url("__TEMP__/{$style}/public/images/help_just.png") no-repeat 10px center;
+       background-size:12px 12px;
+       float:right;
+   }
+   .help_class li h4 span:hover{
+       cursor:pointer;
+   }
+   .help_class li h4 span.actives{
+       background: url("__TEMP__/{$style}/public/images/help_back.png") no-repeat 10px center;
+       background-size:12px 12px;
+   }
+   .help_class li h4 span img{
+       width:20px;
+       height:20px;
+   }
+   .help_class li a{
+       width:80%;
+       height:30px;
+       line-height:30px;
+       font-size:13px;
+       color:#999;
+       padding:0 10px 0 20%;
+       display:block;
+       border-bottom:1px solid #efefef;
+   }
+   .help_class li a.curr{
+       color:#0D84D4;
+   }
+    </style>
+    <!--topbar end-->
+    <div class="main myorder">
+    <section class="head">
+    <a class="head_back" id="backoutapp" href="javascript:window.history.go(-1);"><i class="icon-back"></i></a>
+		<div class="head-title">{$category_name}</div>
+		
+	</section>
+    <div class="floor">
+		<section class="members_goodspic">
+			<div class="detail">
+               <h3>{$info['title']}</h3>
+               <div class="content">{$info['content']}</div>
+			</div>
+		</section>
+	</div>	
+    </div>
+   
+{/block}

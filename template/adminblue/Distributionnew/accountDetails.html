@@ -1,0 +1,186 @@
+{extend name="adminblue/base" /}
+{block name="resources"/}
+<script type="text/javascript" src="__STATIC__/My97DatePicker/WdatePicker.js"></script>
+<link href="__STATIC__/blue/css/order/ns_orderlist.css" rel="stylesheet" type="text/css" />
+<style>
+body{
+	background:#fff;
+}
+.mytable.select td{padding-bottom:0;}
+.mytable.select #more_search{display: block;}
+.table-class tbody td a {margin-left: 0;}
+.to-fixed{position: fixed;width: 85.5%;top: 50px;box-shadow: 0 2px 6px 0 rgba(0,0,0,.3);z-index: 5;}
+.mytable td{padding:10px 0;}
+.btn-common-white{line-height: 20px;outline: none;background: white}
+/*.ns-main{margin-top: 0;}*/
+.seller_memo{background: #FFF9DF!important;color: #D09B4C;}
+</style>
+<style type="text/css">
+.account_info{background: #ffffff;margin-bottom: 10px;line-height: 40px;overflow: hidden;}
+.account_info .account_item{border-top: 1px solid #eeeeee;clear: both;}
+.account_info .account_item p{margin-bottom: -10px;}
+.account_info .account_item .item_value{color: #484848; float: left;display: inline-block;margin-right: 5%;}
+.account_info .account_item .item_value span{color: #999999;}
+.account_list{overflow: hidden;display: block;background: #ffffff;}
+</style>
+{/block}
+<!-- {1block name="thirdmenu"}{/block} -->
+<!-- {1block name="warm_prompt"}{/block} -->
+<!-- {1block name="right_tab_tip"}{/block} -->
+{block name="main"}	
+	<div class="ns-main">
+			
+<div class="set-style">
+	<div class="account_info">
+	
+		<div class="account_item">
+			<p>会员身份</p>
+			<div class="item_value">
+				<div>是否为推广员：<span>{if condition="$row.is_promoters eq 1"}是{else/}否{/if}</span></div>
+			</div>
+		</div>
+		
+		<div class="account_item">
+			<p>推广员信息</p>
+			<div class="item_value">
+				<div>推广编号：<span>{$row.number}</span></div>
+			</div>
+			<div class="item_value">
+				<div>会员账号：<span>{$row.nick_name}</span></div>
+			</div>
+			<div class="item_value">
+				<div>推广等级：<span>{$row.level_name}</span></div>
+			</div>
+			<div class="item_value">
+				<div>推广人数：<span>{$row.peopleNum}</span></div>
+			</div>
+			<div class="item_value">
+				<div>粉丝数：<span>0</span></div>
+			</div>
+			<div class="item_value">
+					<div>上级推广员：<span>{if condition="$row.Pid eq 0"}无{else/}{$row.parent_name}{/if}</span></div>
+			</div>
+		</div>
+
+		<div class="account_item">
+			<p>账户信息</p>
+			<div class="item_value">
+				<div>总佣金：<span>{$row.total_commission}</span></div>
+			</div>
+			<div class="item_value">
+				<div>可提现佣金：<span>{$row.can_commission}</span></div>
+			</div>
+			<div class="item_value">
+				<div>已提现佣金：<span>{$row.stop_commission}</span></div>
+			</div>
+			<div class="item_value">
+				<div>分销佣金：<span>{$row['total_commission']-$row['stop_commission']|sprintf='%.2f'}</span></div>
+			</div>
+		</div>
+	</div>
+	
+		<table class="mytable">
+			<tbody><tr>
+				<th>
+					交易时间：
+					<input type="text" id="startDate" class="input-common middle" placeholder="请选择开始日期" onclick="WdatePicker()"> - 
+					<input type="text" id="endDate" placeholder="请选择结束日期" class="input-common middle" onclick="WdatePicker()">
+					<button onclick="searchData()" value="搜索" class="btn-common">搜索</button>
+				</th>
+			</tr>
+		</tbody></table>
+	<div class="account_list">
+		<table class="table-class">
+			<colgroup>
+				<col style="width: 8%;">
+				<col style="width: 8%;">
+				<!-- <col style="width: 8%;"> -->
+				<col style="width: 8%;">
+			</colgroup>
+			<thead>
+				<tr>						
+					<th>交易日期</th>					
+					<th>金额</th>
+					<!-- <th>交易类型</th> -->						
+					<th>描述</th>
+				</tr>
+			</thead>
+	
+			<tbody><tr align="center"><td colspan="11">暂无符合条件的数据记录</td></tr></tbody>
+		</table>
+	</div>
+</div>
+
+
+<input type="hidden" id="page_count" value="0">
+<input type="hidden" id="page_size" value="0">
+</div>
+<script type="text/javascript">	
+//查询
+function searchData(){
+	LoadingInfo(1);
+}
+//加载数据
+function LoadingInfo(page_index) {
+	var user_name = $("#userName").val();
+	var user_phone = $("#userTel").val();
+	var role = $("#role").val();
+	var uid="{$uid}";
+	$.ajax({
+		type : "post",
+		url : "{:__URL('ADMIN_MAIN/Distributionnew/accountDetails')}",
+		async : true,
+		data : {
+			"page_index" : page_index,
+			"page_size" : $("#showNumber").val(),
+			"uid" : uid,
+			"startDate" : $('#startDate').val(),
+			"endDate" : $('#endDate').val(),
+		},
+		success : function(data) {
+
+			$("#page_count").val(data["page_count"]);
+			$("#total_count").val(data["total_count"]);
+			$("#pageNumber a").remove();
+			
+			var html = '';
+			if (data["data"].length > 0) {
+				for (var i = 0; i < data["data"].length; i++) {
+				
+					var item_data = data['data'][i];
+					html += '<tr align="center">';
+					html += '<td>' + timeStampTurnTime(data["data"][i]["add_time"])+'</td>';
+					html += '<td>' + data["data"][i]["commission_money"] +'</td>';
+					html += '<td>' + data["data"][i]["text"] +'</td>';
+					html += '</tr>';
+				}
+			} else {
+				html += '<tr align="center"><td colspan="11">暂无符合条件的数据记录</td></tr>';
+			}
+			
+			$(".table-class tbody").html(html);
+			
+			$("#page_count").val(data["page_count"]);
+			$("#total_count").val(data["total_count"]);
+			$("#pageNumber a").remove();
+			
+			var totalpage = $("#page_count").val();
+			if (totalpage == 1) {
+				changeClass("all");
+			}
+			initPageData(data["page_count"],data['data'].length,data['total_count']);
+			var $html = pagenumShow(jumpNumber,totalpage,5)
+			$("#pageNumber").append($html);
+		}
+	});
+}		
+
+</script>
+{/block}
+<!-- {block name="script"}
+
+{include file="adminblue/Order/orderAction"/}
+{include file="adminblue/Order/orderRefundAction"/}
+订单打印
+{include file="adminblue/Order/orderPrintAction"/}
+{/block} -->

@@ -1,0 +1,128 @@
+{extend name="adminblue/base" /}
+{block name="resources"/}{/block}
+{block name="main"}
+<nav class="ns-third-menu" style="margin:0">
+	<ul>
+		<li onclick='location.href=__URL("ADMIN_MAIN/distributionnew/intercalate")'>基本设置</li>
+		<li class="selected" onclick='location.href=__URL("ADMIN_MAIN/distributionnew/rankRromotersList")'>推广员等级</li>
+	</ul>
+</nav>
+<table class="mytable">
+	<tr>
+		<th width="20%" style="text-align: left;">
+			<button class="btn-common btn-small" onclick="location.href='{:__URL('ADMIN_MAIN/distributionnew/addrankRromoters')}';" style="margin:0 5px 0 0 !important;">添加</button>
+		</th>
+	</tr>
+</table>
+<div>	
+<table class="table-class">
+	<colgroup>
+		<col style="width: 5%;">
+		<col style="width: 10%;">
+		<col style="width: 10%;">
+		<col style="width: 15%;">
+		<col style="width: 15%;">
+		<col style="width: 15%;">
+		<col style="width: 15%;">
+	</colgroup>
+	<thead>
+		<tr align="center">
+			<th><i class="checkbox-common"><input type="checkbox" onclick="CheckAll(this)"></i></th>
+			<th>等级名称</th>
+			<th>升级条件</th>
+			<th>店内销售佣金比率</th>
+			<th>给上级的佣金比率</th>
+			<th>创建时间</th>
+			<th>操作</th>
+		</tr>
+	</thead>
+	<tbody>
+      
+	</tbody>
+</table>
+</div>
+
+<script>
+//加载数据
+function LoadingInfo(page_index) {
+	$.ajax({
+		type : "post",
+		url : "{:__URL('ADMIN_MAIN/distributionnew/rankRromotersList')}",
+		data : {
+			"page_index" : page_index,
+			"page_size" : $("#showNumber").val(),
+			"search_text" : $("#search_text").val()
+		},
+		success : function(data) {
+			if (data["data"].length > 0) {
+				$(".table-class tbody").empty();
+				for (var i = 0; i < data["data"].length; i++) {
+					var html = '';
+					html += '<tr align="center">';
+					html += '<td align="center"><i class="checkbox-common"><input value="'+ data["data"][i]["level_id"] +'" name="sub" data-state="0" type="checkbox"></i></td>';
+					html += '<td>' + data["data"][i]["level_name"] + '</td>';
+					
+					html += '<td>' + data["data"][i]["level_money"] + '</td>';
+					html += '<td>' + data["data"][i]["level_0"] + '</td>';
+					html += '<td>' + data["data"][i]["level_1"] + '</td>';
+					html += '<td>' + data["data"][i]["addtime"] + '</td>';
+				//	html += '<td>'+data["data"][i]['category_id_1_name']+'&nbsp;'+data["data"][i]['category_id_2_name']+'&nbsp;'+data["data"][i]['category_id_3_name']+'</td>';
+					html += '<td><a href="'+__URL('ADMIN_MAIN/distributionnew/updaterankRromoters?level_id=' + data["data"][i]["level_id"] )+ '">修改</a>  <a href="javascript:deleteBox(' + data["data"][i]["level_id"] + ')">删除</a></td> ';
+					html += '</tr>';
+					$(".table-class tbody").append(html);
+				}
+			} else {
+				var html = '<tr align="center"><td colspan="9">暂无符合条件的数据记录</td></tr>';
+				$(".table-class tbody").html(html);
+			}
+			initPageData(data["page_count"],data['data'].length,data['total_count']);
+			$("#pageNumber").html(pagenumShow(jumpNumber,$("#page_count").val(),{$pageshow}));
+		}
+	});
+}
+//全选
+function CheckAll(event){
+	var checked = event.checked;
+	$("#productTbody input[type = 'checkbox']").prop("checked",checked);
+	if(checked) $(".table-class tbody input[type = 'checkbox']").parent().addClass("selected");
+	else $(".table-class tbody input[type = 'checkbox']").parent().removeClass("selected");
+}
+
+/**
+ *删除框
+ */
+function deleteBox(level_id){
+	$( "#dialog" ).dialog({
+        buttons: {
+            "确定,#51A351": function() {
+                $(this).dialog('close');
+                deleteRankRromoters(level_id);
+            },
+            "取消,#e57373": function() {
+                $(this).dialog('close');
+            }
+        },
+        contentText:"确定删除吗",
+        title:"提醒"
+    });
+}
+//删除等级
+function deleteRankRromoters(level_id){
+	$.ajax({
+		type:"post",
+		url:"{:__URL('ADMIN_MAIN/distributionnew/deleteRankRromoters')}",
+		data:{
+			'level_id':level_id
+		},
+		async:true,
+		success:function (data) {
+			if (data["code"] > 0) {
+				showMessage('success', data["message"],"{:__URL('ADMIN_MAIN/Distributionnew/rankRromotersList')}");
+			}else{
+				showMessage('error', "已使用的推广员的等级不可删除！");
+			}	
+		}
+	});
+}
+</script>
+{/block}

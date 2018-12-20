@@ -1,0 +1,84 @@
+{extend name="adminblue/base" /}
+{block name="resources"/}
+<style>
+.error{padding:5px 0 0;}
+</style>
+{/block}
+{block name="main"}
+<div class="ns-main">
+			
+<div class="set-style">
+    <input type="hidden" id="level_id" value="{$rank_info.level_id}">
+	<dl>
+		<dt>等级名称:</dt>
+		<dd>
+			<p><input name="" id="level_name" type="text" value="{$rank_info.level_name}"></p>	
+			<p class="error">请输入等级名称</p>
+		</dd>
+	</dl>
+	<dl>
+		<dt>升级条件:</dt>
+		<dd>
+			<p><input name="" id="level_money" type="text" value="{$rank_info.level_money}" onkeyup="javascript:CheckInputIntFloat(this);"></p>	
+			<p class="error">请输入升级条件</p>
+		</dd>
+	</dl>
+	<dl>
+		<dt>本店销售佣金比率:</dt>
+		<dd>
+			<p><input name="" id="level_0" type="text" value="{$rank_info.level_0}" onkeyup="javascript:CheckInputIntFloat(this);">&nbsp;%</p>	
+			<p class="error">请输入本店销售佣金比率</p>
+		</dd>
+	</dl>
+	<dl>
+		<dt>给上级的佣金比率:</dt>
+		<dd>
+			<p><input name="" id="level_1" type="text" value="{$rank_info.level_1}" onkeyup="javascript:CheckInputIntFloat(this);">&nbsp;%</p>	
+			<p class="error">请输入给上级的佣金比率</p>
+		</dd>
+	</dl>
+	<dl>
+		<dt></dt>
+		<dd>
+		<button class="btn-common btn-big" onclick="updateLevel();">提交</button>
+		</dd>
+	</dl>
+</div>
+<script>			
+	function updateLevel(){
+		var level_name = $("#level_name").val();
+		var level_money = $("#level_money").val();
+		var level_0 = $("#level_0").val();
+		var level_1 = $("#level_1").val();
+		var level_id = $("#level_id").val();
+		if(level_name == ""){
+			$("#level_name").parent().next().show();
+			return false;
+		}else{
+			$("#level_name").parent().next().hide();
+		}
+		if((parseFloat(level_0) +parseFloat(level_1))>100 ){
+			showMessage('error', "佣金比率不可超过100%！");	
+			return false;
+		}
+		$.ajax({
+			type:"post",
+			url:"{:__URL('ADMIN_MAIN/Distributionnew/updaterankRromoters')}",
+			data:{
+				'level_name':level_name,
+				'level_money':level_money,
+				'level_0':level_0,
+				'level_1':level_1,
+				'level_id':level_id			},
+			async:true,
+			success:function (data) {
+				if (data["code"] > 0) {
+					showMessage('success', data["message"],"{:__URL('ADMIN_MAIN/Distributionnew/rankRromotersList')}");
+				}else{
+					showMessage('error', data["message"]);
+				}	
+			}
+		});
+	}
+</script>
+{/block}

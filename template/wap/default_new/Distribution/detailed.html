@@ -1,0 +1,284 @@
+{extend name="wap/default_new/base" /}
+{block name="resources"}
+<link rel="stylesheet" type="text/css" href="__TEMP__/{$style}/public/css/common-v4.4.css">
+<link rel="stylesheet" type="text/css" href="__TEMP__/{$style}/public/css/member_address.css">
+
+<link rel="stylesheet" type="text/css" href="__TEMP__/{$style}/public/css/person-v4.4.css"> 
+<link rel="stylesheet" type="text/css" href="__TEMP__/{$style}/public/css/my_order_list.css">
+<style>
+
+.tab-title2{margin-top: 0px;padding: 0;}
+.tabs.tab-title2 dd > a{padding: 7px 12px;color:#000000;font-size: 14px;}
+.tabs.tab-title2 dd > a:nth-child(1){border-right:3px solid #F7F7F7;}
+tr {
+    overflow: hidden;
+    border-bottom: 1px solid #ddd;
+    float: left;
+    width: 100%;
+    background: #FFFFFF;
+}
+tr td:last-child {
+    width: 95%;
+}
+tr td {
+    padding: 0.5625rem 0.625rem ;
+    font-size: 0.875rem;
+    color: #222222;
+	  float: left;
+}
+
+tr td:last-child p {
+    line-height: 22px;
+    margin-bottom: 0px;
+    width: 100%;
+    font-size: 16px;
+}
+tr td:last-child p:last-child {
+    float: left;
+    color: #666666;
+    font-size: 14px;
+}
+tr td:last-child .text-name {
+    float: left;
+    color: #2d2d2d;
+    font-size: 14px;
+}
+tr td:last-child .text-money {
+    float: right;
+    font-size: 14px;
+    color: #FF7C56;
+}
+tr td:last-child .text-2{
+    color: #909090;
+    font-size: 14px;
+}
+
+.disorder-none .icon-none {
+    display: block;
+    width: 115px;
+    height: 110px;
+    margin: 60px auto 15px auto;
+    background:url(/template/wap/default_new/public/images/money_cry.png) no-repeat;
+    background-size: 100px 100px;
+}
+.disorder-none{width:100%;text-align:center;}
+.tabs-content {
+    margin-top: 85px;
+	margin-bottom: 10px;
+}
+.tabs.tab-title2 dd a {
+    color: #000;
+    border-bottom: none;
+    text-align: center;
+    border-radius: inherit;
+	padding: 0;
+	font-size: 14px;
+	width:100%;
+	display:block;
+}
+.tabs.tab-title2 dd.active a {
+    color: #FF9F9F;
+    border-bottom: none;
+    text-align: center;
+    border-radius: inherit;
+}
+
+.tabs.tab-title2 dd {
+    width: 50%;
+    text-align: center;
+    float: left;
+    height: 40px;
+    line-height: 40px;
+    background: #fff;
+    border-bottom: 1px solid #d2d2d2;
+}
+
+.ns-rg-time {
+    font-size: 14px;
+    float: right;
+}
+.ns-lf {
+    float: left;
+}
+</style>
+{/block}
+{block name="main"}
+<input type="hidden" id="ref_url" value="{$pre_url}">
+<input type="hidden" value="{$flag}" id="hidden_flag" />
+<section class="head">
+	<a class="head_back" onclick="window.history.go(-1)" href="javascript:void(0)"><i class="icon-back"></i></a>
+	<div class="head-title">{:lang('distribution_commissions')}</div>
+</section>
+
+<section class="head">
+	<a class="head_back" onclick="window.history.go(-1)" href="javascript:void(0)"><i class="icon-back"></i></a>
+	<div class="head-title">{:lang('distribution_commissions')}</div>
+	 <dl class="tabs tab-title2">
+        <dd class="active" id="brokeragetab"><a href="javascript:void(0)" onclick="brokeragelistshow(this)" style="border-right: 3px solid #F7F7F7;width: 98.6%;">{:lang('distribution_my_commissions')}</a></dd>
+        <dd id="extracttab"><a href="javascript:void(0)" onclick="extractlistshow(this)">{:lang('distribution_present_record')}</a></dd>
+    </dl>
+</section>
+
+    <div class="tabs-content">
+        <div class="content_01" id="detail_List" style="display: block;overflow:hidden;">
+        <div class="tabs-content" style="margin-top:0px;">
+            <div class="content active" id="list_content" style="padding:0;">
+
+            </div>
+        </div>
+        </div>
+        <div class="content_02" id="extractlist" style="display: none;">
+              <div id="withdraw">
+                <div class="nothing-data" align="center">
+                    {if condition="count($withdraws) neq 0 "}
+                    <table class="ns-table">
+                        {volist name="withdraws.data" id="vo"}
+                        <tr align="center">
+                            <td style="padding-bottom: 0.2rem; font-size: 16px;"><span
+                                class="ns-lf" style="color: #444;">{$vo['bank_name']}({$vo['status']})</span> <span
+                                class="ns-rg">{$vo['cash']}</span></td>
+                            <td style="padding-top: 0.2rem; font-size: 14px; color: #888;">
+                                <span class="ns-lf">{$vo['account_number']}</span> <span class="ns-rg-time">{$vo['ask_for_date'] | getTimeStampTurnTime}</span>
+                            </td>
+                        </tr>
+                        {/volist}
+                    </table>
+                    {else/}
+                    <div>
+                        <div class="emptyFrame">
+                            <i class="user_money"></i><span>{:lang('you_don_not_have_a_balance_record_yet')}！</span>
+                        </div>
+                    </div>
+                    {/if}
+                </div>
+              </div>            
+        </div>
+        <!-- <div class="content_01" id="detail_List" style="display: block;overflow:hidden;"><div class="nothing-data" align="center"><img src="__TEMP__/{$style}/public/images/wap_nodata.png" style="margin-bottom: 10px;width: 33%;"><div>您还没有佣金！</div></div></div>
+        <div class="content_02" id="extractlist" style="display: none;">
+              <div id="withdraw"><div class="nothing-data" align="center"><img src="__TEMP__/{$style}/public/images/wap_nodata.png" style="margin-bottom: 10px;width: 33%;"><div>您还没有提现记录！</div></div></div>            
+        </div> -->
+        <!--wait recevie end-->
+    </div>
+<input type="hidden" value="0" id="id">
+
+	<!-- 微信登录弹出绑定手机号遮罩层 -->
+	
+	
+	<input type="hidden" value="20" id="uid">
+	<!-- 加载弹出层 -->
+	<div class="mask-layer-loading">
+		<img src="/template/wap/default_new/public/images/mask_load.gif">
+	</div>
+	
+ <script type="text/javascript">
+    function brokeragelistshow() {
+        $("#detail_List").show();
+        $("#extractlist").hide();
+        $("#brokeragetab").addClass("active");
+        $("#extracttab").removeClass("active");
+    }
+    function extractlistshow() {
+        $("#detail_List").hide();
+        $("#extractlist").show();
+        $("#extracttab").addClass("active");
+        $("#brokeragetab").removeClass("active");
+    }
+    </script>
+<!-- 总页数 -->
+<input type="hidden" id="page_count" value="{$data.page_count}">
+<!-- 当前页数 -->
+<input type="hidden" id="page" value="1">
+{/block}
+{block name="bottom"}{/block}
+{block name="javascript"}
+<script type="text/javascript">
+$(function(){
+    getCommissionlist(1);
+})
+var is_load = true;//防止重复加载
+function getCommissionlist(page){
+    $("#page").val(page);
+    if(is_load){
+        is_load = false;
+        $.ajax({
+            type:"post",
+            url : "{:__URL('APP_MAIN/Distribution/distributionCommissionList')}",
+            data : {
+                "page" : page,
+                "type":1
+            },
+            success : function(data){
+                $("#page_count").val(data['page_count']);//总页数
+                if(data['data'].length >0){
+                    var list_html="";
+                    for(var i=0;i<data['data'].length;i++){
+                        list_html += '<div class="list-myorder" style="margin: 0 0 1px 0;">';
+                        list_html += '<div class="ordernumber" style="height:auto;overflow:hidden;line-height:22px;">';
+                        list_html += '<span class="order-num" style="font-size: 12px;">购买人:'+data['data'][i]['buyer_name']+'&nbsp;&nbsp;'+data['data'][i]['order_no']+'</span><span class="order-date" style="font-size: 12px;">'+data['data'][i]['add_time']+'</span></div><ul class="ul-product">';
+                        list_html += '<li>';
+                        list_html += '<a href="{:__URL("APP_MAIN/goods/goodsdetail?id='+data['data'][i]['goods_id']+'")}">';
+                        if(data['data'][i]['pic_cover_micro']!=''&&data['data'][i]['pic_cover_micro']!=undefined){
+                            var img='<img src="{:__IMG("'+data['data'][i]['pic_cover_micro']+'")}">';
+                        }else{
+                            var img='<img src="{:__IMG($default_headimg)}" />';
+                        }
+                        list_html += '<span class="pic">'+img+'</span>';
+                        list_html += '<div class="text">';
+                        list_html += '<span class="pro-name" style="font-size: 12px;">'+data['data'][i]['goods_name']+'</span>';
+                        list_html += '<div class="pro-pric" style="margin-top: 5px;">';
+                        list_html += '<a><span style="font-size: 12px;">价格:</span><b style="font-size:12px;font-weight:normal;">￥'+data['data'][i]['price']+'</b></a>/';
+                        list_html += '<a><span style="font-size: 12px;">利润:</span><b style="font-size:12px;font-weight:normal;">￥'+data['data'][i]['profit']+'</b></a>';
+                        if(data['data'][i]['goods_kind']){
+                            var sku_name='人数:';
+                        }else{
+                            if(data['data'][i]['sku_name']!=''){
+                                var sku_name=''+data['data'][i]['sku_name']+'&nbsp;x&nbsp;';
+                            }else{
+                                var sku_name='数量:';
+                            }
+                        }
+                        
+                        list_html += '<a style="float:right"><span style="font-size: 12px;"></span><b style="font-size:12px;font-weight:normal;">'+data['data'][i]['distribution_commission_rate']+'%</b>&nbsp;<b style="font-size:12px;font-weight:normal;">'+sku_name+''+data['data'][i]['num']+'</b></a>';
+
+                        list_html += '</div>';
+                        list_html += '<div class="pro-pric" style="margin-top: 0px;">';
+                        list_html += '<a><span style="font-size: 12px;">佣金:</span><b style="font-size:12px;font-weight:normal;">￥'+data['data'][i]['commission_money']+' </b></a>';
+                        list_html += '<a style="float:right"><b style="font-size:12px;font-weight:normal;">'+data['data'][i]['commission_rate']+'%</b></a>';
+                        list_html += '</div></div></a><div class="" style="width:100%;float:left;color:#999999;margin-top: 5px;font-size: 12px;padding-top:5px;"></div></li></ul></div></div>';
+                    }
+                }
+                is_load = true;
+                $('#list_content').append(list_html);
+                /*img_lazyload();   
+                var goods_img_height = parseInt($('.goods_img').height());
+                $(".data_info").height(goods_img_height);*/
+            }
+        }); 
+    }
+}
+
+window.onresize = function(){
+    /*var   goods_img_height = parseInt($('.goods_img').height());
+    $(".data_info").height(goods_img_height);*/
+}
+
+//滑动到底部加载
+$(window).scroll(function(){
+    var totalheight = parseFloat($(window).height()) + parseFloat($(window).scrollTop());
+    var content_box_height = parseFloat($("#list_content").height()); 
+    if(totalheight - content_box_height >= 0){
+        if(is_load){
+            var page = parseInt($("#page").val()) + 1;//页数
+            var total_page_count = $("#page_count").val(); // 总页数
+            if(page > total_page_count){
+                return false;
+            }else{
+                getCommissionlist(page);
+            }
+        }
+        
+    }
+})
+</script>
+{/block}
+{block name="bottom"}{/block}

@@ -1,0 +1,342 @@
+{extend name="wap/default_new/base" /}
+{block name="resources"}
+<link rel="stylesheet" type="text/css" href="__TEMP__/{$style}/public/css/common-v4.4.css">
+<link rel="stylesheet" type="text/css" href="__TEMP__/{$style}/public/css/member_address.css">
+<style>
+.addr-box {
+	padding-top: 0px;
+	text-align: center;
+}
+
+.addr-tip {
+	font-size: 14px;
+	color: #8f8f8f;
+	margin-top: 10px;
+}
+
+.btn-save {
+	margin-top: 40px;
+}
+
+.team {
+	margin-top: 45px;
+}
+
+.team-item {
+	padding: 10px;
+	height: 70px;
+	border-bottom: 1px solid #E2E1E1;
+	position: relative;
+}
+
+.team-item img {
+	vertical-align: middle;
+	width: 50px;
+	height: 50px;
+	border-radius: 50%;
+	margin-right: 10px;
+	margin-top: 10px;
+}
+
+.team-info {
+	position: absolute;
+	top: 20%;
+	display: inline-block;
+}
+
+.team-info strong {
+	font-weight: normal;
+	color: #333333;
+	font-size: 14px;
+}
+
+.team-info time {
+	color: #B0B0B0;
+	font-size: 12px;
+}
+.team-info .role_name{
+	font-size: 14px;
+	color: #EE4349;
+}
+.team-info .role_user{
+	font-size: 12px;
+	color: #B0B0B0;
+}
+</style>
+<style>
+@CHARSET "UTF-8";
+.main_content{
+	width: 100%;
+	overflow: hidden;
+	    margin-top: 45px;
+}
+.main_content .title_img img{
+	width: 100%;
+	height: auto;
+}
+.apply_content{
+    margin: 8px 0px;
+    background-color: #fff;
+    overflow: hidden;
+    padding: 10px 0px;
+}
+.a_button{
+	display: block;
+    margin: 10px auto;
+    width: 80%;
+    text-align: center;
+    background: #ea1717;
+    height: 35px;
+    line-height: 35px;
+    color: #fff;
+    font-size: 15px;
+    border-radius: 5px;
+	    font-weight: bold;
+}
+.apply_content .apply_title_one{
+    color: #666;
+    font-size: 15px;
+    border-left: 2px solid #FF4040;
+    padding: -1px 0px;
+    height: 20px;
+    margin: 5px 0px;
+    padding-left: 7px;
+}
+.apply_content .apply_title_one .title_two{
+	    font-size: 12px;
+    color: #ccc;
+    margin-left: 6px;
+}
+.apply_content .content_i
+{
+	padding:5px 0px;
+/* 	max-height: 75px; */
+	overflow: auto;
+	border-top: 1px solid #ddd;
+}
+.apply_content .content_i a{
+    display: inline-block;
+    width: 92%;
+    height: 30px;
+    line-height: 30px;
+    border-bottom: 1px solid #ddd;
+    margin: 0px 4%;
+    font-size: 12px;
+	color: #666;
+}
+.apply_content .content_i a.no_i{
+	color: #ccc;
+}
+.apply_content .content_i a>.weui_icon_curr{
+	float: right;
+    margin-right: 11px;
+}
+.apply_content .content_i a>.weui_icon_curr:before{
+	    font-family: "weui";
+	    display: block;
+    content: '\EA08';
+    color: #EA1511;
+    font-size: 24px;
+}
+.weui_cell{padding: 4px 15px 0px;}
+.apply_content .apply_title_item{
+	    width: 97%;
+    display: inline-block;
+    overflow: hidden;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 0px 5px 7px;
+}
+.apply_content .apply_title_item i{
+	margin-right: 10px;
+    display: inline-block;
+    width: 26px;
+    height: 28px;
+    background: url(__TEMP__/{$style}/public/images/member_index_ico.png) no-repeat;
+    float: left;
+    margin-top: 9px;
+}
+.apply_content .apply_title_item i.apply_add{
+	background-position: -51px 1px;
+}
+.apply_content .apply_title_item i.extension{
+	background-position: -51px -27px;
+}
+.apply_content .apply_title_item i.team{
+	background-position: -51px -55px;
+}
+.apply_content .apply_title_item .item_row{
+	overflow: hidden;
+	float: left;
+}
+.item_row .item_title{
+	    color: #333;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+.item_row .item_content{
+	color: #999;
+    font-size: 13px;
+}
+.weui_btn_primary {
+    background-color: #f72020;
+}
+
+
+
+/*.apply_content .content_i a>.weui_icon_curr:before {
+    font-family: "weui";
+    display: block;
+    content: '\EA08';
+    color: #EA1511;
+    font-size: 24px;
+}*/
+.apply_content .content_i a>.weui_icon_curr:before {
+	color:#fff;
+    background:url(__TEMP__/{$style}/public/images/gou.png) no-repeat;
+    background-size: 20px 20px;
+    background-position: 0px 5px;
+
+}
+</style>
+{/block}
+{block name="main"}
+<input type="hidden" id="newshop_rewrite_model" value="1">
+<input type="hidden" id="newshop_url_model" value="0">
+
+    <section class="head">
+		<a class="head_back" onclick="window.history.go(-1)" href="javascript:void(0)"><i class="icon-back"></i></a>
+		<div class="head-title">{:lang('distribution_application_promoters')}</div>
+	</section>
+
+	
+	<!-- showBox弹出框 -->
+	<div class="motify" style="display: none;">
+		<i class="show_type warning"></i>
+		<div class="motify-inner">弹出框提示</div>
+	</div>
+
+	
+ <div class="main_content">
+    {if condition="$is_promoters eq 0" }
+		<p class="title_img"><img src="__TEMP__/{$style}/public/images/apply_promoter.png" alt=""></p>
+	<div class="apply_content">
+		<p class="apply_title_one">申请等级 <span class="title_two">添加信息，立刻赚钱</span></p>
+	    <div class="content_i">
+	        {volist name="list" id="vo" key="k"}
+	    	<a href="javascript:;" class="{if condition='$order_money lt $vo.level_money'}no_i{/if}">	    		
+	   			{$vo.level_name}（消费满{$vo.level_money}/已消费{$order_money}）
+	   			{if condition="$k eq 1 && $order_money egt $vo.level_money"}
+	   			<span class="weui_icon_curr"></span>
+	   			{/if}
+	    	</a> 
+            {/volist}
+	     </div>
+	</div> 
+    <a onclick="applyPromoter();" class="a_button">申请</a>
+	{else/}
+	<div class="frog">        
+	    <img src="__TEMP__/{$style}/public/images/agent_apply.png" style="width: 107px;">
+	    申请
+	    {if condition="$is_promoters eq 1"}
+	    {:lang('distribution_adopt')}
+	    {elseif condition="$is_promoters eq 2"/}
+	    {:lang('distribution_audit')}
+	    {elseif condition="$is_promoters eq 3"/}
+        {:lang('distribution_refuse')}
+	    {/if}
+	    ......
+	</div><!-- {:__URL('APP_MAIN/Distribution/applyAuditing')} -->
+	<a href="{:__URL('APP_MAIN/member/index')}" class="a_button">返回会员中心</a>
+    {/if}
+	<!-- <a href="javascript:applyPromoter()" class="a_button">申请</a> -->
+		<div class="apply_content">
+		<div class="apply_title_item">
+			<i class="apply_add" style="background-position: -2px -227px;"></i>
+			<div class="item_row">
+				<p class="item_title">无门槛加入</p>
+				<p class="item_content">零成本，轻松获利</p>
+			</div>
+		</div>
+		<div class="apply_title_item">
+			<i class="extension" style="background-position: -2px -94px;"></i>
+			<div class="item_row">
+				<p class="item_title">推广方式灵活</p>
+				<p class="item_content">课程、二维码任选</p>
+			</div>
+		</div>
+		<div class="apply_title_item">
+			<i class="team" style="background-position: -2px -172px;"></i>
+			<div class="item_row">
+				<p class="item_title">团队一起来</p>
+				<p class="item_content">支持多人分享，奖励更多</p>
+			</div>
+		</div>
+	</div>
+</div>
+<input type="hidden" id="shop_id" value="0">
+
+	<!-- 微信登录弹出绑定手机号遮罩层 -->
+	
+	
+	<input type="hidden" value="34" id="uid">
+	<!-- 加载弹出层 -->
+	<div class="mask-layer-loading">
+		<img src="/template/wap/default_new/public/images/mask_load.gif">
+	</div>
+	
+  <script type="text/javascript">
+	/*$(function(){
+		$('.apply_content .content_i>a').click(function(){alert("11");
+			if(!$(this).is(".no_i")){
+				$('.apply_content .content_i>a').children('span').removeClass('weui_icon_curr');
+				$(this).children('span').addClass('weui_icon_curr');	
+			}else{
+				showBox("您未满足消费条件!");
+			}
+		}); 
+	});*/
+	var is_repeat = true;
+ 	function applyPromoter(){
+ 		if(Number({$list['0']['level_money']})>Number('0')){
+ 			showBox("您未满足消费条件!");
+ 			return false;
+ 		}
+ 		
+ 		var promoter_shop_name = $("#promoter_shop_name").val();
+ 		var shop_id = $("#shop_id").val();
+		
+ 	    /*if(promoter_shop_name==''){
+        	showBox("名称不能为空");
+    		$("#promoter_shop_name").focus();
+        	return false;
+        }*/
+       level_id = "{$list['0']['level_id']}";
+       level_name = "{$list['0']['level_name']}";
+ 	   if(is_repeat){
+ 	    	is_repeat = false;
+	 		$.ajax({
+				type : "post",
+				url : "{:__URL('APP_MAIN/Distribution/applyPeople')}",
+				dataType : "json",
+				data : {
+                    level_id:level_id,
+                    level_name:level_name
+				},
+				success : function(data) {
+					if(data['code']>0){
+						showBox("已提交申请,等待审核");
+						location.reload();
+					}else{
+						is_repeat = true;
+						showBox("申请失败");
+					}
+					
+				}
+			})
+ 	   }else{
+ 		  showBox("请勿重复提交申请！");
+ 	   }
+ 	}
+  </script>
+{/block}
+{block name="bottom"}{/block}

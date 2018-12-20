@@ -1,0 +1,199 @@
+{extend name="shop/blue/deskBase" /}
+{block name="commonMain"}
+<style>
+   .content_left{
+       width:280px;
+       float:left;
+       margin-right:20px;
+       background:#f9f9f9;
+   }
+   .content_left h3{
+       width:260px;
+       height:40px;
+       line-height:40px;
+       font-size:16px;
+       color:#fff;
+       background:#0689e1;
+       padding:0 10px;
+   }
+   .content_left li h4{
+       width:260px;
+       height:35px;
+       line-height:35px;
+       font-size:14px;
+       color:#333;
+       background:#eaeaea;
+       padding:0 10px;
+   }
+   .content_left li h4 a.titlename{
+       color:#666;
+       font-weight:500;
+   }
+   .content_left li h4 a.h4actives{
+       color:#0D84D4;
+   }
+   .content_left li h4 span{
+       width:25px;
+       height:35px;
+       background: url("__TEMP__/{$style}/public/images/help_just.png") no-repeat 10px center;
+       background-size:12px 12px;
+       float:right;
+   }
+   .content_left li h4 span:hover{
+       cursor:pointer;
+   }
+   .content_left li h4 span.actives{
+       background: url("__TEMP__/{$style}/public/images/help_back.png") no-repeat 10px center;
+       background-size:12px 12px;
+   }
+   .content_left li h4 span img{
+       width:20px;
+       height:20px;
+   }
+   .content_left li a.classList{
+       width:325px;
+       height:30px;
+       line-height:30px;
+       font-size:13px;
+       color:#999;
+       padding:0 10px 0 25px;
+       display:block;
+       border-bottom:1px solid #efefef;
+   }
+   .content_left li a.curr{
+       color:#0D84D4;
+   }
+   .meirong{
+       width:860px;
+       float:left;
+   }
+   .bt {
+
+    }
+    .content_left li a.classList {
+        border-bottom: none;
+    }
+    .l{
+      position: relative;
+    }
+    .commend_flag{
+        width:30px;
+        line-height:25px;
+        background: #fb9336;
+        text-align:center;
+        border-radius:4px;
+        display:block;
+        position:absolute;
+        right:0;
+        top:0;
+        color:#fff;
+        font-size:12px;
+      }
+</style>
+<div class="banner ny">
+    <div class="flexslider">
+        <ul class="slides">
+            <li><img src="__TEMP__/{$style}/public/FrontDesk/images/temp/mr.jpg"></li>
+
+        </ul>
+    </div>
+</div>
+<div class="index-content inside clearfix">
+<div class="content_left">
+       <h3>{$category_name}</h3>
+       <ul>
+        {foreach name="cmsList" id="cms"}
+        {if condition="$cms['pid'] eq '0'"}
+        <li>
+            <h4><a href="{:__URL('SHOP_MAIN/frontDesk/articleList','id='.$cms['class_id'].'&class_id='.$cms['pid'].'&category='.$category)}" title="{$cms.name}" class="titlename {$class_id==$cms['class_id']?'h4actives':''}">{$cms.name}</a>
+            {if condition="$cms['class_id'] eq $pid"}
+            <span class="actives">
+            {else/}
+            <span>
+            {/if}
+            </span>
+            </h4>
+            {if condition="$cms['class_id'] eq $pid"}
+            <div class="helpList" style="display: block;">
+            {else/}
+            <div class="helpList" style="display: none;">
+            {/if}
+            {foreach name="cmsList" id="cms_item"}
+                {if condition="$cms_item['pid'] eq $cms['class_id']"}
+                {if condition="$cms_item['class_id'] eq $class_id"}
+                <a href="SHOP_MAIN/frontDesk/articleList?id={$cms_item['class_id']}&class_id={$cms_item['pid']}&category={$category}" class="curr classList" target="_self" name="ducoment" title="{$cms_item.name}">{$cms_item.name}</a>
+                {else /}
+                <a href="SHOP_MAIN/frontDesk/articleList?id={$cms_item['class_id']}&class_id={$cms_item['pid']}&category={$category}" name="ducoment" target="_self" title="{$cms_item.name}" class="classList">{$cms_item.name}</a>
+                {/if}
+                {/if}
+            {/foreach}
+            <div>
+         </li>
+        {/if}
+        {/foreach}
+         
+       </ul> 
+       
+    </div>
+        <div class="meirong">
+            <div class="bt">
+                <span class="r">当前位置：<a href="{:__URL('SHOP_MAIN/frontDesk/index')}"> 首页</a> > {$category_name}</span>
+                <h2></h2>
+            </div>
+            <div class="zjtd click">
+                {if condition="count($result) neq 0"}
+                {volist name="result" id="news"}
+                <ul>
+                    <li>
+                        <a href="{:__URL('SHOP_MAIN/frontDesk/articleDetails', 'article_id='.$news.article_id.'&category='.$category)}" class="clearfix" data-id="{$news.article_id}">
+                            <div class="l"><img src="{:__IMG($news['image'])}" class="zximg">{if($news.commend_flag eq 1)}
+                             <span class="commend_flag">推荐</span>
+                             {/if}
+                             </div>
+                            <div class="zxnr">
+                                <span class="date r">{$news.create_time | getTimeStampTurnTime}</span>
+                                <h2>{$news.title}</h2>
+                                <p>{$news.summary}</p>
+                            </div>
+                        </a>
+                    </li>
+                    {/volist}
+                    {else/}
+                    <div style="margin-top: 15px;">
+                        <div style="margin-top: 15px; overflow: hidden;">
+                            <span>{:lang('no_article')}</span>
+                        </div>
+                    </div>
+                    {/if}
+                    {include file='shop/blue/daskCommonPage' /}
+               <!-- <div class="pages">
+                   <span class="nolink">首页</span><span class="nolink">上一页</span><span class="current_page">1</span><span class="nolink">下一页</span><span class="nolink">尾页</span>
+               </div>  -->
+            </div>
+        </div>
+
+
+</div>
+<script>
+//文章点击数
+$("body").on('click',".click li a",function(){
+    var href=this.href;
+    var article_id=$(this).attr('data-id');
+    var url="{:__URL('APP_MAIN/Goods/addClick')}&article_id="+article_id;
+    $.get(url,function(data){
+         window.location.href=href;
+    })
+    return false;
+})
+$(".content_left li h4 span").click(function(){
+    if($(this).hasClass("actives")){
+        $(this).parent().siblings(".helpList").hide(50);
+        $(this).removeClass("actives");
+    }else{
+        $(this).parent().siblings(".helpList").show(50);
+        $(this).addClass("actives");
+    }
+})
+</script>
+{/block}
+{/block}

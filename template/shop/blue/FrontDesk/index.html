@@ -1,0 +1,76 @@
+{extend name="shop/blue/deskBase" /}
+{block name="commonMain"}
+<div class="banner">
+    <div class="flexslider">
+        <ul class="slides">
+            {volist name="AlbumPictureList" id="item"}
+            <li><img src="{:__IMG($item['pic_cover'])}" ></li>
+            {/volist}
+        </ul>
+    </div>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('.flexslider').flexslider({
+                directionNav: true,
+                pauseOnAction: false,
+                slideshowSpeed: 3000
+            });
+        });
+
+    </script>
+</div>
+<style>
+.commend_flag{
+    width:30px;
+    line-height:22px;
+    background: #fb9336;
+    text-align:center;
+    border-radius:4px;
+    display:inline-block;
+    color:#fff;
+    font-size:12px;
+    margin-right:5px;
+  }
+</style>
+<div class="index-content clearfix">
+    <div class="about">
+        <div class="title"><span><a href="{:__URL('SHOP_MAIN/frontDesk/articleDetails', 'article_id='.$about_list.article_id.'&category=9')}">关于我们</a></span></div>
+        <div class="nr">
+            <img src="{:__IMG($about_list['image'])}" class="gsimg" align="left"><p>{$about_list.summary}</p>
+        </div>
+    </div>
+
+    <div class="new">
+        <div class="title"><span><a href="{:__URL('SHOP_MAIN/frontDesk/articleList', 'category=8')}">资讯中心</a></span></div>
+        <div class="list">
+            <ul>
+                {foreach name="article_list" item ="v"}
+                <li><span class="date r">{$v["create_time"]|date='Y-m-d',###}</span><a href="{:__URL('SHOP_MAIN/frontDesk/articleDetails', 'article_id='.$v.article_id.'&category=8')}" data-id="{$v.article_id}">
+                {if($v.commend_flag eq 1)}
+                <span class="commend_flag">推荐</span>
+                {/if}
+                {$v["title"]}</a></li>
+                {/foreach}
+            </ul>
+        </div>
+    </div>
+    <div class="erm">
+        {if condition="$data neq ''"}
+        <img src="{:__IMG($code_path)}"><br>扫二维码  得{$data['money']}元优惠券
+        {/if}
+    </div>
+</div>
+<script>
+//文章点击数
+$("body").on('click',".list li a",function(){
+    var href=this.href;
+    var article_id=$(this).attr('data-id');
+    var url="{:__URL('APP_MAIN/Goods/addClick')}&article_id="+article_id;
+    $.get(url,function(data){
+         window.location.href=href;
+    })
+    return false;
+})
+</script>
+{/block}
+{/block}

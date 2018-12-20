@@ -1,0 +1,130 @@
+{extend name="wap/default_new/base" /}
+{block name="resources"}
+<link rel="stylesheet" type="text/css" href="__TEMP__/{$style}/public/css/components.css">
+<link rel="stylesheet" type="text/css" href="__TEMP__/{$style}/public/css/group_goods_list.css">
+<link rel="stylesheet" type="text/css" href="__TEMP__/{$style}/public/css/group_buy.css">
+<style>
+.custom-tag-list{margin-bottom:10px;}
+.group-list-box{width:100%;}
+.group-list-box .group-list li {width: 43%;float: left;margin: 0 3px 5px 3px;}
+.brand-info .brand-info-right .main-btn {font-size: 12px;}
+.slick {max-height: 175px;}
+.custom-tag-list {margin-top: 0;}
+.slick{margin-bottom: 10px;}
+.custom-tag-list{padding-top:0;}
+.group-list-box .group-list li .brand-name{text-align: left;}
+</style>
+{/block}
+
+{block name="goodsHead"}
+<section class="head">
+	<a class="head_back" href="javascript:window.history.go(-1)"><i class="icon-back"></i></a>
+	<div class="head-title"><span style="margin-left: 40px;">{:lang("goods_topSelling")}</span>
+	{include file="wap/default_new/controGroup" /}
+	</div>
+</section>
+<div style="height: 45px;"></div>
+<input type="hidden" id="page_count"><!-- 总页数 -->
+<input type="hidden" id="page" value="1"><!-- 当前页数 -->
+<input type="hidden" id="ms_time" value="{$ms_time}"/>
+{/block}
+{block name="main"}
+<div class="custom-tag-list clearfix">
+	<div class="group-list-box">
+		{if condition="$discounts_adv['is_use'] eq 1"}
+		    {if condition="$discounts_adv['adv_list'][0]['adv_image'] neq ''"}
+			<div class="slick">
+				<a href="{$discounts_adv['adv_list'][0]['adv_url']}">
+					<img src="{:__IMG($discounts_adv['adv_list'][0]['adv_image'])}" style="max-width: 100%;max-height: 100%;">
+					<!-- style="height:{$discounts_adv.ap_height}px;" -->
+				</a>
+			</div>
+		   {/if}
+		{/if}
+		<ul class="group-list" style="overflow: hidden;"></ul>
+	</div>
+<script>
+$(function(){
+	showCategorySecond(0,0,1);
+})
+
+var is_load = true;
+function showCategorySecond(obj,category_id,page){
+	//设置选中效果
+	if($(obj).length!=0){
+		$(".custom-tag-list-side-menu li a").removeClass("selected");
+		$(obj).addClass("selected");
+	}
+	if(is_load){
+		is_load = false;
+		$.ajax({
+			type : "get",
+			url:'{:__URL('APP_MAIN/Index/topSelling')}',
+			async:false,
+			data:{'category_id':"{$category_id}","page":page},
+			dataType:'json',
+			success:function(data){
+				is_load = true;
+				$("#page_count").val(data['page_count']);
+				$("#page").val(page);
+				if(page == 1){
+					var list_html='';
+				}else if(page > 1){
+					var list_html = $('.group-list').html();
+				}
+			
+				if(data['data'].length==0){
+					$('.group-list').html('<p style="color:#939393;text-align:center;margin-top:100px;"><img src="__TEMP__/{$style}/public/images/wap_nodata.png" height="60" style="margin-bottom:20px;"><br>Sorry！{:lang("goods_no_goods_you_want")}…</p>');
+				}else{
+					for(key in data['data']){
+						var item=data['data'][key];
+						var img = "";
+						if(item.pic_cover_small != null){
+							img = item.pic_cover_small;
+							var default_goods_img=__IMG(img);
+						}else{
+							var default_goods_img="{:__IMG($default_goods_img)}";
+						}
+						list_html+='<li>'
+							+'<div class="p-img">'
+							+'<a href="'+__URL('APP_MAIN/goods/goodsdetail?id='+item.goods_id)+'" title="'+item.goods_name+'">'
+							+'<img src="'+default_goods_img+'" class="lazy_load" data-original="'+__IMG(img)+'">'
+							+'</a>'
+							+'</div>'
+							+'<span class="brand-name">'+item.goods_name+'</span>'
+							+'<div class="brand-info"  style="height:initial;">'
+							+'<div class="brand-info-left"  style="float:none;">'
+							+'<p class="b-price" style="float:left;margin:5px 0;">'+item.display_price+'</p>';
+							list_html+= '<p class="buyer" style="float:right;line-height:30px;">{:lang("goods_sales_volume")}: '+item.sales+'</p>';	
+							list_html+= '</div>'
+							list_html+= '</div></li>';
+					}
+					$('.group-list').html(list_html);
+				}
+				img_lazyload();	
+			}
+		});
+	}
+}
+
+//滑动到底部加载
+$(window).scroll(function(){
+	var totalheight = parseFloat($(window).height()) + parseFloat($(window).scrollTop());
+	var content_box_height = parseFloat($(".group-list-box").height());
+	if(totalheight - content_box_height >= 50){
+		if(is_load){
+			var page = parseInt($("#page").val()) + 1;//页数
+			var total_page_count = $("#page_count").val(); // 总页数
+			var sear_type = $("#sear_type").val();
+			if(page > total_page_count){
+				return false;
+			}else{
+				showCategorySecond(0,0,page);
+			}
+		}
+	}
+})
+</script>
+</div>
+{/block}
+{block name="bottom"}{/block}

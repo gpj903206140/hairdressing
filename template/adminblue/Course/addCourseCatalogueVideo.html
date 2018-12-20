@@ -1,0 +1,139 @@
+{extend name="adminblue/base" /}
+{block name="resources"/}
+<!-- 选择课程图，弹出框的样式 -->
+<link href="__STATIC__/blue/css/goods/add_goods.css" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="ADMIN_CSS/plugin/video-js.css">
+
+<script type="text/javascript" src="ADMIN_JS/goods/goods_sku_create.js"></script>
+<script src="ADMIN_JS/goods/release_course_second.js"></script>
+<script src="ADMIN_JS/plugin/videojs-ie8.min.js"></script>
+<script src="ADMIN_JS/plugin/video.min.js"></script>
+<style>
+.error{padding:5px 0 0;}
+</style>
+{/block}
+{block name="main"}
+<div class="space-10"></div>
+<div class="set-style">
+	<dl>
+		<dt><span class="color-red">*</span>机构老师：</dt>
+		<dd>
+			<p>
+			 <select id="teacher_id" class="input-common" style="width: 290px !important;">
+				<option value="0">请选择机构老师</option>
+                {foreach name="teacher_list" item="teacher"}
+					<option value="{$teacher.teacher_id}">{$teacher.teacher_name}</option>
+				{/foreach} 
+			</select>
+			</p>
+			<p class="error">机构老师不能为空，且长度不能超过30个字</p>
+			<input id="goods_id" type="hidden" value="{$goods_id}" />
+			<input id="catalogue_id" type="hidden" value="{$catalogue_id}" />
+		</dd>
+	</dl>
+	<!-- <dl>
+		<dt>排序：</dt>
+		<dd>
+			<p><input id="sort" type="number" placeholder="请输入序号" class="input-common harf" /></p>
+		</dd>
+	</dl> -->
+	<dl>
+		<dt>视频上传：</dt>
+		<dd style="padding:0;">
+			<div class="goodspic-uplaod" style="overflow: hidden;position:relative;">
+		
+				<div class="video-thumb">
+						<video id="my-video" class="video-js vjs-big-play-centered" controls poster="__STATIC__/blue/img/goods_video_upload_bg.png" preload="auto">
+							<p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that</p>
+						</video>
+						<span class="del-video hide" onclick="del_video()"></span>
+				</div>
+				<input class="input-file" name="file_upload" id="videoupload" type="file" onchange="fileUpload_video(this);" title="视频上传" style="position: absolute;left: 0;width: 290px;height: 140px;opacity: 0;cursor: pointer;z-index:10;" />
+			</div>
+		</dd>
+	</dl>
+    <dl>
+		<dt>输入网址：</dt>
+		<dd>
+			<input type="text" id="video_url" class="input-common" style="width: 290px !important;" placeholder="在此输入外链视频地址"  />
+			<p class="hint">
+				<span>展示视频<i class="important-note">支持手动输入外链视频地址</i>或者<i class="important-note">上传本地视频</i></span>
+			</p>
+		</dd>
+	</dl>
+	<dl>
+		<dt></dt>
+		<dd>
+			<button class="btn-common btn-big" onclick="addGoodsCategoryAjax();">保存</button>
+			<button class="btn-common-cancle btn-big" onclick="window.location.href = window.history.go(-1);">返回</button>
+		</dd>
+	</dl>
+</div>
+<script src="__STATIC__/js/ajax_file_upload.js" type="text/javascript"></script>
+<script src="__STATIC__/js/file_upload.js" type="text/javascript"></script>
+<script>
+//图片上传
+function imgUpload(event) {
+	var fileid = $(event).attr("id");
+	var id = $(event).next().attr("id");
+	var data = { 'file_path' : UPLOADGOODSCATEGORY };
+	uploadFile(fileid,data,function(res){
+		if(res.code){
+			$("#"+id).val(res.data);
+			$("#text_" + id).val(res.data);
+			$("#preview_" + id).attr("data-src",__IMG(res.data));
+			showTip(res.message,"success");
+		}else{
+			showTip(res.message,"error");
+		}
+	});
+}
+
+//模块输入信息验证
+function verify( video_url){
+	if(video_url == '' ){
+		$("#video_url").focus().parent().next().show();
+		return false;
+	}else{
+		$(".error").hide();
+	}
+	return true;
+}
+
+//添加模块
+var flag = false;
+function addGoodsCategoryAjax() {
+	var goods_id = $("#goods_id").val();
+	var catalogue_id = $("#catalogue_id").val();
+	var teacher_id = $("#teacher_id option:selected").val();
+	var teacher_name = $("#teacher_id option:selected").text();
+	var sort = $("#sort").val();
+	var video_url = $("#video_url").val();
+	if(verify(video_url)){
+		if(flag) return;
+		flag = true;
+		$.ajax({
+			type : "post",
+			url : "{:__URL('ADMIN_MAIN/course/addCourseCatalogueVideo')}",
+			data : {
+				'goods_id' : goods_id,
+				'catalogue_id' : catalogue_id,
+				'sort' : sort,
+				'teacher_id' : teacher_id,
+				'teacher_name' : teacher_name,
+				"video_url" : video_url,
+			},
+			success : function(data) {
+				if (data["code"] > 0) {
+					showTip(data['message'],"success");
+					location.href = "{:__URL('ADMIN_MAIN/course/CourseCataloguelist')}&goods_id={$goods_id}";
+				}else{
+					showTip(data['message'],"error");
+					flag = false;
+				}
+			}
+		});
+	}
+}
+</script>
+{/block}
