@@ -59,7 +59,7 @@
 			<td style="text-align: center;"><input type="number" class="sort input-common input-common-sort" fieldid="{$v1['teacher_id']}" fieldname="sort" value="{$v1['sort']}" size="1"></td>
 			<td style="text-align: center;">
 				<a href="{:__URL('ADMIN_MAIN/course/updateCourseTeacher','mechanism_id='.$mechanism_id.'&teacher_id='.$v1['teacher_id'])}">修改</a>
-				<a href="javascript:void(0);" onclick="delCategory({$v1['teacher_id']})">删除</a>
+				<a href="javascript:void(0);" onclick="delCategory({$mechanism_id},{$v1['teacher_id']})">删除</a>
 			</td>
 		</tr>
 			
@@ -67,7 +67,7 @@
 	</tbody>
 </table>
 {else/}
-	<div class="tip-box">当前系统还没有机构老师，<a href="{:__URL('ADMIN_MAIN/course/addCourseTeacher')}">马上添加</a></div>
+	<div class="tip-box">当前系统还没有机构老师，<a href="{:__URL('ADMIN_MAIN/course/addCourseTeacher','mechanism_id='.$mechanism_id)}">马上添加</a></div>
 {/notempty}
 
 
@@ -87,7 +87,7 @@ $(".table-class tr[data-category-id] input").live("change",function(){
 	}else{
 		$.ajax({
 			type:"post",
-			url:"{:__URL('ADMIN_MAIN/course/modifycourseclassField')}",
+			url:"{:__URL('ADMIN_MAIN/course/modifyCourseTeacherField')}",
 			data:{'fieldid':fieldid,'fieldname':fieldname,'fieldvalue':fieldvalue},
 			success: function (data) {
 				if(data>0){
@@ -113,7 +113,7 @@ function tab_switch(module_id){
 }
 
 /* 删除机构老师 */
-function delCategory(teacher_id) {
+function delCategory(mechanism_id,teacher_id) {
 	$( "#dialog" ).dialog({
 		buttons: {
 			"确定": function() {
@@ -122,6 +122,7 @@ function delCategory(teacher_id) {
 					type : "post",
 					url : "{:__URL('ADMIN_MAIN/course/deleteCourseTeacher')}",
 					data : {
+						'mechanism_id' : mechanism_id,
 						'teacher_id' : teacher_id,
 						//'goods_category_quick' : JSON.stringify(getCookieGoodsCategory(mechanism_id))
 					},

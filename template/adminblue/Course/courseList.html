@@ -137,12 +137,13 @@ input, textarea, .uneditable-input {width: 147px;}
 		<table class="table-class">
 			<colgroup>
 				<col style="width: 2%;">
-				<col style="width: 25%;">
+				<col style="width: 20%;">
 				<col style="width: 10%;">
 				
 				<col style="width: 10%;">
+				<col style="width: 10%;">
 				<col style="width: 11%;">
-				<col style="width: 15%;">
+				<col style="width: 10%;">
 				<col style="width: 9%;">
 				<col style="width: 4%;">
 				<col style="width: 15%;">
@@ -156,7 +157,8 @@ input, textarea, .uneditable-input {width: 147px;}
 					</th>
 					<th align="left">课程名称</th>
 					<th class="goods-fields-sort" data-field="price" style="text-align: right;">价格(元)<span class="desc"></span></th>
-					<th class="goods-fields-sort" data-field="stock" style="text-align: right;">总课数<span class="desc"></span></th>
+					<th class="goods-fields-sort" data-field="total_num" style="text-align: right;">总课数<span class="desc"></span></th>
+					<th class="goods-fields-sort" data-field="release_num" style="text-align: right;">发布课数<span class="desc"></span></th>
 					<th class="goods-fields-sort" data-field="sales" style="text-align: right;">销量<span class="desc"></span></th>
 <!-- 					<th>上下架</th> -->
 					<th>适合人群</th>
@@ -408,6 +410,11 @@ function LoadingInfo(page_index) {
 						html += '<td style="text-align: right;">';
 							html += '<div class="cell">';
 								html += '<span class="pro-stock" style="color: #666;" id="moreChangeStock'+ data["data"][i]["goods_id"] + '">' + data["data"][i]["total_num"] + '</span>';
+							html += '</div>';
+						html += '</td>';
+						html += '<td style="text-align: right;">';
+							html += '<div class="cell">';
+								html += '<span class="pro-stock" style="color: #666;" id="moreChangeStock'+ data["data"][i]["goods_id"] + '">' + data["data"][i]["release_num"] + '</span>';
 							html += '</div>';
 						html += '</td>';
 

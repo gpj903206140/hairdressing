@@ -1076,18 +1076,15 @@ function ValidateUserInput() {
 	}
 	//课程单位
     var is_error = false;
-    var goods_kind=$("#goods_kind").val();
-    if(goods_kind==0){
-    	//销售价格
-		if (!IsNum("#txtProductSalePrice") || parseFloat($("#txtProductSalePrice").val()) < 0) {
-			$(".goods-nav ul li:eq(0)").click();
-			$("#txtProductSalePrice").nextAll("span:last").text("课程销售价不能为空，且不能为负数").show();
-			$("#txtProductSalePrice").focus();
-			return false;
-		} else {
-			$("#txtProductSalePrice").nextAll("span:last").hide();
-		}
-    }
+	//销售价格
+	if (!IsNum("#txtProductSalePrice") || parseFloat($("#txtProductSalePrice").val()) < 0) {
+		$(".goods-nav ul li:eq(0)").click();
+		$("#txtProductSalePrice").nextAll("span:last").text("课程销售价不能为空，且不能为负数").show();
+		$("#txtProductSalePrice").focus();
+		return false;
+	} else {
+		$("#txtProductSalePrice").nextAll("span:last").hide();
+	}
 
 	if($(".upload_img_id").length == 0){
 		$(".goods-nav ul li:eq(3)").click();

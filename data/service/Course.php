@@ -50,6 +50,8 @@ use think\Log;
 
 use data\model\NcCmsArticleCommentModel as cmsArticleComment;
 use data\model\NcCmsArticleModel as cmsArticle;
+use data\model\NsCourseCatalogueModel as NsCourseCatalogueModel;
+use data\service\CourseCatalogue;
 
 class Course extends BaseService implements ICourse
 {
@@ -140,85 +142,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsList($page_index = 1, $page_size = 0, $condition = '', $order = 'ng.sort asc,ng.create_time desc', $group_id = 0)
     {
-        $goods_view = new NsGoodsViewModel();
-        // 针对课程分类
-        if (! empty($condition['ng.category_id'])) {
-            $goods_category = new GoodsCategory();
-            $category_list = $goods_category->getCategoryTreeList($condition['ng.category_id']);
-            unset($condition['ng.category_id']);
-            $query_goods_ids = "";
-            $goods_list = $goods_view->getGoodsViewQueryField($condition, "ng.goods_id");
-            if (! empty($goods_list) && count($goods_list) > 0) {
-                foreach ($goods_list as $goods_obj) {
-                    if ($query_goods_ids === "") {
-                        $query_goods_ids = $goods_obj["goods_id"];
-                    } else {
-                        $query_goods_ids = $query_goods_ids . "," . $goods_obj["goods_id"];
-                    }
-                }
-                $extend_query = "";
-                $category_str = explode(",", $category_list);
-                foreach ($category_str as $category_id) {
-                    if ($extend_query === "") {
-                        $extend_query = " FIND_IN_SET( " . $category_id . ",ng.extend_category_id) ";
-                    } else {
-                        $extend_query = $extend_query . " or FIND_IN_SET( " . $category_id . ",ng.extend_category_id) ";
-                    }
-                }
-                $condition = " ng.goods_id in (" . $query_goods_ids . ") and ( ng.category_id in (" . $category_list . ") or " . $extend_query . ")";
-            }
-        }
-        $goods_view = new NsGoodsViewModel();
-        $list = $goods_view->getGoodsViewList($page_index, $page_size, $condition, $order);
-        if (! empty($list['data'])) {
-            // 用户针对课程的收藏
-            foreach ($list['data'] as $k => $v) {
-                if (! empty($this->uid)) {
-                    $member = new Member();
-                    $list['data'][$k]['is_favorite'] = $member->getIsMemberFavorites($this->uid, $v['goods_id'], 'goods');
-                } else {
-                    $list['data'][$k]['is_favorite'] = 0;
-                }
-                // 查询课程单品活动信息
-                $goods_preference = new GoodsPreference();
-                $goods_promotion_info = $goods_preference->getGoodsPromote($v['goods_id']);
-                $list["data"][$k]['promotion_info'] = $goods_promotion_info;
-                
-                if($v['point_exchange_type'] == 0 || $v['point_exchange_type'] == 2){
-                    $list['data'][$k]['display_price'] = '￥'.$v["promotion_price"];
-                }else{
-                    if($v['point_exchange_type'] == 1 && $v["promotion_price"] > 0){
-                        $list['data'][$k]['display_price'] = '￥'.$v["promotion_price"].'+'.$v["point_exchange"].'积分';
-                    }else{
-                        $list['data'][$k]['display_price'] = $v["point_exchange"].'积分';
-                    }
-                }
-                
-                // 查询课程标签
-                $ns_goods_group = new NsGoodsGroupModel();
-                $group_name = "";
-                // $group_id = 0;
-                if (! empty($v['group_id_array'])) {
-                    $group_id_array = explode(",", $v['group_id_array']);
-                    
-                    if (empty($group_id) || ! in_array($group_id, $group_id_array)) {
-                        $group_id = $group_id_array[0];
-                    }
-                    
-                    $group_info = $ns_goods_group->getInfo([
-                        "group_id" => $group_id
-                    ], "group_name");
-                    
-                    if (! empty($group_info)) {
-                        $group_name = $group_info['group_name'];
-                    }
-                }
-                $list["data"][$k]['group_name'] = $group_name;
-            }
-        }
-        return $list;
         
-        // TODO Auto-generated method stub
     }
 
     /**
@@ -247,15 +171,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsRankViewList($page_index = 1, $page_size = 0, $condition = '', $order = 'ng.sort asc')
     {
-        $goods_model = new NsCourseModel();
-        // 针对课程分类
-        $viewObj = $goods_model->alias("ng")
-            ->join('sys_album_picture ng_sap', 'ng_sap.pic_id = ng.picture', 'left')
-            ->field("ng.goods_id,ng.goods_name,ng_sap.pic_cover_mid,ng.promotion_price,ng.market_price,ng.goods_type,ng.stock,ng_sap.pic_id,ng.max_buy,ng.state,ng.is_hot,ng.is_recommend,ng.is_new,ng.sales,ng_sap.pic_cover_small");
-        $queryList = $goods_model->viewPageQuery($viewObj, $page_index, $page_size, $condition, $order);
-        $queryCount = $this->getGoodsQueryCount($condition);
-        $list = $goods_model->setReturnList($queryList, $queryCount, $page_size);
-        return $list;
+        
     }
     
     /*
@@ -354,7 +270,7 @@ class Course extends BaseService implements ICourse
         , $description, $QRcode, $is_hot, $is_recommend, $is_new
         , $sort, $image_array, $sort, $extend_category_id, $state
         , $pc_custom_template, $wap_custom_template,$allow_delete
-        ,$mechanism_id, $teacher_id,$crowd, $score,$total_num
+        ,$mechanism_id, $teacher_id,$crowd, $score,$total_num,$release_num
         ,$promotion_price,$goods_video_address
     )
     {
@@ -433,6 +349,7 @@ class Course extends BaseService implements ICourse
                 'crowd' => $crowd,
                 'score' => $score,
                 'total_num'=>$total_num,
+                'release_num'=>$release_num,
                 'promotion_price'=>$promotion_price,
                 'goods_video_address'=>$goods_video_address
             );
@@ -450,6 +367,7 @@ class Course extends BaseService implements ICourse
                 $this->addUserLog($this->uid, 1, '课程', '添加课程', '添加课程:' . $goods_name);
             } else {
                 $data_goods['update_time'] = time();
+                unset($data_goods['release_num']);
                 $res = $this->course->save($data_goods, [
                     'goods_id' => $goods_id
                 ]);
@@ -482,36 +400,7 @@ class Course extends BaseService implements ICourse
      */
     protected function modifyGoodsPromotionPrice($goods_id)
     {
-        $discount_goods = new GoodsDiscount();
-        $goods = new NsCourseModel();
-        $goods_sku = new NsGoodsSkuModel();
-        $discount = $discount_goods->getDiscountByGoodsid($goods_id);
-        if ($discount == - 1) {
-            // 当前课程没有参加活动
-        } else {
-            // 当前课程有正在进行的活动
-            // 查询出课程的价格进行修改
-            $goods_price = $goods->getInfo([
-                'goods_id' => $goods_id
-            ], 'price');
-            $goods->save([
-                'promotion_price' => $goods_price['price'] * $discount / 10
-            ], [
-                'goods_id' => $goods_id
-            ]);
-            // 查询出所有的课程sku价格进行修改
-            $goods_sku_list = $goods_sku->getQuery([
-                'goods_id' => $goods_id
-            ], 'sku_id, price', '');
-            foreach ($goods_sku_list as $k => $v) {
-                $goods_sku = new NsGoodsSkuModel();
-                $goods_sku->save([
-                    'promote_price' => $v['price'] * $discount / 10
-                ], [
-                    'sku_id' => $v['sku_id']
-                ]);
-            }
-        }
+        
     }
 
     /**
@@ -523,25 +412,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsAttribute($goods_id)
     {
-        // 查询课程主表
-        $goods = new NsCourseModel();
-        $goods_detail = $goods->get($goods_id);
-        $spec_list = array();
-        if (! empty($goods_detail) && ! empty($goods_detail['goods_spec_format']) && $goods_detail['goods_spec_format'] != "[]") {
-            $spec_list = json_decode($goods_detail['goods_spec_format'], true);
-            if (! empty($spec_list)) {
-                foreach ($spec_list as $k => $v) {
-                    foreach ($v["value"] as $m => $t) {
-                        if (empty($t["spec_show_type"])) {
-                            $spec_list[$k]["value"][$m]["spec_show_type"] = 1;
-                        }
-                        
-                        $spec_list[$k]["value"][$m]["picture"] = $this->getGoodsSkuPictureBySpecId($goods_id, $spec_list[$k]["value"][$m]['spec_id'], $spec_list[$k]["value"][$m]['spec_value_id']);
-                    }
-                }
-            }
-        }
-        return $spec_list;
+        
     }
     
     /*
@@ -550,12 +421,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsSku($goods_id)
     {
-        $goods_sku = new NsGoodsSkuModel();
-        $list = $goods_sku->get([
-            'goods_id' => $goods_id
-        ]);
-        return $list;
-        // TODO Auto-generated method stub
+        
     }
     
     /*
@@ -573,19 +439,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsImg($goods_id)
     {
-        // TODO Auto-generated method stub
-        $goods_info = $this->course->getInfo([
-            'goods_id' => $goods_id
-        ], 'picture');
-        $pic_info = array();
-        if (! empty($goods_info)) {
-            $picture = new AlbumPictureModel();
-            $pic_info['pic_cover'] = '';
-            if (! empty($goods_info['picture'])) {
-                $pic_info = $picture->get($goods_info['picture']);
-            }
-        }
-        return $pic_info;
+        
     }
     
     /*
@@ -776,72 +630,7 @@ class Course extends BaseService implements ICourse
      */
     public function getBasisGoodsDetail($goods_id)
     {
-        // $cache = Cache::tag("niu_goods")->get("getBasisGoodsDetail" . $goods_id);
-        // if(empty($cache)){
-        // 课程的基础信息
-        $goods = new NsCourseModel();
-        $goods_detail = $goods->get($goods_id);
-        if ($goods_detail == null) {
-            return null;
-        }
         
-        // 查询课程分组表
-        $course_group = new NsCoursGroupModel();
-        $goods_group_list = $course_group->all($goods_detail['group_id_array']);
-        $goods_detail['goods_group_list'] = $goods_group_list;
-        
-        // 查询图片表
-        $goods_img = new AlbumPictureModel();
-        $order = "instr('," . $goods_detail['img_id_array'] . ",',CONCAT(',',pic_id,','))"; // 根据 in里边的id 排序
-        $goods_img_list = $goods_img->getQuery([
-            'pic_id' => [
-                "in",
-                $goods_detail['img_id_array']
-            ]
-        ], '*', $order);
-        if (trim($goods_detail['img_id_array']) != "") {
-            $img_array = array();
-            $img_temp_array = array();
-            $img_array = explode(",", $goods_detail['img_id_array']);
-            foreach ($img_array as $k => $v) {
-                if (! empty($goods_img_list)) {
-                    foreach ($goods_img_list as $t => $m) {
-                        if ($m["pic_id"] == $v) {
-                            $img_temp_array[] = $m;
-                        }
-                    }
-                }
-            }
-        }
-        $goods_picture = $goods_img->get($goods_detail['picture']);
-        $goods_detail["img_temp_array"] = $img_temp_array;
-        $goods_detail['img_list'] = $goods_img_list;
-        $goods_detail['picture_detail'] = $goods_picture;
-        
-        // 查询分类名称
-        $category_name = $this->getGoodsCategoryName($goods_detail['category_id_1'], $goods_detail['category_id_2'], $goods_detail['category_id_3']);
-        $goods_detail['category_name'] = $category_name;
-        
-        // 扩展分类 去掉查询 检测影响
-        $extend_category_array = array();
-        $goods_detail['extend_category_name'] = "";
-        $goods_detail['extend_category'] = $extend_category_array;
-        
-        if ($goods_detail['match_ratio'] == 0) {
-            $goods_detail['match_ratio'] = 100;
-        }
-        if ($goods_detail['match_point'] == 0) {
-            $goods_detail['match_point'] = 5;
-        }
-        // 处理小数
-        $goods_detail['match_ratio'] = round($goods_detail['match_ratio'], 2);
-        $goods_detail['match_point'] = round($goods_detail['match_point'], 2);
-        
-        // Cache::tag("niu_goods")->set("getBasisGoodsDetail" . $goods_id, $goods_detail);
-        // }else{
-        // $goods_detail=$cache;
-        // }
-        return $this->getBusinessGoodsInfo($goods_detail);
     }
 
     /**
@@ -849,88 +638,7 @@ class Course extends BaseService implements ICourse
      */
     public function getBusinessGoodsInfo($goods_detail)
     {
-        /**
-         * *******************************************会员价格-start****************************************************
-         */
-        // 会员的折扣价格
-        $goods_preference = new GoodsPreference();
-        if (! empty($this->uid)) {
-            $member_discount = $goods_preference->getMemberLevelDiscount($this->uid);
-        } else {
-            $member_discount = 1;
-        }
-        // 查询课程会员价
-        if ($member_discount == 1) {
-            $goods_detail['is_show_member_price'] = 0;
-        } else {
-            $goods_detail['is_show_member_price'] = 1;
-        }
-        $member_price = $member_discount * $goods_detail['price'];
-        $goods_detail['member_price'] = sprintf("%.2f", $member_price);
-        // 课程sku价格
-        foreach ($goods_detail['sku_list'] as $k => $goods_sku) {
-            $goods_detail['sku_list'][$k]['member_price'] = $goods_sku['price'] * $member_discount;
-        }
         
-        /**
-         * *******************************************会员价格-end*********************************************************
-         */
-        
-        // 查询课程单品活动信息
-        $goods_preference = new GoodsPreference();
-        $goods_promotion_info = $goods_preference->getGoodsPromote($goods_detail["goods_id"]);
-        if (! empty($goods_promotion_info)) {
-            $goods_discount_info = new NsPromotionDiscountModel();
-            $goods_detail['promotion_detail'] = $goods_discount_info->getInfo([
-                'discount_id' => $goods_detail['promote_id']
-            ], 'start_time, end_time,discount_name');
-        }
-        // 判断活动内容是否为空
-        if (! empty($goods_detail['promotion_detail'])) {
-            $goods_detail['promotion_info'] = $goods_promotion_info;
-        } else {
-            $goods_detail['promotion_info'] = "";
-        }
-        
-        // 查询课程团购信息
-      
-        $goods_detail['group_info'] = "";
-        
-        // 查询课程满减送活动
-        $goods_mansong = new GoodsMansong();
-        $goods_detail['mansong_name'] = $goods_mansong->getGoodsMansongName($goods_detail["goods_id"]);
-        // 查询包邮活动
-        $full = new Promotion();
-        $baoyou_info = $full->getPromotionFullMail($this->instance_id);
-        if ($baoyou_info['is_open'] == 1) {
-            if ($baoyou_info['full_mail_money'] == 0) {
-                $goods_detail['baoyou_name'] = '全场包邮';
-            } else {
-                $goods_detail['baoyou_name'] = '满' . $baoyou_info['full_mail_money'] . '元包邮';
-            }
-        } else {
-            $goods_detail['baoyou_name'] = '';
-        }
-        $goods_express = new GoodsExpress();
-        $goods_detail['shipping_fee_name'] = $goods_express->getGoodsExpressTemplate($goods_detail["goods_id"], 1, 1, 1);
-        
-        // 查询课程的已购数量
-        if (! empty($this->uid)) {
-            $orderGoods = new NsOrderGoodsModel();
-            $num = 0;
-            $num = $orderGoods->getSum([
-                "goods_id" => $goods_detail["goods_id"],
-                "buyer_id" => $this->uid,
-                "order_status" => array(
-                    "neq",
-                    5
-                )
-            ], "num");
-            $goods_detail["purchase_num"] = $num;
-        } else {
-            $goods_detail["purchase_num"] = 0;
-        }
-        return $goods_detail;
     }
     /*
      * (non-PHPdoc)
@@ -1169,41 +877,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsSkuPicture($goods_id)
     {
-        $goods_sku = new NsGoodsSkuPictureModel();
-        $sku_picture_list = $goods_sku->getQuery([
-            "goods_id" => $goods_id
-        ], "*", "");
-        $total_sku_img_array = array();
-        foreach ($sku_picture_list as $k => $v) {
-            $sku_img_ids = $v["sku_img_array"];
-            $sku_img_array = explode(",", $sku_img_ids);
-            if (! empty($total_sku_img_array)) {
-                $total_sku_img_array = array_keys(array_flip($total_sku_img_array) + array_flip($sku_img_array));
-            } else {
-                $total_sku_img_array = $sku_img_array;
-            }
-        }
-        $total_sku_img_ids = implode(",", $total_sku_img_array);
-        $picture_model = new AlbumPictureModel();
-        if (! empty($total_sku_img_ids)) {
-            $picture_list = $picture_model->getQuery("pic_id in ($total_sku_img_ids)", "*", "");
-        } else {
-            $picture_list = '';
-        }
         
-        foreach ($sku_picture_list as $k => $v) {
-            $sku_img_ids = $v["sku_img_array"];
-            $sku_img_array = explode(",", $sku_img_ids);
-            $album_picture_list = array();
-            foreach ($picture_list as $picture_obj) {
-                $curr_pic_id = $picture_obj["pic_id"];
-                if (in_array($curr_pic_id, $sku_img_array)) {
-                    $album_picture_list[] = $picture_obj;
-                }
-            }
-            $sku_picture_list[$k]["album_picture_list"] = $album_picture_list;
-        }
-        return $sku_picture_list;
     }
 
     /**
@@ -1215,20 +889,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsSkuPictureBySpecId($goods_id, $spec_id, $spec_value_id)
     {
-        $picture = 0;
         
-        $goods_sku = new NsGoodsSkuPictureModel();
-        $sku_img_array = $goods_sku->getInfo([
-            "goods_id" => $goods_id,
-            "spec_id" => $spec_id,
-            "spec_value_id" => $spec_value_id,
-            "shop_id" => $this->instance_id
-        ], "sku_img_array");
-        if (! empty($sku_img_array)) {
-            $array = explode(",", $sku_img_array['sku_img_array']);
-            $picture = $array[0];
-        }
-        return $picture;
     }
 
     /**
@@ -1238,9 +899,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsAttributeList($condition, $field, $order)
     {
-        $spec = new NsGoodsSpecModel();
-        $list = $spec->getQuery($condition, $field, $order);
-        return $list;
+        
     }
 
     /**
@@ -1251,9 +910,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsAttributeValueList($condition, $field)
     {
-        $attribute = new NsGoodsSpecValueModel();
-        $list = $attribute->getQuery($condition, $field, '');
-        return $list;
+       
     }
     
     /*
@@ -1263,24 +920,7 @@ class Course extends BaseService implements ICourse
      */
     public function addGoodsSpec($spec_name, $sort = 0)
     {
-        $attribute = new NsGoodsSpecModel();
-        $data = array(
-            'shop_id' => $this->instance_id,
-            'spec_name' => $spec_name,
-            'sort' => 0,
-            'create_time' => time()
-        );
-        $find_id = $attribute->get([
-            'spec_name' => $spec_name
-        ]);
-        if (! empty($find_id)) {
-            return $find_id['spec_id'];
-        } else {
-            $res = $attribute->save($data);
-            return $attribute->spec_id;
-        }
         
-        // TODO Auto-generated method stub
     }
     
     /*
@@ -1290,25 +930,7 @@ class Course extends BaseService implements ICourse
      */
     public function addGoodsSpecValue($spec_id, $spec_value, $sort = 0)
     {
-        $spec_value_model = new NsGoodsSpecValueModel();
-        $data = array(
-            'spec_id' => $spec_id,
-            'spec_value_name' => $spec_value,
-            'sort' => $sort,
-            'create_time' => time()
-        );
-        $find_id = $spec_value_model->get([
-            'spec_value_name' => $spec_value,
-            'spec_id' => $spec_id
-        ]);
-        if (! empty($find_id)) {
-            return $find_id['spec_value_id'];
-        } else {
-            $res = $spec_value_model->save($data);
-            return $spec_value_model->spec_value_id;
-        }
         
-        // TODO Auto-generated method stub
     }
 
     /**
@@ -1320,69 +942,12 @@ class Course extends BaseService implements ICourse
      */
     private function addOrUpdateGoodsSkuItem($goods_id, $sku_item_array)
     {
-        $sku_item = explode('¦', $sku_item_array);
-        $goods_sku = new NsGoodsSkuModel();
-        $sku_name = $this->createSkuName($sku_item[0]);
-        $condition = array(
-            'goods_id' => $goods_id,
-            'attr_value_items' => $sku_item[0]
-        );
-        $sku_count = $goods_sku->where($condition)->find();
         
-        if (empty($sku_count)) {
-            $data = array(
-                'goods_id' => $goods_id,
-                'sku_name' => $sku_name,
-                'attr_value_items' => $sku_item[0],
-                'attr_value_items_format' => $sku_item[0],
-                'price' => $sku_item[1],
-                'promote_price' => $sku_item[1],
-                'market_price' => $sku_item[2],
-                'cost_price' => $sku_item[3],
-                'stock' => $sku_item[4],
-                'picture' => 0,
-                'code' => $sku_item[5],
-                'QRcode' => '',
-                'create_date' => time()
-            );
-            $goods_sku->save($data);
-            return $goods_sku->sku_id;
-        } else {
-            $data = array(
-                'goods_id' => $goods_id,
-                'sku_name' => $sku_name,
-                'price' => $sku_item[1],
-                'promote_price' => $sku_item[1],
-                'market_price' => $sku_item[2],
-                'cost_price' => $sku_item[3],
-                'stock' => $sku_item[4],
-                'code' => $sku_item[5],
-                'QRcode' => '',
-                'update_date' => time()
-            );
-            $res = $goods_sku->save($data, [
-                'sku_id' => $sku_count['sku_id']
-            ]);
-            return $res;
-        }
     }
 
     private function deleteSkuItem($goods_id, $sku_list_array)
     {
-        $sku_item_list_array = array();
-        foreach ($sku_list_array as $k => $sku_item_array) {
-            $sku_item = explode('¦', $sku_item_array);
-            $sku_item_list_array[] = $sku_item[0];
-        }
-        $goods_sku = new NsGoodsSkuModel();
-        $list = $goods_sku->where('goods_id=' . $goods_id)->select();
-        if (! empty($list)) {
-            foreach ($list as $k => $v) {
-                if (! in_array($v['attr_value_items'], $sku_item_list_array)) {
-                    $goods_sku->destroy($v['sku_id']);
-                }
-            }
-        }
+        
     }
 
     /**
@@ -1393,17 +958,7 @@ class Course extends BaseService implements ICourse
      */
     private function createSkuName($pvs)
     {
-        $name = '';
-        $pvs_array = explode(';', $pvs);
-        foreach ($pvs_array as $k => $v) {
-            $value = explode(':', $v);
-            $prop_id = $value[0];
-            $prop_value = $value[1];
-            $goods_spec_value_model = new NsGoodsSpecValueModel();
-            $value_name = $this->getUserSkuName($prop_value);
-            $name = $name . $value_name . ' ';
-        }
-        return $name;
+       
     }
 
     /**
@@ -1413,19 +968,7 @@ class Course extends BaseService implements ICourse
      */
     private function getUserSkuName($spec_id)
     {
-        $sku_name = "";
-        $goods_spec_format = $_SESSION['goods_spec_format'];
-        if (! empty($goods_spec_format)) {
-            $goods_spec_format = json_decode($goods_spec_format, true);
-            foreach ($goods_spec_format as $spec_value) {
-                foreach ($spec_value["value"] as $spec) {
-                    if ($spec_id == $spec['spec_value_id']) {
-                        $sku_name = $spec['spec_value_name'];
-                    }
-                }
-            }
-        }
-        return $sku_name;
+        
     }
 
     /**
@@ -1506,17 +1049,7 @@ class Course extends BaseService implements ICourse
      */
     public function getSearchGoodsList($page_index = 1, $page_size = 0, $condition = '', $order = '', $field = '*')
     {
-        $result = $this->course->pageQuery($page_index, $page_size, $condition, $order, $field);
-        foreach ($result['data'] as $k => $v) {
-            $picture = new AlbumPictureModel();
-            $pic_info = array();
-            $pic_info['pic_cover'] = '';
-            if (! empty($v['picture'])) {
-                $pic_info = $picture->get($v['picture']);
-            }
-            $result['data'][$k]['picture_info'] = $pic_info;
-        }
-        return $result;
+        
     }
 
     /**
@@ -1575,11 +1108,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsGivePoint($goods_id)
     {
-        $goods = new NsCourseModel();
-        $point_info = $goods->getInfo([
-            'goods_id' => $goods_id
-        ], 'give_point');
-        return $point_info['give_point'];
+        
     }
 
     /**
@@ -1589,11 +1118,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsId($sku_id)
     {
-        $goods_sku = new NsGoodsSkuModel();
-        $sku_info = $goods_sku->getInfo([
-            'sku_id' => $sku_id
-        ], 'goods_id');
-        return $sku_info['goods_id'];
+        
     }
 
     /**
@@ -1603,71 +1128,7 @@ class Course extends BaseService implements ICourse
      */
     public function getCartList($carts)
     {
-        $cart = new NsCartModel();
-        $cart_list = $cart->getQuery([
-            'buyer_id' => $this->uid
-        ], '*', 'cart_id');
-        $cart_array = explode(',', $carts);
-        $list = array();
-        foreach ($cart_list as $k => $v) {
-            $goods = new NsCourseModel();
-            $goods_info = $goods->getInfo([
-                'goods_id' => $v['goods_id']
-            ], 'max_buy,state,point_exchange_type,point_exchange,max_use_point');
-            // 获取课程sku信息
-            $goods_sku = new NsGoodsSkuModel();
-            $sku_info = $goods_sku->getInfo([
-                'sku_id' => $v['sku_id']
-            ], 'stock');
-            if (empty($sku_info)) {
-                $cart->destroy([
-                    'buyer_id' => $this->uid,
-                    'sku_id' => $v['sku_id']
-                ]);
-                continue;
-            } else {
-                if ($sku_info['stock'] == 0) {
-                    $cart->destroy([
-                        'buyer_id' => $this->uid,
-                        'sku_id' => $v['sku_id']
-                    ]);
-                    continue;
-                }
-            }
-            
-            $v['stock'] = $sku_info['stock'];
-            $v['max_buy'] = $goods_info['max_buy'];
-            $v['point_exchange_type'] = $goods_info['point_exchange_type'];
-            $v['point_exchange'] = $goods_info['point_exchange'];
-            if ($goods_info['state'] != 1) {
-                $this->cartDelete($v['cart_id']);
-                unset($v);
-            }
-            $num = $v['num'];
-            if ($goods_info['max_buy'] != 0 && $goods_info['max_buy'] < $v['num']) {
-                $num = $goods_info['max_buy'];
-            }
-            
-            if ($sku_info['stock'] < $num) {
-                $num = $sku_info['stock'];
-            }
-            if ($num != $v['num']) {
-                // 更新购物车
-                $this->cartAdjustNum($v['cart_id'], $sku_info['stock']);
-                $v['num'] = $num;
-            }
-            $v["max_use_point"] = $goods_info["max_use_point"] * $num;
-            // 获取阶梯优惠后的价格
-            $v["price"] = $this->getGoodsLadderPreferentialInfo($v["goods_id"], $v['num'], $v['price']);
-            // 获取图片信息
-            $picture = new AlbumPictureModel();
-            $picture_info = $picture->get($v['goods_picture']);
-            $v['picture_info'] = $picture_info;
-            if (in_array($v['cart_id'], $cart_array)) {
-                $list[] = $v;
-            }
-        }
-        return $list;
+        
     }
 
     /**
@@ -1677,159 +1138,7 @@ class Course extends BaseService implements ICourse
      */
     public function getCart($uid, $shop_id = 0)
     {
-        if ($uid > 0) {
-            $cart = new NsCartModel();
-            $cart_goods_list = null;
-            if ($shop_id == 0) {
-                $cart_goods_list = $cart->getQuery([
-                    'buyer_id' => $this->uid
-                ], '*', '');
-            } else {
-                
-                $cart_goods_list = $cart->getQuery([
-                    'buyer_id' => $this->uid,
-                    'shop_id' => $shop_id
-                ], '*', '');
-            }
-        } else {
-            $cart_goods_list = cookie('cart_array');
-            if (empty($cart_goods_list)) {
-                $cart_goods_list = array();
-            } else {
-                $cart_goods_list = json_decode($cart_goods_list, true);
-            }
-        }
-        $goods_id_array = array();
-        if (! empty($cart_goods_list)) {
-            foreach ($cart_goods_list as $k => $v) {
-                $goods = new NsCourseModel();
-                $goods_info = $goods->getInfo([
-                    'goods_id' => $v['goods_id']
-                ], 'max_buy,state,point_exchange_type,point_exchange,goods_name,price, picture, min_buy ');
-                // 获取课程sku信息
-                $goods_sku = new NsGoodsSkuModel();
-                $sku_info = $goods_sku->getInfo([
-                    'sku_id' => $v['sku_id']
-                ], 'stock, price, sku_name, promote_price');
-                // 将goods_id 存放到数组中
-                $goods_id_array[] = $v["goods_id"];
-                // 验证课程或sku是否存在,不存在则从购物车移除
-                if ($uid > 0) {
-                    if (empty($goods_info)) {
-                        $cart->destroy([
-                            'goods_id' => $v['goods_id'],
-                            'buyer_id' => $uid
-                        ]);
-                        unset($cart_goods_list[$k]);
-                        continue;
-                    }
-                    if (empty($sku_info)) {
-                        unset($cart_goods_list[$k]);
-                        $cart->destroy([
-                            'buyer_id' => $uid,
-                            'sku_id' => $v['sku_id']
-                        ]);
-                        continue;
-                    }
-                } else {
-                    if (empty($goods_info)) {
-                        unset($cart_goods_list[$k]);
-                        $this->cartDelete($v['cart_id']);
-                        continue;
-                    }
-                    if (empty($sku_info)) {
-                        unset($cart_goods_list[$k]);
-                        $this->cartDelete($v['cart_id']);
-                        continue;
-                    }
-                }
-                // exit();
-                // 为cookie信息完善课程和sku信息
-                if ($uid > 0) {
-                    // 查看用户会员价
-                    $goods_preference = new GoodsPreference();
-                    if (! empty($this->uid)) {
-                        $member_discount = $goods_preference->getMemberLevelDiscount($uid);
-                    } else {
-                        $member_discount = 1;
-                    }
-                    $member_price = round($member_discount * $sku_info['price'], 2);
-                    if ($member_price > $sku_info["promote_price"]) {
-                        $price = $sku_info["promote_price"];
-                    } else {
-                        $price = $member_price;
-                    }
-                    $update_data = array(
-                        "goods_name" => $goods_info["goods_name"],
-                        "sku_name" => $sku_info["sku_name"],
-                        "goods_picture" => $v['goods_picture'], // $goods_info["picture"],
-                        "price" => $price
-                    );
-                    // 更新数据
-                    $cart->save($update_data, [
-                        "cart_id" => $v["cart_id"]
-                    ]);
-                    $cart_goods_list[$k]["price"] = $price;
-                    $cart_goods_list[$k]["goods_name"] = $goods_info["goods_name"];
-                    $cart_goods_list[$k]["sku_name"] = $sku_info["sku_name"];
-                    $cart_goods_list[$k]["goods_picture"] = $v['goods_picture']; // $goods_info["picture"];
-                } else {
-                    $cart_goods_list[$k]["price"] = $sku_info["promote_price"];
-                    $cart_goods_list[$k]["goods_name"] = $goods_info["goods_name"];
-                    $cart_goods_list[$k]["sku_name"] = $sku_info["sku_name"];
-                    $cart_goods_list[$k]["goods_picture"] = $v['goods_picture']; // $goods_info["picture"];
-                }
-                
-                $cart_goods_list[$k]['stock'] = $sku_info['stock'];
-                $cart_goods_list[$k]['max_buy'] = $goods_info['max_buy'];
-                $cart_goods_list[$k]['min_buy'] = $goods_info['min_buy'];
-                $cart_goods_list[$k]['point_exchange_type'] = $goods_info['point_exchange_type'];
-                $cart_goods_list[$k]['point_exchange'] = $goods_info['point_exchange'];
-                
-                if ($goods_info['state'] != 1) {
-                    unset($cart_goods_list[$k]);
-                    // 更新cookie购物车
-                    $this->cartDelete($v['cart_id']);
-                    continue;
-                }
-                $num = $v['num'];
-                if ($goods_info['max_buy'] != 0 && $goods_info['max_buy'] < $v['num']) {
-                    $num = $goods_info['max_buy'];
-                }
-                if ($sku_info['stock'] < $num) {
-                    $num = $sku_info['stock'];
-                }
-                // 课程最小购买数大于现购买数
-                if ($goods_info['min_buy'] > 0 && $num < $goods_info['min_buy']) {
-                    $num = $goods_info['min_buy'];
-                }
-                // 课程最小购买数大于现有库存
-                if ($goods_info['min_buy'] > $sku_info['stock']) {
-                    unset($cart_goods_list[$k]);
-                    // 更新cookie购物车
-                    $this->cartDelete($v['cart_id']);
-                    continue;
-                }
-                if ($num != $v['num']) {
-                    // 更新购物车
-                    $cart_goods_list[$k]['num'] = $num;
-                    $this->cartAdjustNum($v['cart_id'], $num);
-                }
-                
-                $cart_goods_list[$k]["promotion_price"] = $cart_goods_list[$k]["price"];
-                // 阶梯优惠后的价格
-                $cart_goods_list[$k]["price"] = $this->getGoodsLadderPreferentialInfo($v['goods_id'], $num, $cart_goods_list[$k]["price"]);
-            }
-            // 为购物车图片
-            foreach ($cart_goods_list as $k => $v) {
-                $picture = new AlbumPictureModel();
-                $picture_info = $picture->get($v['goods_picture']);
-                $cart_goods_list[$k]['picture_info'] = $picture_info;
-            }
-            sort($cart_goods_list);
-            // $cart_goods_list[0]["goods_id_array"] = $goods_id_array;
-        }
-        return $cart_goods_list;
+        
     }
 
     /**
@@ -1839,125 +1148,7 @@ class Course extends BaseService implements ICourse
      */
     public function addCart($uid, $shop_id, $shop_name, $goods_id, $goods_name, $sku_id, $sku_name, $price, $num, $picture, $bl_id)
     {
-        $retval = array(
-            'code' => 0,
-            "message" => ""
-        );
-        // 课程限购，判断是否允许添加到购物车
-        $goods_purchase_restriction = array(
-            "code" => 1,
-            "message" => "添加购物车成功"
-        );
-        if ($uid > 0) {
-            $cart = new NsCartModel();
-            $condition = array(
-                'buyer_id' => $uid,
-                'sku_id' => $sku_id
-            );
-            
-            // 查询当前用户所购买的课程限购，是否允许添加到购物车中
-            $goods_purchase_restriction = $this->getGoodsPurchaseRestrictionForCurrentUser($goods_id, $num);
-            if ($goods_purchase_restriction['code'] == 0) {
-                $retval = $goods_purchase_restriction;
-                return $retval;
-            }
-            
-            $count = $cart->where($condition)->count();
-            if ($count == 0 || empty($count)) {
-                $data = array(
-                    'buyer_id' => $uid,
-                    'shop_id' => $shop_id,
-                    'shop_name' => $shop_name,
-                    'goods_id' => $goods_id,
-                    'goods_name' => $goods_name,
-                    'sku_id' => $sku_id,
-                    'sku_name' => $sku_name,
-                    'price' => $price,
-                    'num' => $num,
-                    'goods_picture' => $picture,
-                    'bl_id' => $bl_id
-                );
-                $cart->save($data);
-                $retval['code'] = $cart->cart_id;
-                $retval['message'] = lang("added_cart_success");
-            } else {
-                $cart = new NsCartModel();
-                // 查询课程限购
-                $goods = new NsCourseModel();
-                $get_num = $cart->getInfo($condition, 'cart_id,num');
-                $max_buy = $goods->getInfo([
-                    'goods_id' => $goods_id
-                ], 'max_buy');
-                $new_num = $num + $get_num['num'];
-                if ($max_buy['max_buy'] != 0) {
-                    
-                    if ($new_num > $max_buy['max_buy']) {
-                        $new_num = $max_buy['max_buy'];
-                    }
-                }
-                $data = array(
-                    'num' => $new_num
-                );
-                $res = $cart->save($data, $condition);
-                if ($res) {
-                    $retval['code'] = $get_num['cart_id'];
-                    $retval['message'] = lang("added_cart_success");
-                }
-            }
-        } else {
-            
-            // 未登录的情况下添加购物车
-            $cart_array = cookie('cart_array');
-            $data = array(
-                'shop_id' => $shop_id,
-                'goods_id' => $goods_id,
-                'sku_id' => $sku_id,
-                'num' => $num,
-                'goods_picture' => $picture
-            );
-            if (! empty($cart_array)) {
-                $cart_array = json_decode($cart_array, true);
-                $tmp_array = array();
-                foreach ($cart_array as $k => $v) {
-                    $tmp_array[] = $v['cart_id'];
-                }
-                $cart_id = max($tmp_array) + 1;
-                $is_have = true;
-                foreach ($cart_array as $k => $v) {
-                    if ($v["goods_id"] == $goods_id && $v["sku_id"] == $sku_id) {
-                        $is_have = false;
-                        $cart_array[$k]["num"] = $data["num"] + $v["num"];
-                    }
-                }
-                
-                if ($is_have) {
-                    $data["cart_id"] = $cart_id;
-                    $cart_array[] = $data;
-                }
-                // 检查课程限购，是否允许添加到购物车中
-                $goods_purchase_restriction = $this->getGoodsPurchaseRestrictionForCurrentUser($goods_id, $num);
-            } else {
-                $data["cart_id"] = 1;
-                $cart_array[] = $data;
-            }
-            try {
-                
-                // 课程限购了，不允许添加
-                if ($goods_purchase_restriction['code'] == 0) {
-                    $retval = $goods_purchase_restriction;
-                } else {
-                    $cart_array_string = json_encode($cart_array);
-                    cookie('cart_array', $cart_array_string, 3600);
-                    $retval['code'] = 1;
-                    $retval['message'] = lang("added_cart_success");
-                }
-            } catch (\Exception $e) {
-                
-                $retval['code'] = 0;
-                $retval['message'] = lang("failed_to_add_cart");
-            }
-        }
-        return $retval;
+        
     }
 
     /**
@@ -1967,19 +1158,7 @@ class Course extends BaseService implements ICourse
      */
     public function cartAdjustNum($cart_id, $num)
     {
-        if ($this->uid > 0) {
-            $cart = new NsCartModel();
-            $data = array(
-                'num' => $num
-            );
-            $retval = $cart->save($data, [
-                'cart_id' => $cart_id
-            ]);
-            return $retval;
-        } else {
-            $result = $this->updateCookieCartNum($cart_id, $num);
-            return $result;
-        }
+        
     }
 
     /**
@@ -1989,14 +1168,7 @@ class Course extends BaseService implements ICourse
      */
     public function cartDelete($cart_id_array)
     {
-        if ($this->uid > 0) {
-            $cart = new NsCartModel();
-            $retval = $cart->destroy($cart_id_array);
-            return $retval;
-        } else {
-            $result = $this->deleteCookieCart($cart_id_array);
-            return $result;
-        }
+       
     }
 
     /**
@@ -2006,49 +1178,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGroupGoodsList($goods_group_id, $condition = '', $num = 0, $order = '')
     {
-        $goods_list = array();
-        $goods = new NsCourseModel();
-        $condition['state'] = 1;
-        $list = $goods->getQuery($condition, '*', $order);
-        foreach ($list as $k => $v) {
-            $picture = new AlbumPictureModel();
-            $picture_info = $picture->get($v['picture']);
-            $v['picture_info'] = $picture_info;
-            $group_id_array = explode(',', $v['group_id_array']);
-            if (in_array($goods_group_id, $group_id_array) || $goods_group_id == 0) {
-                $goods_list[] = $v;
-            }
-        }
-        foreach ($goods_list as $k => $v) {
-            if (! empty($this->uid)) {
-                $member = new Member();
-                $goods_list[$k]['is_favorite'] = $member->getIsMemberFavorites($this->uid, $v['goods_id'], 'goods');
-            } else {
-                $goods_list[$k]['is_favorite'] = 0;
-            }
-            
-            $goods_sku = new NsGoodsSkuModel();
-            // 获取sku列表
-            $sku_list = $goods_sku->where([
-                'goods_id' => $v['goods_id']
-            ])->select();
-            $goods_list[$k]['sku_list'] = $sku_list;
-            
-            // 查询课程单品活动信息
-            $goods_preference = new GoodsPreference();
-            $goods_promotion_info = $goods_preference->getGoodsPromote($v['goods_id']);
-            $goods_list[$k]['promotion_info'] = $goods_promotion_info;
-        }
-        if ($num == 0) {
-            return $goods_list;
-        } else {
-            $count_list = count($goods_list);
-            if ($count_list > $num) {
-                return array_slice($goods_list, 0, $num);
-            } else {
-                return $goods_list;
-            }
-        }
+        
     }
 
     /**
@@ -2058,41 +1188,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGroupGoodsListForApp($page_index, $page_size, $group_id, $fields = "*", $order = 'sort asc,create_time desc')
     {
-        $res = array();
-        $goods_list = array();
-        $goods = new NsCourseModel();
-        $goods_group = new NsGoodsGroupModel();
-        $res['goods_group'] = $goods_group->getInfo([
-            "group_id" => $group_id
-        ], "group_id,group_name,group_pic,group_dec");
-        if (! empty($res['goods_group'])) {
-            
-            if (strpos($res['goods_group']['group_pic'], "http") === false) {
-                $res['goods_group']['group_pic'] = getBaseUrl() . "/" . $res['goods_group']['group_pic'];
-            }
-        }
-        $condition = array();
-        $condition['state'] = 1;
-        $condition['group_id_array'] = [
-            'like',
-            '%' . $group_id . '%'
-        ];
-        $list = $goods->pageQuery($page_index, $page_size, $condition, $order, $fields);
-        if (! empty($list['data'])) {
-            $picture = new AlbumPictureModel();
-            foreach ($list['data'] as $k => $v) {
-                $picture_info = $picture->getInfo([
-                    "pic_id" => $v['picture']
-                ], "pic_cover");
-                
-                if (strpos($picture_info['pic_cover'], "http") === false) {
-                    $list['data'][$k]['pic_cover'] = getBaseUrl() . "/" . $picture_info['pic_cover'];
-                }
-            }
-        }
-        $res['goods_list'] = $list;
         
-        return $res;
     }
 
     /**
@@ -2105,9 +1201,7 @@ class Course extends BaseService implements ICourse
      */
     public function getDiscountGoodsList($page_index = 1, $page_size = 0, $condition = array(), $order = '')
     {
-        $goods_discount = new GoodsDiscount();
-        $goods_list = $goods_discount->getDiscountGoodsList($page_index, $page_size, $condition, $order);
-        return $goods_list;
+        
     }
 
     /**
@@ -2117,10 +1211,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsEvaluate($goods_id)
     {
-        $goodsEvaluateModel = new NsGoodsEvaluateModel();
-        $condition['goods_id'] = $goods_id;
-        $field = 'order_id, order_no, order_goods_id, goods_id, goods_name, goods_price, goods_image, storeid, storename, content, addtime, image, explain_first, member_name, uid, is_anonymous, scores, again_content, again_addtime, again_image, again_explain';
-        return $goodsEvaluateModel->getQuery($condition, $field, 'id ASC');
+        
     }
 
     /**
@@ -2130,8 +1221,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsEvaluateList($page_index = 1, $page_size = 0, $condition = array(), $order = '', $field = '*')
     {
-        $goodsEvaluateModel = new NsGoodsEvaluateModel();
-        return $goodsEvaluateModel->pageQuery($page_index, $page_size, $condition, $order, $field);
+        
     }
 
     /**
@@ -2141,11 +1231,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsShopid($goods_id)
     {
-        $goods_model = new NsCourseModel();
-        $goods_info = $goods_model->getInfo([
-            'goods_id' => $goods_id
-        ], 'shop_id');
-        return $goods_info['shop_id'];
+        
     }
 
     /**
@@ -2156,35 +1242,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsEvaluateCount($goods_id)
     {
-        $goods_evaluate = new NsGoodsEvaluateModel();
-        $evaluate_count_list['evaluate_count'] = $goods_evaluate->where([
-            'goods_id' => $goods_id,
-            'is_show' => 1
-        ])->count();
         
-        $evaluate_count_list['imgs_count'] = $goods_evaluate->where([
-            'goods_id' => $goods_id,
-            'is_show' => 1
-        ])
-            ->where('image|again_image', 'NEQ', '')
-            ->count();
-        
-        $evaluate_count_list['praise_count'] = $goods_evaluate->where([
-            'goods_id' => $goods_id,
-            'explain_type' => 1,
-            'is_show' => 1
-        ])->count();
-        $evaluate_count_list['center_count'] = $goods_evaluate->where([
-            'goods_id' => $goods_id,
-            'explain_type' => 2,
-            'is_show' => 1
-        ])->count();
-        $evaluate_count_list['bad_count'] = $goods_evaluate->where([
-            'goods_id' => $goods_id,
-            'explain_type' => 3,
-            'is_show' => 1
-        ])->count();
-        return $evaluate_count_list;
     }
 
     /**
@@ -2194,15 +1252,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsPointExchange($goods_id)
     {
-        $goods_model = new NsCourseModel();
-        $goods_info = $goods_model->getInfo([
-            'goods_id' => $goods_id
-        ], 'point_exchange_type,point_exchange');
-        if ($goods_info['point_exchange_type'] == 0) {
-            return 0;
-        } else {
-            return $goods_info['point_exchange'];
-        }
+        
     }
 
     /**
@@ -2213,9 +1263,7 @@ class Course extends BaseService implements ICourse
      */
     public function getConsultTypeList($page_index = 1, $page_size = 0, $condition = '', $order = '')
     {
-        $consult_type = new NsConsultTypeModel();
-        $list = $consult_type->pageQuery($page_index, $page_size, $condition, $order, '');
-        return $list;
+        
     }
 
     /**
@@ -2226,15 +1274,7 @@ class Course extends BaseService implements ICourse
      */
     public function getConsultList($page_index = 1, $page_size = 0, $condition = '', $order = '')
     {
-        $consult = new NsConsultModel();
-        $list = $consult->pageQuery($page_index, $page_size, $condition, $order, '');
-        if (! empty($list)) {
-            foreach ($list['data'] as $k => $v) {
-                $pic_info = $this->getGoodsImg($v['goods_id']);
-                $list['data'][$k]['picture_info'] = $pic_info;
-            }
-        }
-        return $list;
+        
     }
 
     /**
@@ -2245,23 +1285,7 @@ class Course extends BaseService implements ICourse
      */
     public function addConsult($goods_id, $goods_name, $uid, $member_name, $shop_id, $shop_name, $ct_id, $consult_content)
     {
-        $consult = new NsConsultModel();
-        $data = array(
-            'goods_id' => $goods_id,
-            'goods_name' => $goods_name,
-            'uid' => $uid,
-            'member_name' => $member_name,
-            'shop_id' => $shop_id,
-            'shop_name' => $shop_name,
-            'ct_id' => $ct_id,
-            'consult_content' => $consult_content,
-            'consult_addtime' => time()
-        );
-        $consult->save($data);
-        $data['consult_id'] = $consult->consult_id;
-        hook("consultSaveSuccess", $data);
-        $res = $consult->consult_id;
-        return $res;
+        
     }
 
     /**
@@ -2272,17 +1296,7 @@ class Course extends BaseService implements ICourse
      */
     public function replyConsult($consult_id, $consult_reply)
     {
-        $consult = new NsConsultModel();
-        $data = array(
-            'consult_reply' => $consult_reply,
-            'consult_reply_time' => time()
-        );
-        $res = $consult->save($data, [
-            'consult_id' => $consult_id
-        ]);
-        $data['consult_id'] = $consult_id;
-        hook("replyConsultSaveSuccess", $data);
-        return $res;
+        
     }
 
     /**
@@ -2310,8 +1324,7 @@ class Course extends BaseService implements ICourse
      */
     public function deleteConsult($consult_id)
     {
-        $consult = new NsConsultModel();
-        return $consult->destroy($consult_id);
+        
     }
 
     /**
@@ -2337,12 +1350,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsRank($condition)
     {
-        $goods = new NsCourseModel();
-        $goods_list = $goods->where($condition)
-            ->order(" real_sales desc ")
-            ->limit(7)
-            ->select();
-        return $goods_list;
+       
     }
 
     /**
@@ -2352,9 +1360,7 @@ class Course extends BaseService implements ICourse
      */
     public function getConsultCount($condition)
     {
-        $consult = new NsConsultModel();
-        $count = $consult->where($condition)->count();
-        return $count;
+        
     }
 
     /**
@@ -2376,24 +1382,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsSpecList($page_index = 1, $page_size = 0, $condition = '', $order = '', $field = '*')
     {
-        $goods_spec = new NsGoodsSpecModel();
-        $goods_spec_value = new NsGoodsSpecValueModel();
-        $goods_spec_list = $goods_spec->pageQuery($page_index, $page_size, $condition, $order, $field);
-        if (! empty($goods_spec_list['data'])) {
-            foreach ($goods_spec_list['data'] as $ks => $vs) {
-                $goods_spec_value_name = '';
-                $spec_value_list = $goods_spec_value->getQuery([
-                    'spec_id' => $vs['spec_id']
-                ], '*', '');
-                foreach ($spec_value_list as $kv => $vv) {
-                    $goods_spec_value_name = $goods_spec_value_name . ',' . $vv['spec_value_name'];
-                }
-                $goods_spec_list['data'][$ks]['spec_value_list'] = $spec_value_list;
-                $goods_spec_value_name = $goods_spec_value_name == '' ? '' : substr($goods_spec_value_name, 1);
-                $goods_spec_list['data'][$ks]['spec_value_name_list'] = $goods_spec_value_name;
-            }
-        }
-        return $goods_spec_list;
+        
     }
 
     /**
@@ -2403,28 +1392,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsSpecDetail($spec_id)
     {
-        $goods_spec = new NsGoodsSpecModel();
-        $goods_spec_value = new NsGoodsSpecValueModel();
-        $info = $goods_spec->getInfo([
-            'spec_id' => $spec_id
-        ], '*');
-        $goods_spec_value_name = '';
-        if (! empty($info)) {
-            // 去除规格属性空值
-            $goods_spec_value->destroy([
-                'spec_id' => $info['spec_id'],
-                'spec_value_name' => ''
-            ]);
-            $spec_value_list = $goods_spec_value->getQuery([
-                'spec_id' => $info['spec_id']
-            ], '*', '');
-            foreach ($spec_value_list as $kv => $vv) {
-                $goods_spec_value_name = $goods_spec_value_name . ',' . $vv['spec_value_name'];
-            }
-        }
-        $info['spec_value_name_list'] = substr($goods_spec_value_name, 1);
-        $info['spec_value_list'] = $spec_value_list;
-        return $info;
+        
     }
 
     /**
@@ -2434,61 +1402,7 @@ class Course extends BaseService implements ICourse
      */
     public function addGoodsSpecService($shop_id, $spec_name, $show_type, $is_visible, $sort, $spec_value_str, $attr_id = 0, $is_screen, $spec_des)
     {
-        $goods_spec = new NsGoodsSpecModel();
-        $goods_spec->startTrans();
-        try {
-            $data = array(
-                'shop_id' => $shop_id,
-                'spec_name' => $spec_name,
-                'show_type' => $show_type,
-                'is_visible' => $is_visible,
-                'sort' => $sort,
-                "is_screen" => $is_screen,
-                'spec_des' => $spec_des,
-                'create_time' => time()
-            );
-            $goods_spec->save($data);
-            $spec_id = $goods_spec->spec_id;
-            // 添加规格并修改上级分类关联规格
-            if ($attr_id > 0) {
-                $attribute = new NsAttributeModel();
-                $attribute_info = $attribute->getInfo([
-                    "attr_id" => $attr_id
-                ], "*");
-                if ($attribute_info["spec_id_array"] == '') {
-                    $attribute->save([
-                        "spec_id_array" => $spec_id
-                    ], [
-                        "attr_id" => $attr_id
-                    ]);
-                } else {
-                    $attribute->save([
-                        "spec_id_array" => $attribute_info["spec_id_array"] . "," . $spec_id
-                    ], [
-                        "attr_id" => $attr_id
-                    ]);
-                }
-            }
-            $spec_value_array = explode(',', $spec_value_str);
-            $spec_value_array = array_filter($spec_value_array); // 去空
-            $spec_value_array = array_unique($spec_value_array); // 去重复
-            foreach ($spec_value_array as $k => $v) {
-                $spec_value = array();
-                if ($show_type == 2) {
-                    $spec_value = explode(':', $v);
-                    $this->addGoodsSpecValueService($spec_id, $spec_value[0], $spec_value[1], 1, 255);
-                } else {
-                    $this->addGoodsSpecValueService($spec_id, $v, '', 1, 255);
-                }
-            }
-            $goods_spec->commit();
-            $data['spec_id'] = $spec_id;
-            hook("goodsSpecSaveSuccess", $data);
-            return $spec_id;
-        } catch (\Exception $e) {
-            $goods_spec->rollback();
-            return $e->getMessage();
-        }
+        
     }
 
     /**
@@ -2498,47 +1412,7 @@ class Course extends BaseService implements ICourse
      */
     public function updateGoodsSpecService($spec_id, $shop_id, $spec_name, $show_type, $is_visible, $sort, $spec_value_str, $is_screen, $spec_des)
     {
-        $goods_spec = new NsGoodsSpecModel();
-        $goods_spec->startTrans();
-        try {
-            $data = array(
-                'shop_id' => $shop_id,
-                'spec_name' => $spec_name,
-                'show_type' => $show_type,
-                'is_visible' => $is_visible,
-                'is_screen' => $is_screen,
-                'sort' => $sort,
-                'spec_des' => $spec_des
-            );
-            $res = $goods_spec->save($data, [
-                'spec_id' => $spec_id
-            ]);
-            // 删掉规格下的属性
-            $this->deleteSpecValue([
-                "spec_id" => $spec_id
-            ]);
-            if (! empty($spec_value_str)) {
-                $spec_value_array = explode(',', $spec_value_str);
-                $spec_value_array = array_filter($spec_value_array); // 去空
-                $spec_value_array = array_unique($spec_value_array); // 去重复
-                foreach ($spec_value_array as $k => $v) {
-                    $spec_value = array();
-                    if ($show_type == 2) {
-                        $spec_value = explode(':', $v);
-                        $this->addGoodsSpecValueService($spec_id, $spec_value[0], $spec_value[1], 1, 255);
-                    } else {
-                        $this->addGoodsSpecValueService($spec_id, $v, '', 1, 255);
-                    }
-                }
-            }
-            $goods_spec->commit();
-            $data['spec_id'] = $spec_id;
-            hook("goodsSpecSaveSuccess", $data);
-            return $res;
-        } catch (\Exception $e) {
-            $goods_spec->rollback();
-            return $e->getMessage();
-        }
+        
     }
 
     /**
@@ -2548,18 +1422,7 @@ class Course extends BaseService implements ICourse
      */
     public function addGoodsSpecValueService($spec_id, $spec_value_name, $spec_value_data, $is_visible, $sort)
     {
-        $goods_spec_value = new NsGoodsSpecValueModel();
-
-        $data = array(
-            'spec_id' => $spec_id,
-            'spec_value_name' => $spec_value_name,
-            'spec_value_data' => $spec_value_data,
-            'is_visible' => $is_visible,
-            'sort' => $sort,
-            'create_time' => time()
-        );
-        $goods_spec_value->save($data);
-        return $goods_spec_value->spec_value_id;
+       
     }
 
     /**
@@ -2569,31 +1432,7 @@ class Course extends BaseService implements ICourse
      */
     public function checkGoodsSpecIsUse($spec_id)
     {
-        // 1.查询所有当前规格下，所有的课程属性，组成字符串
-        $goods_spec_value = new NsGoodsSpecValueModel();
-        $goods_sku = new NsGoodsSkuModel();
-        $goods_sku_delete = new NsGoodsSkuDeletedModel();
-        $spec_value_list = $goods_spec_value->getQuery([
-            'spec_id' => $spec_id
-        ], '*', '');
-        if (! empty($spec_value_list)) {
-            $check_str = '';
-            $res = 0;
-            foreach ($spec_value_list as $k => $v) {
-                $check_str = $spec_id . ':' . $v['spec_value_id'] . ';';
-                $res += $goods_sku->where(" CONCAT(attr_value_items, ';') like '%" . $check_str . "%'")->count();
-                $res += $goods_sku_delete->where(" CONCAT(attr_value_items, ';') like '%" . $check_str . "%'")->count();
-                if ($res > 0) {
-                    return true;
-                    break;
-                }
-            }
-            if ($res == 0) {
-                return false;
-            }
-        } else {
-            return false;
-        }
+        
     }
 
     /**
@@ -2603,63 +1442,22 @@ class Course extends BaseService implements ICourse
      */
     public function checkGoodsSpecValueIsUse($spec_id, $spec_value_id)
     {
-        $check_str = $spec_id . ':' . $spec_value_id . ';';
-        $goods_sku = new NsGoodsSkuModel();
-        $goods_sku_delete = new NsGoodsSkuDeletedModel();
-        // 课程sku
-        $res = $goods_sku->where(" CONCAT(attr_value_items, ';') like '%" . $check_str . "%'")->count();
-        // 课程回收站sku
-        $res_delete = $goods_sku_delete->where(" CONCAT(attr_value_items, ';') like '%" . $check_str . "%'")->count();
-        if (($res + $res_delete) > 0) {
-            return true;
-        } else {
-            return false;
-        }
+        
     }
 
     public function addGoodsEvaluateReply($id, $replyContent, $replyType)
     {
-        $goodsEvaluate = new NsGoodsEvaluateModel();
-        if ($replyType == 1) {
-            return $goodsEvaluate->save([
-                'explain_first' => $replyContent
-            ], [
-                'id' => $id
-            ]);
-        } elseif ($replyType == 2) {
-            return $goodsEvaluate->save([
-                'again_explain' => $replyContent
-            ], [
-                'id' => $id
-            ]);
-        }
+        
     }
 
     public function setEvaluateShowStatu($id)
     {
-        $goodsEvaluate = new NsGoodsEvaluateModel();
-        $showStatu = $goodsEvaluate->getInfo([
-            'id' => $id
-        ], 'is_show');
-        if ($showStatu['is_show'] == 1) {
-            return $goodsEvaluate->save([
-                'is_show' => 0
-            ], [
-                'id' => $id
-            ]);
-        } elseif ($showStatu['is_show'] == 0) {
-            return $goodsEvaluate->save([
-                'is_show' => 1
-            ], [
-                'id' => $id
-            ]);
-        }
+        
     }
 
     public function deleteEvaluate($id)
     {
-        $goodsEvaluate = new NsGoodsEvaluateModel();
-        return $goodsEvaluate->destroy($id);
+        
     }
 
     /**
@@ -2669,21 +1467,7 @@ class Course extends BaseService implements ICourse
      */
     public function deleteGoodsSpecValue($spec_id, $spec_value_id)
     {
-        // 检测是否使用
-        $res = $this->checkGoodsSpecValueIsUse($spec_id, $spec_value_id);
-        // 检测规格属性数量
-        $result = $this->getGoodsSpecValueCount([
-            'spec_id' => $spec_id
-        ]);
-        if ($res) {
-            return - 1;
-        } else 
-            if ($result == 1) {
-                return - 2;
-            } else {
-                $goods_spec_value = new NsGoodsSpecValueModel();
-                return $goods_spec_value->destroy($spec_value_id);
-            }
+        
     }
 
     /**
@@ -2693,9 +1477,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsSpecValueCount($condition)
     {
-        $spec_value = new NsGoodsSpecValueModel();
-        $count = $spec_value->where($condition)->count();
-        return $count;
+        
     }
 
     /**
@@ -2705,31 +1487,7 @@ class Course extends BaseService implements ICourse
      */
     public function deleteGoodsSpec($spec_id)
     {
-        $goods_spec = new NsGoodsSpecModel();
-        $goods_spec_value = new NsGoodsSpecValueModel();
-        $goods_spec->startTrans();
-        try {
-            $spec_id_array = explode(',', $spec_id);
-            foreach ($spec_id_array as $k => $v) {
-                // $res = $this->checkGoodsSpecIsUse($v);
-                // if ($res) {
-                // return - 1;
-                // $goods_spec->rollback();
-                // } else {
-                $goods_spec->destroy($v);
-                $goods_spec_value->destroy([
-                    'spec_id' => $v
-                ]);
-                // }
-            }
-            
-            $goods_spec->commit();
-            hook("goodsSpecDeleteSuccess", $spec_id);
-            return 1;
-        } catch (\Exception $e) {
-            $goods_spec->rollback();
-            return $e->getMessage();
-        }
+        
     }
 
     /**
@@ -2739,12 +1497,7 @@ class Course extends BaseService implements ICourse
      */
     public function modifyGoodsSpecField($spec_id, $field_name, $field_value)
     {
-        $goods_spec = new NsGoodsSpecModel();
-        return $goods_spec->save([
-            "$field_name" => $field_value
-        ], [
-            'spec_id' => $spec_id
-        ]);
+        
     }
 
     /**
@@ -2754,12 +1507,7 @@ class Course extends BaseService implements ICourse
      */
     public function modifyGoodsSpecValueField($spec_value_id, $field_name, $field_value)
     {
-        $goods_spec_value = new NsGoodsSpecValueModel();
-        return $goods_spec_value->save([
-            "$field_name" => $field_value
-        ], [
-            'spec_value_id' => $spec_value_id
-        ]);
+        
     }
 
     /**
@@ -2769,12 +1517,7 @@ class Course extends BaseService implements ICourse
      */
     public function updateAttributeIsUse($attr_id, $is_use)
     {
-        $goods_spec = new NsAttributeModel();
-        return $goods_spec->save([
-            'is_use' => $is_use
-        ], [
-            'attr_id' => $attr_id
-        ]);
+        
     }
 
     /**
@@ -2784,23 +1527,7 @@ class Course extends BaseService implements ICourse
      */
     public function getAttributeServiceList($page_index = 1, $page_size = 0, $condition = '', $order = '', $field = '*')
     {
-        $attribute = new NsAttributeModel();
-        $attribute_value = new NsAttributeValueModel();
-        $list = $attribute->pageQuery($page_index, $page_size, $condition, $order, $field);
-        if (! empty($list['data'])) {
-            foreach ($list['data'] as $k => $v) {
-                $new_array = $attribute_value->getQuery([
-                    'attr_id' => $v['attr_id']
-                ], 'attr_value_name', '');
-                $value_str = '';
-                foreach ($new_array as $kn => $vn) {
-                    $value_str = $value_str . ',' . $vn['attr_value_name'];
-                }
-                $value_str = substr($value_str, 1);
-                $list['data'][$k]['value_str'] = $value_str;
-            }
-        }
-        return $list;
+        
     }
 
     /**
@@ -2810,35 +1537,7 @@ class Course extends BaseService implements ICourse
      */
     public function addAttributeService($attr_name, $is_use, $spec_id_array, $sort, $value_string, $brand_id_array)
     {
-        $attribute = new NsAttributeModel();
-        $attribute->startTrans();
-        try {
-            $data = array(
-                "attr_name" => $attr_name,
-                "is_use" => $is_use,
-                "spec_id_array" => $spec_id_array,
-                "sort" => $sort,
-                "brand_id_array" => $brand_id_array,
-                "create_time" => time()
-            );
-            $attribute->save($data);
-            $attr_id = $attribute->attr_id;
-            if (! empty($value_string)) {
-                $value_array = explode(';', $value_string);
-                foreach ($value_array as $k => $v) {
-                    $new_array = array();
-                    $new_array = explode('|', $v);
-                    $this->addAttributeValueService($attr_id, $new_array[0], $new_array[1], $new_array[2], $new_array[3], $new_array[4]);
-                }
-            }
-            $attribute->commit();
-            $data['attr_id'] = $attr_id;
-            hook("goodsAttributeSaveSuccess", $data);
-            return $attr_id;
-        } catch (\Exception $e) {
-            $attribute->rollback();
-            return $e->getMessage();
-        }
+        
     }
 
     /**
@@ -2848,36 +1547,7 @@ class Course extends BaseService implements ICourse
      */
     public function updateAttributeService($attr_id, $attr_name, $is_use, $spec_id_array, $sort, $value_string, $brand_id_array)
     {
-        $attribute = new NsAttributeModel();
-        $attribute->startTrans();
-        try {
-            $data = array(
-                "attr_name" => $attr_name,
-                "is_use" => $is_use,
-                "spec_id_array" => $spec_id_array,
-                "sort" => $sort,
-                'brand_id_array' => $brand_id_array,
-                "modify_time" => time()
-            );
-            $res = $attribute->save($data, [
-                'attr_id' => $attr_id
-            ]);
-            if (! empty($value_string)) {
-                $value_array = explode(';', $value_string);
-                foreach ($value_array as $k => $v) {
-                    $new_array = array();
-                    $new_array = explode('|', $v);
-                    $this->addAttributeValueService($attr_id, $new_array[0], $new_array[1], $new_array[2], $new_array[3], $new_array[4]);
-                }
-            }
-            $attribute->commit();
-            $data['attr_id'] = $attr_id;
-            hook("goodsAttributeSaveSuccess", $data);
-            return $res;
-        } catch (\Exception $e) {
-            $attribute->rollback();
-            return $e->getMessage();
-        }
+        
     }
 
     /**
@@ -2887,17 +1557,7 @@ class Course extends BaseService implements ICourse
      */
     public function addAttributeValueService($attr_id, $attr_value_name, $type, $sort, $is_search, $value)
     {
-        $attribute_value = new NsAttributeValueModel();
-        $data = array(
-            'attr_id' => $attr_id,
-            'attr_value_name' => $attr_value_name,
-            'type' => $type,
-            'sort' => $sort,
-            'is_search' => $is_search,
-            'value' => $value
-        );
-        $attribute_value->save($data);
-        return $attribute_value->attr_value_id;
+        
     }
 
     /**
@@ -2907,16 +1567,7 @@ class Course extends BaseService implements ICourse
      */
     public function getAttributeServiceDetail($attr_id, $condition = '')
     {
-        $attribute = new NsAttributeModel();
-        $info = $attribute->get($attr_id);
-        $array = Array();
-        $condition = Array();
-        if (! empty($info)) {
-            $condition['attr_id'] = $attr_id;
-            $array = $this->getAttributeValueServiceList(1, 0, $condition, 'sort');
-            $info['value_list'] = $array;
-        }
-        return $info;
+        
     }
 
     /**
@@ -2926,8 +1577,7 @@ class Course extends BaseService implements ICourse
      */
     public function getAttributeValueServiceList($page_index = 1, $page_size = 0, $condition = '', $order = '', $field = '*')
     {
-        $attribute_value = new NsAttributeValueModel();
-        return $attribute_value->pageQuery($page_index, $page_size, $condition, $order, $field);
+       
     }
 
     /**
@@ -2937,16 +1587,7 @@ class Course extends BaseService implements ICourse
      */
     public function deleteAttributeService($attr_id)
     {
-        $attribute = new NsAttributeModel();
-        $attribute_value = new NsAttributeValueModel();
-        $res = $attribute->destroy($attr_id);
-        $attribute_value->destroy([
-            'attr_id' => $attr_id
-        ]);
-        hook("goodsAttributeDeleteSuccess", [
-            'attr_id' => $attr_id
-        ]);
-        return $res;
+        
     }
 
     /**
@@ -2956,16 +1597,7 @@ class Course extends BaseService implements ICourse
      */
     public function deleteAttributeValueService($attr_id, $attr_value_id)
     {
-        $attribute_value = new NsAttributeValueModel();
-        // 检测类型属性数量
-        $result = $this->getGoodsAttrValueCount([
-            'attr_id' => $attr_id
-        ]);
-        if ($result == 1) {
-            return - 2;
-        } else {
-            return $attribute_value->destroy($attr_value_id);
-        }
+        
     }
 
     /**
@@ -2975,9 +1607,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsAttrValueCount($condition)
     {
-        $attr_value = new NsAttributeValueModel();
-        $count = $attr_value->where($condition)->count();
-        return $count;
+        
     }
 
     /**
@@ -2987,12 +1617,7 @@ class Course extends BaseService implements ICourse
      */
     public function modifyAttributeValueService($attr_value_id, $field_name, $field_value)
     {
-        $attribute_value = new NsAttributeValueModel();
-        return $attribute_value->save([
-            "$field_name" => $field_value
-        ], [
-            'attr_value_id' => $attr_value_id
-        ]);
+        
     }
 
     /**
@@ -3002,12 +1627,7 @@ class Course extends BaseService implements ICourse
      */
     public function modifyAttributeFieldService($attr_id, $field_name, $field_value)
     {
-        $attribute = new NsAttributeModel();
-        return $attribute->save([
-            "$field_name" => $field_value
-        ], [
-            'attr_id' => $attr_id
-        ]);
+        
     }
 
     /**
@@ -3017,12 +1637,7 @@ class Course extends BaseService implements ICourse
      */
     public function checkGoodsSpecValueNameIsUse($spec_id, $value_name)
     {
-        $goods_spec_value = new NsGoodsSpecValueModel();
-        $num = $goods_spec_value->where([
-            'spec_id' => $spec_id,
-            'spec_value' => $value_name
-        ])->count();
-        return $num > 0 ? true : false;
+        
     }
     
     /*
@@ -3031,10 +1646,7 @@ class Course extends BaseService implements ICourse
      */
     public function getAttributeInfo($condition)
     {
-        // TODO Auto-generated method stub
-        $attribute = new NsAttributeModel();
-        $info = $attribute->getInfo($condition, "*");
-        return $info;
+  
     }
     
     /*
@@ -3043,17 +1655,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsSpecQuery($condition)
     {
-        // TODO Auto-generated method stub
-        $goods_spec = new NsGoodsSpecModel();
-        $goods_spec_query = $goods_spec->getQuery($condition, "*", 'sort');
-        foreach ($goods_spec_query as $k => $v) {
-            $goods_spec_value = new NsGoodsSpecValueModel();
-            $goods_spec_value_query = $goods_spec_value->getQuery([
-                "spec_id" => $v["spec_id"]
-            ], "*", '');
-            $goods_spec_query[$k]["values"] = $goods_spec_value_query;
-        }
-        return $goods_spec_query;
+       
     }
     
     /*
@@ -3062,31 +1664,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsAttrSpecQuery($condition)
     {
-        // TODO Auto-generated method stub
-        if ($condition["attr_id"] == 0) {
-            return - 1;
-        }
-        $goods_attribute = $this->getAttributeInfo($condition);
-        $condition_spec["spec_id"] = array(
-            "in",
-            $goods_attribute['spec_id_array']
-        );
-        $condition_spec["is_visible"] = 1;
-        $spec_list = $this->getGoodsSpecQuery($condition_spec); // 课程规格
         
-        $attribute_detail = $this->getAttributeServiceDetail($condition["attr_id"], [
-            'is_search' => 1
-        ]);
-        $attribute_list = $attribute_detail['value_list']['data'];
-        
-        foreach ($attribute_list as $k => $v) {
-            $value_items = explode(",", $v['value']);
-            $attribute_list[$k]['value_items'] = $value_items;
-        }
-        
-        $list["spec_list"] = $spec_list; // 课程规格集合
-        $list["attribute_list"] = $attribute_list; // 课程属性集合
-        return $list;
     }
     
     /*
@@ -3095,10 +1673,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsAttributeQuery($condition)
     {
-        // TODO Auto-generated method stub
-        $goods_attribute = new NsGoodsAttributeModel();
-        $query = $goods_attribute->getQuery($condition, "*", "");
-        return $query;
+        
     }
 
     /**
@@ -3223,7 +1798,7 @@ class Course extends BaseService implements ICourse
 
  , $goods_detail['pc_custom_template'], $goods_detail['wap_custom_template'],$goods_detail['allow_delete'],$goods_detail['mechanism_id'], $goods_detail['teacher_id']
 
- ,$goods_detail['crowd'], $goods_detail['score'],$goods_detail['total_num'],$goods_detail['price'],$goods_detail['goods_video_address']);
+ ,$goods_detail['crowd'], $goods_detail['score'],$goods_detail['total_num'],$goods_detail['release_num'],$goods_detail['price'],$goods_detail['goods_video_address']);
         return $res;
     }
     
@@ -3239,20 +1814,21 @@ class Course extends BaseService implements ICourse
         $course_delete->startTrans();
         try {
             $res = $course_delete->where("goods_id in ($goods_id) and shop_id=$this->instance_id ")->delete();
-            /*if ($res > 0) {
+            if ($res > 0) {
                 $goods_id_array = explode(',', $goods_id);
-                $goods_sku_model = new NsGoodsSkuDeletedModel();
-                $goods_attribute_model = new NsGoodsAttributeDeletedModel();
-                $goods_sku_picture_delete = new NsGoodsSkuPictureDeleteModel();
+                $course_catalogue_model = new NsCourseCatalogueModel();
+                $course_catalogue = new CourseCatalogue();
+
                 foreach ($goods_id_array as $k => $v) {
-                    // 删除课程sku
-                    $goods_sku_model->where("goods_id = $v")->delete();
-                    // 删除课程属性
-                    $goods_attribute_model->where("goods_id = $v")->delete();
-                    // 删除
-                    $goods_sku_picture_delete->where("goods_id = $v")->delete();
+                    $catalogue = $course_catalogue_model->getQuery(['goods_id'=>$v],'catalogue_id','catalogue_id desc');
+                    if(!empty($catalogue)){
+                        foreach($catalogue as $vo){
+                            $course_catalogue->deleteCourseCatalogue($v,$vo['catalogue_id']);
+                        }
+                    }
+                    
                 }
-            }*/
+            }
             $course_delete->commit();
             if ($res > 0) {
                 return SUCCESS;
@@ -3271,36 +1847,7 @@ class Course extends BaseService implements ICourse
      */
     private function deleteCookieCart($cart_id_array)
     {
-        // TODO Auto-generated method stub
-        // 获取删除条件拼装
-        $cart_id_array = trim($cart_id_array);
-        if (empty($cart_id_array) && $cart_id_array != 0) {
-            return 0;
-        }
-        // 获取购物车
-        $cart_goods_list = cookie('cart_array');
-        if (empty($cart_goods_list)) {
-            $cart_goods_list = array();
-        } else {
-            $cart_goods_list = json_decode($cart_goods_list, true);
-        }
-        foreach ($cart_goods_list as $k => $v) {
-            if (strpos((string) $cart_id_array, (string) $v["cart_id"]) !== false) {
-                unset($cart_goods_list[$k]);
-            }
-        }
-        if (empty($cart_goods_list)) {
-            cookie('cart_array', null);
-            return 1;
-        } else {
-            sort($cart_goods_list);
-            try {
-                cookie('cart_array', json_encode($cart_goods_list), 3600);
-                return 1;
-            } catch (\Exception $e) {
-                return 0;
-            }
-        }
+        
     }
 
     /**
@@ -3312,25 +1859,7 @@ class Course extends BaseService implements ICourse
      */
     private function updateCookieCartNum($cart_id, $num)
     {
-        // 获取购物车
-        $cart_goods_list = cookie('cart_array');
-        if (empty($cart_goods_list)) {
-            $cart_goods_list = array();
-        } else {
-            $cart_goods_list = json_decode($cart_goods_list, true);
-        }
-        foreach ($cart_goods_list as $k => $v) {
-            if ($v["cart_id"] == $cart_id) {
-                $cart_goods_list[$k]["num"] = $num;
-            }
-        }
-        sort($cart_goods_list);
-        try {
-            cookie('cart_array', json_encode($cart_goods_list), 3600);
-            return 1;
-        } catch (\Exception $e) {
-            return 0;
-        }
+        
     }
     
     /*
@@ -3339,74 +1868,7 @@ class Course extends BaseService implements ICourse
      */
     public function syncUserCart($uid)
     {
-        // TODO Auto-generated method stub
-        $cart = new NsCartModel();
-        $cart_query = $cart->getQuery([
-            "buyer_id" => $uid
-        ], '*', '');
-        // 获取购物车
-        $cart_goods_list = cookie('cart_array');
-        if (empty($cart_goods_list)) {
-            $cart_goods_list = array();
-        } else {
-            $cart_goods_list = json_decode($cart_goods_list, true);
-        }
-        $goodsmodel = new NsCourseModel();
-        $web_site = new WebSite();
-        $goods_sku = new NsGoodsSkuModel();
         
-        $web_info = $web_site->getWebSiteInfo();
-        // 遍历cookie购物车
-        if (! empty($cart_goods_list)) {
-            foreach ($cart_goods_list as $k => $v) {
-                // 课程信息
-                $goods_info = $goodsmodel->getInfo([
-                    'goods_id' => $v['goods_id']
-                ], 'picture, goods_name, price');
-                // sku信息
-                $sku_info = $goods_sku->getInfo([
-                    'sku_id' => $v['sku_id']
-                ], 'price, sku_name, promote_price');
-                if (empty($goods_info)) {
-                    break;
-                }
-                if (empty($sku_info)) {
-                    break;
-                }
-                // 查看用户会员价
-                $goods_preference = new GoodsPreference();
-                if (! empty($this->uid)) {
-                    $member_discount = $goods_preference->getMemberLevelDiscount($uid);
-                } else {
-                    $member_discount = 1;
-                }
-                $member_price = $member_discount * $sku_info['price'];
-                if ($member_price > $sku_info["promote_price"]) {
-                    $price = $sku_info["promote_price"];
-                } else {
-                    $price = $member_price;
-                }
-                // 判断此用户有无购物车
-                if (empty($cart_query)) {
-                    // 获取课程sku信息
-                    $this->addCart($uid, $this->instance_id, $web_info['title'], $v["goods_id"], $goods_info["goods_name"], $v["sku_id"], $sku_info["sku_name"], $price, $v["num"], $goods_info["picture"], 0);
-                } else {
-                    $is_have = true;
-                    foreach ($cart_query as $t => $m) {
-                        if ($m["sku_id"] == $v["sku_id"] && $m["goods_id"] == $v["goods_id"]) {
-                            $is_have = false;
-                            $num = $m["num"] + $v["num"];
-                            $this->cartAdjustNum($m["cart_id"], $num);
-                            break;
-                        }
-                    }
-                    if ($is_have) {
-                        $this->addCart($uid, $this->instance_id, $web_info['title'], $v["goods_id"], $goods_info["goods_name"], $v["sku_id"], $sku_info["sku_name"], $price, $v["num"], $goods_info["picture"], 0);
-                    }
-                }
-            }
-        }
-        cookie('cart_array', null);
     }
 
     /**
@@ -3418,12 +1880,7 @@ class Course extends BaseService implements ICourse
      */
     public function updateGoodsSort($goods_id, $sort)
     {
-        $goods = new NsCourseModel();
-        return $goods->save([
-            'sort' => $sort
-        ], [
-            'goods_id' => $goods_id
-        ]);
+        
     }
     
     /*
@@ -3432,19 +1889,7 @@ class Course extends BaseService implements ICourse
      */
     public function addGoodsSkuPicture($shop_id, $goods_id, $spec_id, $spec_value_id, $sku_img_array)
     {
-        // TODO Auto-generated method stub
-        $goods_sku_picture = new NsGoodsSkuPictureModel();
-        $data = array(
-            "shop_id" => $shop_id,
-            "goods_id" => $goods_id,
-            "spec_id" => $spec_id,
-            "spec_value_id" => $spec_value_id,
-            "sku_img_array" => $sku_img_array,
-            "create_time" => time(),
-            "modify_time" => time()
-        );
-        $retval = $goods_sku_picture->save($data);
-        return $retval;
+        
     }
     
     /*
@@ -3453,10 +1898,7 @@ class Course extends BaseService implements ICourse
      */
     public function deleteGoodsSkuPicture($condition)
     {
-        // TODO Auto-generated method stub
-        $goods_sku_picture = new NsGoodsSkuPictureModel();
-        $retval = $goods_sku_picture->destroy($condition);
-        return $retval;
+       
     }
 
     /**
@@ -3468,19 +1910,7 @@ class Course extends BaseService implements ICourse
      */
     public function getRandGoodsList()
     {
-        $result = $this->course->getQuery([
-            'state' => 1
-        ], 'goods_id', '');
-        $res = array_rand($result, 12);
-        $goods_id_list = array();
-        foreach ($res as $v) {
-            $goods_id_list[] = $result[$v];
-        }
-        $goodsList = array();
-        foreach ($goods_id_list as $g) {
-            $goodsList[] = $this->getGoodsDetail($g['goods_id']);
-        }
-        return $goodsList;
+        
     }
     
     /*
@@ -3500,79 +1930,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsCoupon($goods_id, $uid, $is_bespoke=0)
     {
-        $coupon_goods = new NsCouponGoodsModel();
-        $coupon_type = new NsCouponTypeModel();
-        $coupon = new NsCouponModel();
-        // 通过课程id获取到优惠劵类型
-        $coupon_goods_type_id_list = $coupon_goods->getQuery([
-            'goods_id' => $goods_id
-        ], 'coupon_type_id', '');
-        // 去除掉未开始的和已结束的
-        foreach ($coupon_goods_type_id_list as $k => $v) {
-            $res = $coupon_type->getInfo([
-                'coupon_type_id' => $v['coupon_type_id'],
-                'is_bespoke' => $is_bespoke
-            ], "start_time,end_time");
-            if ($res['start_time'] > time() || time() > $res['end_time']) {
-                unset($coupon_goods_type_id_list[$k]);
-            }
-        }
-
-        // 获取全课程优惠劵
-        $conditions = array(
-            'start_time' => array(
-                'ELT',
-                time()
-            ),
-            'end_time' => array(
-                'EGT',
-                time()
-            ),
-            'range_type' => 1,
-            'is_show' => 1,
-        );
-        $coupon_type_id_list = $coupon_type->getQuery($conditions, 'coupon_type_id', '');
-        foreach ($coupon_type_id_list as $v) {
-            array_push($coupon_goods_type_id_list, $v);
-        }
-        $coupon_list = array();
-        foreach ($coupon_goods_type_id_list as $v) {
-            // 已领取，已使用的数目
-            $already_received = $coupon->getCount([
-                'coupon_type_id' => $v['coupon_type_id'],
-                "state" => [
-                    'neq',
-                    0
-                ]
-            ]);
-            $condition = array(
-                'start_time' => array(
-                    'ELT',
-                    time()
-                ),
-                'end_time' => array(
-                    'EGT',
-                    time()
-                ),
-                'coupon_type_id' => $v['coupon_type_id'],
-                'count' => array(
-                    'GT',
-                    $already_received
-                )
-            );
-            $coupon_detial = $coupon_type->getInfo($condition, 'money,max_fetch,at_least,coupon_type_id,start_time,end_time,max_fetch');
-            if (! empty($coupon_detial)) {
-                $receive_quantity = $coupon->getCount([
-                    "coupon_type_id" => $coupon_detial['coupon_type_id'],
-                    "uid" => $uid
-                ]);
-                // if($coupon_detial['max_fetch'] == 0 || $coupon_detial['max_fetch']> $receive_quantity){
-                $coupon_detial['receive_quantity'] = $receive_quantity;
-                $coupon_list[] = $coupon_detial;
-                // }
-            }
-        }
-        return $coupon_list;
+        
     }
     
     /**
@@ -3580,24 +1938,7 @@ class Course extends BaseService implements ICourse
      */
     public function setGoodsSpotFabulous($shop_id, $uid, $goods_id)
     {
-        $click_goods = new NsClickFabulousModel();
-        // 点赞成功送积分
-        $rewardRule = new PromoteRewardRule();
-        // 查询点赞赠送积分数量，然后叠加
-        $info = $rewardRule->getRewardRuleDetail($shop_id);
-        $data = array(
-            'shop_id' => $shop_id,
-            'uid' => $uid,
-            'goods_id' => $goods_id,
-            'status' => 1,
-            'number' => $info['click_point'],
-            'create_time' => time()
-        );
-        $retval = $click_goods->save($data);
-        if ($retval > 0) {
-            $res = $rewardRule->addMemberPointData($shop_id, $uid, $info['click_point'], 19, '点赞赠送积分');
-        }
-        return $retval;
+        
     }
 
     /**
@@ -3609,24 +1950,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsSpotFabulous($shop_id, $uid, $goods_id)
     {
-        $click_goods = new NsClickFabulousModel();
-        $start_time = mktime(0, 0, 0, date('m'), date('d'), date('Y'));
-        $end_time = mktime(0, 0, 0, date('m'), date('d') + 1, date('Y')) - 1;
-        $condition = array(
-            'shop_id' => $shop_id,
-            'uid' => $uid,
-            'goods_id' => $goods_id,
-            'create_time' => array(
-                'between',
-                [
-                    $start_time,
-                    $end_time
-                ]
-            )
-        );
         
-        $retval = $click_goods->getInfo($condition);
-        return $retval;
     }
 
     /**
@@ -3634,19 +1958,7 @@ class Course extends BaseService implements ICourse
      */
     public function updateGoodsNameOrIntroduction($goods_id, $up_type, $up_content)
     {
-        $condition = array(
-            "goods_id" => $goods_id,
-            "shop_id" => $this->instance_id
-        );
-        if ($up_type == "goods_name") {
-            return $this->course->save([
-                "goods_name" => $up_content
-            ], $condition);
-        } elseif ($up_type == "introduction") {
-            return $this->course->save([
-                "introduction" => $up_content
-            ], $condition);
-        }
+       
     }
 
     /**
@@ -3658,13 +1970,7 @@ class Course extends BaseService implements ICourse
      */
     public function updateGoodsAttributeSort($attr_value_id, $sort, $shop_id)
     {
-        $goods_attribute = new NsGoodsAttributeModel();
-        return $goods_attribute->save([
-            "sort" => $sort
-        ], [
-            "attr_value_id" => $attr_value_id,
-            "shop_id" => $shop_id
-        ]);
+        
     }
 
     /**
@@ -3678,74 +1984,7 @@ class Course extends BaseService implements ICourse
      */
     function getGoodsPurchaseRestrictionForCurrentUser($goods_id, $num = 0, $flag = "")
     {
-        $res = array(
-            "code" => 1,
-            "message" => "允许购买",
-            "value" => 0
-        );
-        $ns_goods_model = new NsCourseModel();
-        $max_buy = $ns_goods_model->getInfo([
-            "goods_id" => $goods_id,
-            "shop_id" => $this->instance_id
-        ], 'max_buy');
         
-        $result = $num; // 用户购买的数量 + 购物车中的数量 + 订单交易数量不能超过课程的限购
-                        
-        // 检测该课程是否有限购
-        if (! empty($max_buy)) {
-            if ($max_buy['max_buy'] > 0) {
-                
-                // 如果当前是订单验证，不需要查询购物车
-                if ($flag != "order") {
-                    
-                    // 检测购物车中是否存在该课程
-                    $cart_list = $this->getCart($this->uid);
-                    if (! empty($cart_list)) {
-                        foreach ($cart_list as $k => $v) {
-                            if ($v['goods_id'] == $goods_id) {
-                                $result += $v['num'];
-                            }
-                        }
-                    }
-                }
-                if (! empty($this->uid)) {
-                    
-                    // 用户可能分开进行购买，统计当前用户购买了多少件该课程
-                    $ns_order_goods_model = new NsOrderGoodsModel();
-                    $order_goods_list = $ns_order_goods_model->getQuery([
-                        "goods_id" => $goods_id,
-                        "shop_id" => $this->instance_id,
-                        "buyer_id" => $this->uid
-                    ], "order_id,num", "");
-                    if (! empty($order_goods_list)) {
-                        
-                        $ns_order_model = new NsOrderModel();
-                        foreach ($order_goods_list as $k => $v) {
-                            
-                            // 查询订单记录，排除已关闭的订单
-                            $count = $ns_order_model->getCount([
-                                'order_id' => $v['order_id'],
-                                "order_status" => [
-                                    "neq",
-                                    5
-                                ]
-                            ]);
-                            if ($count > 0) {
-                                $result += $v['num'];
-                            }
-                        }
-                    }
-                }
-                if ($result > $max_buy['max_buy']) {
-                    
-                    $res['code'] = 0;
-                    $res['message'] = "该课程每人限购" . $max_buy['max_buy'] . "件";
-                    $res['value'] = $result - $max_buy['max_buy']; // 还能购买的课程数量
-                }
-            }
-        }
-        
-        return $res;
     }
 
     /**
@@ -3760,9 +1999,7 @@ class Course extends BaseService implements ICourse
      */
     public function getSelectGoodsList($page_index, $page_size, $condition, $order, $field)
     {
-        $ns_goods = new NsCourseModel();
-        $list = $ns_goods->pageQuery($page_index, $page_size, $condition, $order, $field);
-        return $list;
+        
     }
 
     /**
@@ -3773,9 +2010,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsLadderPreferential($condition, $order = "", $filed = "*")
     {
-        $nsGoodsLadderPreferential = new NsGoodsLadderPreferentialModel();
-        $list = $nsGoodsLadderPreferential->pageQuery(1, 0, $condition, $order, $filed);
-        return $list["data"];
+        
     }
 
     /**
@@ -3786,18 +2021,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsLadderPreferentialInfo($goods_id, $num, $goods_price)
     {
-        $nsGoodsLadderPreferential = new NsGoodsLadderPreferentialModel();
-        $condition["goods_id"] = $goods_id;
-        $condition["quantity"] = array(
-            "ELT",
-            $num
-        );
-        $res = $nsGoodsLadderPreferential->pageQuery(1, 1, $condition, "quantity desc", "*");
-        if ($res["total_count"] > 0) {
-            $goods_price -= $res["data"][0]["price"];
-        }
-        $goods_price = $goods_price < 0 ? 0 : $goods_price;
-        return $goods_price;
+       
     }
     /*
      * (non-PHPdoc)
@@ -3805,38 +2029,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsBrowseList($page_index, $page_size, $condition, $order, $field = "*")
     {
-        // TODO Auto-generated method stub
-        $goods_browse = new NsGoodsBrowseModel();
-        $goods_browse_list = $goods_browse->pageQuery($page_index, $page_size, $condition, $order, $field);
-        $category_list = array();
-        if (! empty($goods_browse_list)) {
-            foreach ($goods_browse_list["data"] as $k => $v) {
-                $goods_info = $this->course->getInfo([
-                    "goods_id" => $v["goods_id"]
-                ], "category_id, category_id_1, goods_name, promotion_type, promotion_price, shop_id, price, picture, clicks, point_exchange_type, point_exchange");
-                
-                $ablum_picture = new AlbumPictureModel();
-                $picture_info = $ablum_picture->getInfo([
-                    "pic_id" => $goods_info["picture"]
-                ]);
-                $goods_info["picture_info"] = $picture_info;
-                $goods_category = new NsGoodsCategoryModel();
-                $category_info = $goods_category->getInfo([
-                    "category_id" => $v["category_id"]
-                ], "category_name, short_name, category_id");
-                // 判断数组是否存在(拼装分类列表)
-                if (! empty($category_info)) {
-                    if (! in_array($category_info, $category_list)) {
-                        $category_list[] = $category_info;
-                    }
-                }
-                $goods_browse_list["data"][$k]["goods_info"] = $goods_info;
-                $goods_browse_list["data"][$k]["category"] = $category_info;
-            }
-        }
-        $goods_browse_list["category_list"] = $category_list;
         
-        return $goods_browse_list;
     }
     
     /*
@@ -3845,35 +2038,7 @@ class Course extends BaseService implements ICourse
      */
     public function addGoodsBrowse($goods_id, $uid)
     {
-        // TODO Auto-generated method stub
-        $goods_browse = new NsGoodsBrowseModel();
-        try {
-            // 判断原足迹中是否有这个课程
-            $condition = array(
-                "goods_id" => $goods_id,
-                "uid" => $uid
-            );
-            $count = $goods_browse->getCount($condition);
-            if ($count > 0) {
-                $goods_browse->destroy($condition);
-            }
-            $goods_model = new NsCourseModel();
-            $goods_info = $goods_model->getInfo([
-                "goods_id" => $goods_id
-            ], "category_id");
-            $data = array(
-                "goods_id" => $goods_id,
-                "uid" => $uid,
-                "create_time" => time(),
-                "category_id" => $goods_info["category_id"]
-            );
-            $goods_browse->save($data);
-            $goods_browse->commit();
-            return $goods_browse->browse_id;
-        } catch (\Exception $e) {
-            $goods_browse->rollback();
-            return 0;
-        }
+        
     }
     /*
      * (non-PHPdoc)
@@ -3881,10 +2046,7 @@ class Course extends BaseService implements ICourse
      */
     public function deleteGoodsBrowse($condition)
     {
-        // TODO Auto-generated method stub
-        $goods_browse = new NsGoodsBrowseModel();
-        $retval = $goods_browse->destroy($condition);
-        return $retval;
+       
     }
 
     /**
@@ -3895,15 +2057,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsQueryLimit($condition, $field, $page_size = PAGESIZE, $order = "ng.sort asc")
     {
-        $goods_model = new NsCourseModel();
-        $list = $goods_model->alias("ng")
-            ->join('sys_album_picture ng_sap', 'ng_sap.pic_id = ng.picture', 'left')
-            ->field($field)
-            ->where($condition)
-            ->order($order)
-            ->limit("0,$page_size")
-            ->select();
-        return $list;
+       
     }
 
     /**
@@ -3915,12 +2069,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsViewQueryField($condition, $field, $order)
     {
-        $goods_model = new NsCourseModel();
-        $viewObj = $goods_model->alias('ng')->field($field);
-        $list = $viewObj->where($condition)
-            ->order($order)
-            ->select();
-        return $list;
+        
     }
 
     /**
@@ -3989,7 +2138,7 @@ class Course extends BaseService implements ICourse
         
         $viewObj = $goods_model->alias("ng")
             ->join('sys_album_picture ng_sap', 'ng_sap.pic_id = ng.picture', 'left')
-            ->field("ng.goods_id,ng.goods_name,ng.promotion_price,ng.crowd,ng.total_num,ng.market_price,ng.goods_type,ng.introduction,ng.state,ng.is_hot,ng.is_recommend,ng.is_new,ng.sales,ng_sap.pic_cover_micro,ng.create_time,ng.QRcode,ng.price,ng.real_sales,ng.sort,ng.group_id_array,ng.allow_delete");
+            ->field("ng.goods_id,ng.goods_name,ng.promotion_price,ng.crowd,ng.total_num,ng.release_num,ng.market_price,ng.goods_type,ng.introduction,ng.state,ng.is_hot,ng.is_recommend,ng.is_new,ng.sales,ng_sap.pic_cover_micro,ng.create_time,ng.QRcode,ng.price,ng.real_sales,ng.sort,ng.group_id_array,ng.allow_delete");
         $queryList = $goods_model->viewPageQuery($viewObj, $page_index, $page_size, $condition, $order);
         $queryCount = $this->getGoodsQueryCount($condition);
         $list = $goods_model->setReturnList($queryList, $queryCount, $page_size);
@@ -4012,68 +2161,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsListNew($page_index = 1, $page_size = 0, $condition = '', $order = 'ng.sort asc')
     {
-        $json = json_encode($condition);
-        $goods_model = new NsCourseModel();
-        $where_sql = "";
-        // 针对课程分类
-        if (! empty($condition['ng.category_id'])) {
-            $goods_category = new GoodsCategory();
-            $select_category_id = $condition['ng.category_id'];
-            unset($condition['ng.category_id']);
-            $category_model = new NsGoodsCategoryModel();
-            $select_category_obj = $category_model->getInfo([
-                "category_id" => $select_category_id
-            ], "level");
-            $select_level = $select_category_obj["level"];
-            if ($select_level == 1) {
-                $where_sql = "(ng.category_id_1=$select_category_id or FIND_IN_SET( " . $select_category_id . ",ng.extend_category_id_1))";
-            } elseif ($select_level == 2) {
-                $where_sql = "(ng.category_id_2=$select_category_id or FIND_IN_SET( " . $select_category_id . ",ng.extend_category_id_2))";
-            } elseif ($select_level == 3) {
-                $where_sql = "(ng.category_id_3=$select_category_id or FIND_IN_SET( " . $select_category_id . ",ng.extend_category_id_3))";
-            }
-        }
-        $viewObj = $goods_model->alias("ng")
-            ->join('sys_album_picture ng_sap', 'ng_sap.pic_id = ng.picture', 'left')
-            ->field("ng.goods_kind,ng.goods_id,ng.goods_name,ng_sap.pic_cover_mid,ng.promotion_price,ng.market_price,ng.goods_type,ng.stock,ng_sap.pic_id,ng.max_buy,ng.state,ng.is_hot,ng.is_recommend,ng.is_new,ng.sales,ng_sap.pic_cover_small,ng.group_id_array,ng.shipping_fee,ng.point_exchange_type,ng.point_exchange");
-        $queryList = $goods_model->viewPageQueryNew($viewObj, $page_index, $page_size, $condition, $where_sql, $order);
-        $queryCount = $this->getGoodsQueryCount($condition, $where_sql);
-        $list = $goods_model->setReturnList($queryList, $queryCount, $page_size);
-        $goods_sku = new NsGoodsSkuModel();
-        $goods_preference = new GoodsPreference();
-        // 用户针对课程的收藏
-        foreach ($list['data'] as $k => $v) {
-            if (! empty($this->uid)) {
-                $member = new Member();
-                $list['data'][$k]['is_favorite'] = $member->getIsMemberFavorites($this->uid, $v['goods_id'], 'goods');
-            } else {
-                $list['data'][$k]['is_favorite'] = 0;
-            }
-            // 查询课程单品活动信息
-            // $goods_promotion_info = $goods_preference->getGoodsPromote($v['goods_id']);
-            // $list["data"][$k]['promotion_info'] = $goods_promotion_info;
-            
-            // // 获取sku列表
-            // $sku_list = $goods_sku->where([
-            // 'goods_id' => $v['goods_id']
-            // ])
-            // ->field("attr_value_items,stock,promote_price,price,sku_id,sku_name")
-            // ->select();
-            
-            $list['data'][$k]['sku_list'] = array();
-            $list['data'][$k]['gorup_list'] = $this->getGoodsTabByGoodsGroupId($list['data'][$k]['group_id_array']);
-            if($v['point_exchange_type'] == 0 || $v['point_exchange_type'] == 2){
-                $list['data'][$k]['display_price'] = '￥'.$v["promotion_price"];
-            }else{
-                if($v['point_exchange_type'] == 1 && $v["promotion_price"] > 0){
-                    $list['data'][$k]['display_price'] = '￥'.$v["promotion_price"].'+'.$v["point_exchange"].'积分';
-                }else{
-                    $list['data'][$k]['display_price'] = $v["point_exchange"].'积分';
-                }
-            }
-            // $list['data'][$k]['sku_list'] = $sku_list;
-        }
-        return $list;
+        
     }
 
     /**
@@ -4084,24 +2172,7 @@ class Course extends BaseService implements ICourse
      */
     public function updateGoodsClicks($goods_id)
     {
-        $res = 0;
-        $model = new NsCourseModel();
-        $info = $model->getInfo([
-            'goods_id' => $goods_id
-        ], "clicks");
-        if (! empty($info)) {
-            $clicks = 0;
-            if (! empty($info['clicks'])) {
-                $clicks = $info['clicks'];
-            }
-            $clicks ++;
-            $res = $model->save([
-                'clicks' => $clicks
-            ], [
-                'goods_id' => $goods_id
-            ]);
-        }
-        return $res;
+        
     }
 
     /**
@@ -4131,24 +2202,7 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsSkuListByGoodsId($goods_id)
     {
-        $goods_sku = new NsGoodsSkuModel();
-        $goods_preference = new GoodsPreference();
-        
-        $goods_promotion_info = $goods_preference->getGoodsPromote($goods_id);
-        
-        $sku_list = $goods_sku->where([
-            'goods_id' => $goods_id
-        ])
-            ->field("attr_value_items,stock,promote_price,price,sku_id,sku_name")
-            ->select();
-        
-        if (! empty($sku_list)) {
-            foreach ($sku_list as $k => $v) {
-                // 判断该课程目前是否参与活动 参与的话sku价格取 促销价 否则取原价
-                $sku_list[$k]["price"] = empty($goods_promotion_info) ? $v['price'] : $v['promote_price'];
-            }
-        }
-        return $sku_list;
+
     }
 
     /**
@@ -4158,97 +2212,7 @@ class Course extends BaseService implements ICourse
      */
     public function batchProcessingGoods($info)
     {
-        if (! empty($info['goods_ids'])) {
-            $goods_model = new NsCourseModel(); // 课程主表
-            $goods_sku_model = new NsGoodsSkuModel(); // 课程sku表
-                                                      // 开启事物
-            $goods_model->startTrans();
-            try {
-                $goods_id_array = explode(',', $info['goods_ids']);
-                if (count($goods_id_array) > 0) {
-                    foreach ($goods_id_array as $v) {
-                        $goods_data = array(); // 课程修改项
-                        if ($info['brand_id'] != 0) {
-                            $goods_data['brand_id'] = $info['brand_id'];
-                        }
-                        
-                        if ($info['catrgory_one'] > 0) {
-                            $goods_data['category_id_1'] = $info['catrgory_one'];
-                            $goods_data['category_id_2'] = $info['catrgory_two'];
-                            $goods_data['category_id_3'] = $info['catrgory_three'];
-                            if ($info['catrgory_three'] > 0) {
-                                $goods_data['category_id'] = $info['catrgory_three'];
-                            } else 
-                                if ($info['catrgory_two'] > 0) {
-                                    $goods_data['category_id'] = $info['catrgory_two'];
-                                } else {
-                                    $goods_data['category_id'] = $info['catrgory_one'];
-                                }
-                        }
-                        
-                        $condition["goods_id"] = $v;
-                        // 课程sku列表
-                        $goods_sku_list = $goods_sku_model->getQuery($condition, "*", "");
-                        
-                        foreach ($goods_sku_list as $goods_sku) {
-                            $data = array(); // 课程sku修该项
-                            if ($info['price'] != 0) {
-                                $price = $goods_sku["price"] + $info['price'];
-                                $data['price'] = $price < 0 ? 0 : $price;
-                                $data['promote_price'] = $price < 0 ? 0 : $price;
-                            }
-                            if ($info['market_price'] != 0) {
-                                $market_price = $goods_sku["market_price"] + $info['market_price'];
-                                $data['market_price'] = $market_price < 0 ? 0 : $market_price;
-                            }
-                            if ($info['cost_price'] != 0) {
-                                $cost_price = $goods_sku["cost_price"] + $info['cost_price'];
-                                $data['cost_price'] = $cost_price < 0 ? 0 : $cost_price;
-                            }
-                            if ($info['stock'] != 0) {
-                                $stock = $goods_sku["stock"] + $info['stock'];
-                                $data['stock'] = $stock < 0 ? 0 : $stock;
-                            }
-                            $goods_sku_model = new NsGoodsSkuModel(); // 课程sku表
-                            if(count($data) > 0){
-                                $goods_sku_model->save($data, [
-                                    "sku_id" => $goods_sku['sku_id']
-                                ]);
-                            }
-                        }
-                       
-                        $goods_data['stock'] = $goods_sku_model->getSum($condition, "stock");
-                        $goods_data['promotion_price'] = $goods_sku_model->getMin($condition, "price");
-                        $goods_data['price'] = $goods_sku_model->getMin($condition, "price");
-                        $goods_data['market_price'] = $goods_sku_model->getMin($condition, "market_price");
-                        $goods_data['cost_price'] = $goods_sku_model->getMin($condition, "cost_price");
-                        $goods_model = new NsCourseModel(); // 课程主表
-                        if(count($goods_data) > 0){
-                            $goods_model->save($goods_data, [
-                                "goods_id" => $v
-                            ]);
-                        }
-                        $this->modifyGoodsPromotionPrice($v);
-                    }
-                }
-                $goods_model->commit();
-                return $retval = array(
-                    "code" => 1,
-                    "message" => '操作成功'
-                );
-            } catch (\Exception $e) {
-                $goods_model->rollback();
-                return $retval = array(
-                    "code" => 0,
-                    "message" => $e->getMessage()
-                );
-            }
-        } else {
-            return $retval = array(
-                "code" => 0,
-                "message" => '请至少选择一件课程'
-            );
-        }
+        
     }
 
     /**
@@ -4259,25 +2223,11 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsSpecInfoQuery($condition)
     {
-        $condition_spec = array();
-        // TODO Auto-generated method stub
-        if ($condition["attr_id"] > 0) {
-            $goods_attribute = $this->getAttributeInfo($condition);
-            $condition_spec["spec_id"] = array(
-                "in",
-                $goods_attribute['spec_id_array']
-            );
-        }
-        $condition_spec["is_visible"] = 1;
-        $spec_list = $this->getGoodsSpecQuery($condition_spec); // 课程规格
-        $list["spec_list"] = $spec_list; // 课程规格集合
-        return $list;
+       
     }
 
     public function deleteSpecValue($condition)
     {
-        // 删掉规格下的属性
-        $goods_spec_value = new NsGoodsSpecValueModel();
-        return $goods_spec_value->destroy($condition);
+        
     }
 }

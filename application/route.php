@@ -111,7 +111,7 @@ if(strpos($root_url,$upload_url) !==false)
         ],
         '[frontDesk]'     => [
     
-            //姿博会前台
+            //前台
             ':action'         => ['shop/frontDesk/:action'],
             '/'               => ['shop/frontDesk/index'],
         ],

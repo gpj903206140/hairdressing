@@ -24,7 +24,7 @@ interface ICourseCatalogue
      * 删除课程目录信息
      * @param unknown $goods_classid_array
      */
-    function deleteCourseCatalogue($catalogue_id);
+    function deleteCourseCatalogue($goods_id,$catalogue_id);
 
     /**
      * 获取课程目录列表应用后台

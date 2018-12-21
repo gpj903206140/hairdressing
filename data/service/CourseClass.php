@@ -267,36 +267,7 @@ class CourseClass extends BaseService implements ICourseClass
      */
     public function getGoodsCategoryBrands($category_id)
     {
-        $brand_list = Cache::tag("course_class_brands")->get("get_course_class_brands" . $category_id);
-        if (empty($brand_list)) {
-            $goods_model = new NsGoodsModel();
-            $condition = array(
-                'category_id | category_id_1 | category_id_2 | category_id_3' => $category_id
-            );
-            $brand_id_array = $goods_model->getQuery($condition, 'brand_id', '');
-            $array = array();
-            if (! empty($brand_id_array)) {
-                foreach ($brand_id_array as $k => $v) {
-                    $array[] = $v['brand_id'];
-                }
-            }
-            if (! empty($array)) {
-                $goods_brand = new NsGoodsBrandModel();
-                $condition = array(
-                    'brand_id' => array(
-                        'in',
-                        $array
-                    )
-                );
-                $brand_list = $goods_brand->getQuery($condition, 'brand_id,brand_name', 'brand_initial asc');
-                Cache::tag("course_class_brands")->set("get_course_class_brands" . $category_id, $brand_list);
-                return $brand_list;
-            } else {
-                return [];
-            }
-        } else {
-            return $brand_list;
-        }
+        
     }
     
     /**
@@ -304,32 +275,7 @@ class CourseClass extends BaseService implements ICourseClass
      * @param unknown $category_id
      */
     public function getGoodsBrandsByGoodsAttr($category_id){
-        $brand_list = Cache::tag("course_class_brands")->get("get_course_class_brands" . $category_id);
-        if (empty($brand_list)) {
-            $course_class = new NsCourseClassModel();
-            $course_class_info = $course_class -> getInfo(["category_id"=>$category_id], "attr_id");
-            if($course_class_info['attr_id'] > 0){
-                $goods_attr = new NsAttributeModel();
-                $goods_attr_info = $goods_attr->getInfo(["attr_id"=>$course_class_info['attr_id']],"*");
-                if(!empty($goods_attr_info["brand_id_array"])){
-                    $goods_brand = new NsGoodsBrandModel();
-                    $condition = array(
-                        'brand_id' => array(
-                            'in',
-                            $goods_attr_info["brand_id_array"]
-                        )
-                    );
-                    $brand_list = $goods_brand->getQuery($condition, 'brand_id,brand_name,brand_pic', 'brand_initial asc');
-                    Cache::tag("course_class_brands")->set("get_course_class_brands" . $category_id, $brand_list);
-                }else{
-                    return array();
-                }
-            }else{
-                return array();
-            }
-        }else{
-            return $brand_list;
-        }
+        
     }
     
     /**
@@ -339,33 +285,7 @@ class CourseClass extends BaseService implements ICourseClass
      */
     public function getGoodsCategoryPriceGrades($category_id)
     {
-        $goods_model = new NsGoodsModel();
-        $max_price = $goods_model->where([
-            'category_id' => $category_id
-        ])->max('price');
-        $min_price = $goods_model->where([
-            'category_id' => $category_id
-        ])->min('price');
-        $price_grade = 1;
-        for ($i = 1; $i <= log10($max_price); $i ++) {
-            $price_grade *= 10;
-        }
-        // 跨度
-        $dx = (ceil(log10(($max_price - $min_price) / 3)) - 1) * $price_grade;
-        if ($dx <= 0) {
-            $dx = $price_grade;
-        }
-        $array = array();
-        $j = 0;
-        while ($j <= $max_price) {
-            $array[] = array(
-                $j,
-                $j + $dx - 1
-            );
-            $j = $j + $dx;
-        }
         
-        return $array;
     }
     
     /*
@@ -374,18 +294,7 @@ class CourseClass extends BaseService implements ICourseClass
      */
     public function getGoodsCategorySaleNum()
     {
-        // TODO Auto-generated method stub
-        $goods_course_class = new NsCourseClassModel();
-        $goods_course_class_all = $goods_course_class->all();
-        foreach ($goods_course_class_all as $k => $v) {
-            $sale_num = 0;
-            $goods_model = new NsGoodsModel();
-            $goods_sale_num = $goods_model->where(array(
-                "category_id_1|category_id_2|category_id_3" => $v["category_id"]
-            ))->sum("sales");
-            $goods_course_class_all[$k]["sale_num"] = $goods_sale_num;
-        }
-        return $goods_course_class_all;
+        
     }
 
     /**
@@ -456,56 +365,7 @@ class CourseClass extends BaseService implements ICourseClass
      */
     public function getCategoryParentQuery($category_id)
     {
-        $cache = Cache::tag("niu_course_class")->get("getCategoryParentQuery" . $category_id);
-        if (empty($cache)) {
-            $parent_category_info = array();
-            $grandparent_category_info = array();
-            $category_name = "";
-            $parent_category_name = "";
-            $grandparent_category_name = "";
-            $goods_course_class = new NsCourseClassModel();
-            $category_info = $goods_course_class->getInfo([
-                "category_id" => $category_id
-            ], "category_id,category_name,pid");
-            $level = $category_info["level"];
-            $nav_name = array();
-            if (! empty($category_info)) {
-                $category_name = $category_info["category_name"];
-                if ($level == 3) {
-                    $parent_category_info = $goods_course_class->getInfo([
-                        "category_id" => $category_info["pid"]
-                    ], "category_id,category_name,pid");
-                    
-                    if (! empty($parent_category_info)) {
-                        $grandparent_category_info = $goods_course_class->getInfo([
-                            "category_id" => $parent_category_info["pid"]
-                        ], "category_id,category_name,pid");
-                    }
-                    $nav_name = array(
-                        $grandparent_category_info,
-                        $parent_category_info,
-                        $category_info
-                    );
-                } else 
-                    if ($level == 2) {
-                        $parent_category_info = $goods_course_class->getInfo([
-                            "category_id" => $category_info["pid"]
-                        ], "category_id,category_name,pid");
-                        $nav_name = array(
-                            $parent_category_info,
-                            $category_info
-                        );
-                    } else {
-                        $nav_name = array(
-                            $category_info
-                        );
-                    }
-            }
-            Cache::tag("niu_course_class")->set("getCategoryParentQuery" . $category_id, $nav_name);
-            return $nav_name;
-        } else {
-            return $cache;
-        }
+        
     }
 
     /**
@@ -573,18 +433,7 @@ class CourseClass extends BaseService implements ICourseClass
      */
     public function getGoodsCategoryBlock($shop_id)
     {
-        // TODO Auto-generated method stub
-        $cache = Cache::tag("niu_course_class_block")->get("getGoodsCategoryBlock" . $shop_id);
-        if (empty($cache)) {
-            $course_class_block = new NsCourseClassBlockModel();
-            $course_class_block_query = $course_class_block->getQuery([
-                "shop_id" => $shop_id
-            ], "*", "sort asc");
-            Cache::tag("niu_course_class_block")->set("getGoodsCategoryBlock" . $shop_id, $course_class_block_query);
-            return $course_class_block_query;
-        } else {
-            return $cache;
-        }
+        
     }
     
     /*
@@ -593,14 +442,7 @@ class CourseClass extends BaseService implements ICourseClass
      */
     public function setGoodsCategoryBlock($id, $shop_id, $data)
     {
-        Cache::tag("niu_course_class_block")->clear();
-        // TODO Auto-generated method stub
-        $course_class_block = new NsCourseClassBlockModel();
-        $result = $course_class_block->save($data, [
-            "shop_id" => $shop_id,
-            "id" => $id
-        ]);
-        return $result;
+        
     }
 
     public function test()
@@ -809,23 +651,7 @@ class CourseClass extends BaseService implements ICourseClass
      */
     public function getGoodsBrandList($page_index = 1, $page_size = 0, $condition = '', $order = "sort asc", $field = '*')
     {
-        $data = array(
-            $page_index,
-            $page_size,
-            $condition,
-            $order,
-            $field
-        );
-        $data = json_encode($data);
-        $cache = Cache::tag("niu_goods_brand")->get("getGoodsBrandList" . $data);
-        if (empty($cache)) {
-            $goods_brand = new NsGoodsBrandModel();
-            $goods_brand_list = $goods_brand->pageQuery($page_index, $page_size, $condition, $order, $field);
-            Cache::tag("niu_goods_brand")->set("getGoodsBrandList" . $data, $goods_brand_list);
-            return $goods_brand_list;
-        } else {
-            return $cache;
-        }
+        
     }
 
     /**

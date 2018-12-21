@@ -2,11 +2,12 @@
 namespace data\service;
 
 /**
- * 商品分类服务层
+ * 合作机构服务层
  */
 use data\service\BaseService as BaseService;
 use data\model\NsCourseMechanismModel as NsCourseMechanismModel;
 use data\api\ICourseMechanism as ICourseMechanism;
+use data\model\AlbumPictureModel as AlbumPictureModel;
 use data\model\NsGoodsModel;
 use data\model\NsGoodsBrandModel;
 use data\model\NsGoodsCategoryBlockModel;
@@ -101,8 +102,27 @@ class CourseMechanism extends BaseService implements ICourseMechanism
     {
         Cache::tag('niu_course_mechanism')->clear();
         $res = $this->course_Mechanism->destroy($mechanism_id);
-        // 删除分类商品楼层
-        //$this->deleteCourseMechanismBlock($category_id);
+        //删除作品墙
+        $album_picture = new AlbumPictureModel();
+        $pic_list = $album_picture->getQuery(['shop_id'=>$mechanism_id],'pic_id,shop_id,pic_cover,pic_cover_big,pic_cover_mid,pic_cover_small,pic_cover_micro','pic_id desc');
+        foreach($pic_list as $k=>$v){
+            $album_picture->destroy($v['pic_id']);
+            if(file_exists($v['pic_cover'])){
+                unlink($v['pic_cover']);
+            }
+            if(file_exists($v['pic_cover_big'])){
+                unlink($v['pic_cover_big']);
+            }
+            if(file_exists($v['pic_cover_mid'])){
+                unlink($v['pic_cover_mid']);
+            }
+            if(file_exists($v['pic_cover_small'])){
+                unlink($v['pic_cover_small']);
+            }
+            if(file_exists($v['pic_cover_micro'])){
+                unlink($v['pic_cover_micro']);
+            }
+        }
         hook("courseMechanismDeleteSuccess", $mechanism_id);
         return $res;
         // TODO Auto-generated method stub
@@ -110,7 +130,7 @@ class CourseMechanism extends BaseService implements ICourseMechanism
     
 
     /**
-     * 获取商品分类列表应用后台
+     * 获取合作机构列表应用后台
      */
     public function getMechanismTreeUseInAdmin()
     {
@@ -120,8 +140,7 @@ class CourseMechanism extends BaseService implements ICourseMechanism
             
             $course_class_one = $course_mechanism_model->getQuery([
                 
-            ], 'mechanism_id, mechanism_name,mechanism_pic,sort,is_visible,level', 'sort');
-            
+            ], 'mechanism_id, mechanism_name,mechanism_pic,teacher_num,sort,is_visible', 'sort');
             Cache::tag("niu_course_mechanism")->set("getmechanismTreeUseInAdmin", $course_class_one);
             return $course_class_one;
         } else {
@@ -146,6 +165,18 @@ class CourseMechanism extends BaseService implements ICourseMechanism
         } else {
             return $cache;
         }
+    }
+    /**
+     * 修改合作机构 单个字段
+     *
+     * @param unknown $category_id            
+     * @param unknown $order            
+     */
+    public function ModifyCourseMechanismField($mechanism_id, $field_name, $field_value)
+    {
+        Cache::tag('niu_course_mechanism')->clear();
+        $res = $this->course_Mechanism->ModifyTableField('mechanism_id', $mechanism_id, $field_name, $field_value);
+        return $res;
     }
     /*
      * (non-PHPdoc)

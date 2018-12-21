@@ -34,7 +34,7 @@
 			</select>
 		</dd>
 	</dl>
-	<dl>
+	<!-- <dl>
 		<dt>课程类型：</dt>
 		<dd>
 			<select name="attr" id="attr_id" class="select-common">
@@ -44,7 +44,7 @@
 				{/volist}
 			</select>
 		</dd>
-	</dl>
+	</dl> -->
 	<dl>
 		<dt>是否可见：</dt>
 		<dd>
@@ -171,12 +171,12 @@ function addGoodsCategoryAjax() {
 	}else{
 		var is_visible = 0;
 	}
-	var attr_id = $("#attr_id").val();
+	/*var attr_id = $("#attr_id").val();
 	if(attr_id.length>0){
 		var attr_name = $("#attr_id").find("option:selected").text();
 	}else{
 		var attr_name = '';
-	}
+	}*/
 	var pc_custom_template = $("#pc_custom_template").val();
 	var wap_custom_template = $("#wap_custom_template").val();
 	if(verify(category_name,short_name, keywords, sort, description)){
@@ -194,8 +194,8 @@ function addGoodsCategoryAjax() {
 				'is_visible' : is_visible,
 				"category_pic" : category_pic,
 				"short_name" : short_name,
-				"attr_id" : attr_id,
-				"attr_name" : attr_name,
+				//"attr_id" : attr_id,
+				//"attr_name" : attr_name,
 				"pc_custom_template" : pc_custom_template,
 				"wap_custom_template" : wap_custom_template
 			},

@@ -107,6 +107,9 @@ function addGoodsCategoryAjax() {
 	var catalogue_id = $("#catalogue_id").val();
 	var teacher_id = $("#teacher_id option:selected").val();
 	var teacher_name = $("#teacher_id option:selected").text();
+	if(teacher_id==0){
+		teacher_name = '';
+	}
 	var sort = $("#sort").val();
 	var video_url = $("#video_url").val();
 	if(verify(video_url)){

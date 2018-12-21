@@ -144,6 +144,12 @@ class Course extends BaseController
                         case "sort":
                             $order['ng.sort'] = $sort_value;
                             break;
+                        case "total_num":
+                            $order['ng.total_num'] = $sort_value;
+                            break;
+                        case "release_num":
+                            $order['ng.release_num'] = $sort_value;
+                            break;
                     }
                 }
             } else {
@@ -269,6 +275,27 @@ class Course extends BaseController
         }
     }
     /**
+     * 生成商品二维码
+     */
+    public function updateCourseQrcode()
+    {
+        $goods_ids = request()->post('goods_id', '');
+        $goods_ids = explode(',', $goods_ids);
+        if (! empty($goods_ids) && is_array($goods_ids)) {
+            foreach ($goods_ids as $v) {
+                $url = __URL(Config::get('view_replace_str.APP_MAIN') . '/goods/goodsdetail?id=' . $v);
+                try {
+                    $pay_qrcode = getQRcode($url, 'upload/course_qrcode', 'course_qrcode_' . $v);
+                } catch (\Exception $e) {
+                    return AjaxReturn(UPLOAD_FILE_ERROR);
+                }
+                $goods = new CourseService();
+                $result = $goods->goods_QRcode_make($v, $pay_qrcode);
+            }
+        }
+        return AjaxReturn($result);
+    }
+    /**
      * 添加商品
      */
     public function addCourse()
@@ -323,8 +350,8 @@ class Course extends BaseController
         $pc_template = $config->getUsePCTemplate($this->instance_id);
         $wap_template = $config ->getUseWapTemplate($this->instance_id);
 
-        $template_url["pc_template_url"] = "template/shop/".$pc_template['value'].'/Goods/';
-        $template_url["wap_template_url"] = "template/wap/".$wap_template['value'].'/Goods/';
+        $template_url["pc_template_url"] = "template/shop/".$pc_template['value'].'/Course/';
+        $template_url["wap_template_url"] = "template/wap/".$wap_template['value'].'/Course/';
         $this->assign("template_url", $template_url);
         //合作机构
         $coursecate = new CourseMechanism();
@@ -400,7 +427,7 @@ $product["description"], $product['qrcode'], // 商品二维码
 
  , $product['pc_custom_template'], $product['wap_custom_template'],$allow_delete,
 
- $product['mechanism_id'], $product['teacher_id'],$product['crowd'], $product['score'],$product['total_num'],$product['price'],$product['goods_video_address']);
+ $product['mechanism_id'], $product['teacher_id'],$product['crowd'], $product['score'],$product['total_num'],0,$product['price'],$product['goods_video_address']);
             
             // sku编码分组
             
@@ -408,7 +435,7 @@ $product["description"], $product['qrcode'], // 商品二维码
                 $goodsId = $res;
                 
                 $url = __URL(Config::get('view_replace_str.APP_MAIN') . '/course/coursedetail?id=' . $goodsId);
-                $pay_qrcode = getQRcode($url, 'upload/goods_qrcode', 'goods_qrcode_' . $goodsId);
+                $pay_qrcode = getQRcode($url, 'upload/course_qrcode', 'course_qrcode_' . $goodsId);
                 
                 $courseService->goods_QRcode_make($goodsId, $pay_qrcode);
             }
@@ -527,7 +554,7 @@ $product["description"], $product['qrcode'], // 商品二维码
             $goodsId = $res;
             
             $url = Config::get('view_replace_str.APP_MAIN') . '/Course/courseDetail?id=' . $goodsId;
-            $pay_qrcode = getQRcode($url, 'upload/goods_qrcode', 'goods_qrcode_' . $goodsId);
+            $pay_qrcode = getQRcode($url, 'upload/course_qrcode', 'course_qrcode_' . $goodsId);
             
             $courseservice->goods_QRcode_make($goodsId, $pay_qrcode);
         }
@@ -937,7 +964,7 @@ $product["description"], $product['qrcode'], // 商品二维码
         $res = $coursecate->ModifyGoodsCategoryField($fieldid, $fieldname, $fieldvalue);
         return $res;
     }
-
+    
 
     /**
      * 课程合作机构
@@ -1028,6 +1055,11 @@ $product["description"], $product['qrcode'], // 商品二维码
     {
         $coursecate = new CourseMechanism();
         $mechanism_id = request()->post('mechanism_id', '');
+        $mechanism = $coursecate->getCourseMechanismDetail($mechanism_id);
+        if($mechanism['teacher_num']>0){
+            $res = -9999999; 
+            return AjaxReturn($res);
+        }
         $res = $coursecate->deleteCourseMechanism($mechanism_id);
         if ($res > 0) {
             $course_mechanism_quick = request()->post("course_mechanism_quick", '');
@@ -1037,11 +1069,22 @@ $product["description"], $product['qrcode'], // 商品二维码
         }
         return AjaxReturn($res);
     }
-    
+    /**
+     * 修改 合作机构 单个字段
+     */
+    public function modifyCourseMechanismField()
+    {
+        $coursecate = new CourseMechanism();
+        $fieldid = request()->post('fieldid', '');
+        $fieldname = request()->post('fieldname', '');
+        $fieldvalue = request()->post('fieldvalue', '');
+        $res = $coursecate->ModifyCourseMechanismField($fieldid, $fieldname, $fieldvalue);
+        return $res;
+    }
 
 
     /**
-     * 课程机构老师
+     * 课程课程老师
      */
     public function courseTeacherList()
     {
@@ -1053,7 +1096,7 @@ $product["description"], $product['qrcode'], // 商品二维码
         return view($this->style . "course/courseTeacherList");
     }
     /**
-     * 添加合作老师
+     * 添加课程老师
      */
     public function addCourseTeacher()
     {
@@ -1086,7 +1129,7 @@ $product["description"], $product['qrcode'], // 商品二维码
         }
     }
     /**
-     * 修改合作老师
+     * 修改课程老师
      */
     public function updateCourseTeacher()
     {
@@ -1123,20 +1166,27 @@ $product["description"], $product['qrcode'], // 商品二维码
     }
 
     /**
-     * 删除合作老师
+     * 删除课程老师
      */
     public function deleteCourseTeacher()
     {
         $coursecate = new Courseteacher();
         $teacher_id = request()->post('teacher_id', '');
-        $res = $coursecate->deleteCourseTeacher($teacher_id);
-        if ($res > 0) {
-            $course_teacher_quick = request()->post("course_teacher_quick", '');
-            if ($course_teacher_quick != '') {
-                setcookie("course_teacher_quick", $goods_teacher_quick, time() + 3600 * 24);
-            }
-        }
+        $mechanism_id = request()->post('mechanism_id', '');
+        $res = $coursecate->deleteCourseTeacher($mechanism_id,$teacher_id);
         return AjaxReturn($res);
+    }
+    /**
+     * 修改 课程老师 单个字段
+     */
+    public function modifyCourseTeacherField()
+    {
+        $coursecate = new CourseTeacher();
+        $fieldid = request()->post('fieldid', '');
+        $fieldname = request()->post('fieldname', '');
+        $fieldvalue = request()->post('fieldvalue', '');
+        $res = $coursecate->ModifyCourseTeacherField($fieldid, $fieldname, $fieldvalue);
+        return $res;
     }
 
 
@@ -1231,8 +1281,9 @@ $product["description"], $product['qrcode'], // 商品二维码
     public function deleteCourseCatalogue()
     {
         $coursecate = new CourseCatalogue();
+        $goods_id = request()->post('goods_id', '');
         $catalogue_id = request()->post('catalogue_id', '');
-        $res = $coursecate->deleteCourseCatalogue($catalogue_id);
+        $res = $coursecate->deleteCourseCatalogue($goods_id,$catalogue_id);
         if ($res > 0) {
             $course_catalogue_quick = request()->post("course_catalogue_quick", '');
             if ($course_catalogue_quick != '') {

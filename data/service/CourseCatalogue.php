@@ -5,6 +5,7 @@ namespace data\service;
  * 课程目录服务层
  */
 use data\service\BaseService as BaseService;
+use data\model\NsCourseModel as NsCourseModel;
 use data\model\NsCourseCatalogueModel as NsCourseCatalogueModel;
 use data\model\NsCourseCatalogueVideoModel as NsCourseCatalogueVideoModel;
 use data\api\ICourseCatalogue as ICourseCatalogue;
@@ -75,6 +76,8 @@ class CourseCatalogue extends BaseService implements ICourseCatalogue
         );
         if ($catalogue_id == 0) {
             $result = $this->course_catalogue->save($data);
+            $course = new NsCourseModel();
+            $course->where("goods_id={$goods_id}")->setInc('release_num',1);
             if ($result) {
                 $res = $this->course_catalogue->catalogue_id;
             } else {
@@ -138,16 +141,29 @@ class CourseCatalogue extends BaseService implements ICourseCatalogue
      * (non-PHPdoc)
      * @see \data\api\ICourseCatalogue::deleteCourseCatalogue()
      */
-    public function deleteCourseCatalogue($catalogue_id)
+    public function deleteCourseCatalogue($goods_id,$catalogue_id)
     {
         Cache::tag('niu_course_catalogue')->clear();
         $catalogue = $this->course_catalogue->get($catalogue_id);
+        //课程发布数减一
+        $course = new NsCourseModel();
+        $course->where("goods_id={$goods_id}")->setDec('release_num',1);
+        //删除课程目录图片
         $res = $this->course_catalogue->destroy($catalogue_id);
         if(file_exists($catalogue['catalogue_pic'])){
             unlink($catalogue['catalogue_pic']);
         }
         if(file_exists($catalogue['video_url'])){
             unlink($catalogue['video_url']);
+        }
+        //删除课程目录下的课程视频
+        $course_catalogue_video_model = new NsCourseCatalogueVideoModel();
+        $catalogue_video = $course_catalogue_video_model->getQuery(['catalogue_id'=>$catalogue_id],'video_id,video_url','video_id desc');
+        foreach($catalogue_video as $video){
+            $course_catalogue_video_model->destroy($video['video_id']);
+            if(file_exists($video['video_url'])){
+                unlink($video['video_url']);
+            }
         }
         hook("CourseCatalogueDeleteSuccess", $catalogue_id);
         return $res;

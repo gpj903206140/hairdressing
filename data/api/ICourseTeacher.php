@@ -24,7 +24,7 @@ interface ICourseTeacher
      * 删除合作老师信息
      * @param unknown $goods_classid_array
      */
-    function deleteCourseTeacher($teacher_id);
+    function deleteCourseTeacher($mechanism_id,$teacher_id);
 
     /**
      * 获取合作老师列表应用后台

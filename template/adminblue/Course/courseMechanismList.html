@@ -28,8 +28,9 @@
 	<colgroup>
 		<col style="width: 2%;">
 		<col style="width: 30%;">
-		<col style="width: 30%;">
-		<col style="width: 17%;">
+		<col style="width: 10%;">
+		<col style="width: 10%;">
+		<col style="width: 10%;">
 		<col style="width: 7%;">
 		<col style="width: 4%;">
 		<col style="width: 10%;">
@@ -39,7 +40,8 @@
 			<th></th>
 			<th align="left">合作机构名称</th>
 			<th align="left">机构老师</th>
-			<th align="left">照片墙</th>
+			<th align="center">老师数量</th>
+			<th align="center">照片墙</th>
 			<th>是否显示</th>
 			<th>排序</th>
 			<th>操作</th>
@@ -57,9 +59,11 @@
 				
 			</td>
 			<td><a href="{:__URL('ADMIN_MAIN/course/courseTeacherList','mechanism_id='.$v1['mechanism_id'])}">查看</a></td>
-			<td><a href="javascript:void(0);" onclick="showEditBg({$v1['mechanism_id']});">查看</a></td>
+			<td align="center">{$v1['teacher_num']}</td>
+			<td align="center"><a href="javascript:void(0);" onclick="showEditBg({$v1['mechanism_id']});">查看</a></td>
 			<td style="text-align: center;">{$v1['is_visible'] ? '是' : '否'}</td>
 			<td style="text-align: center;"><input type="number" class="sort input-common input-common-sort" fieldid="{$v1['mechanism_id']}" fieldname="sort" value="{$v1['sort']}" size="1"></td>
+			
 			<td style="text-align: center;">
 				<a href="{:__URL('ADMIN_MAIN/course/updateCourseMechanism','mechanism_id='.$v1['mechanism_id'])}">修改</a>
 				<a href="javascript:void(0);" onclick="delCategory({$v1['mechanism_id']})">删除</a>
@@ -101,6 +105,7 @@
 }
 .modal-dl2 dd span img{
 	width:142px;
+	height:140px;
 	
 }
 </style>
@@ -172,7 +177,7 @@ $(".table-class tr[data-category-id] input").live("change",function(){
 	}else{
 		$.ajax({
 			type:"post",
-			url:"{:__URL('ADMIN_MAIN/course/modifycourseclassField')}",
+			url:"{:__URL('ADMIN_MAIN/course/modifyCourseMechanismField')}",
 			data:{'fieldid':fieldid,'fieldname':fieldname,'fieldvalue':fieldvalue},
 			success: function (data) {
 				if(data>0){
@@ -216,7 +221,12 @@ function delCategory(mechanism_id) {
 							showTip(data['message'],"success");
 							location.href = "{:__URL('ADMIN_MAIN/course/coursemechanismlist')}";
 						}else{
-							showTip(data['message'],"error");
+							if(data['code']==-9999999){
+								showTip('请先删除机构老师',"error");
+							}else{
+								showTip(data['message'],"error");
+							}
+							
 						}
 					}
 				});

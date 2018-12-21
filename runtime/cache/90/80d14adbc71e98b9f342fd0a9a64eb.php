@@ -1,0 +1,3 @@
+<?php
+//000000000000s:485:"D:\phpstudy\WWW\hairdressing\runtime\cache\e3\73da4ec5cee745e6558d6639add1b7.php,D:\phpstudy\WWW\hairdressing\runtime\cache\58\7a397be6bcc5dc47ae9097a8c3472a.php,D:\phpstudy\WWW\hairdressing\runtime\cache\99\c1fca17b9e5e4b26826da6d4b55b25.php,D:\phpstudy\WWW\hairdressing\runtime\cache\1f\ec952ee44d79913f0fd187c8a7e595.php,D:\phpstudy\WWW\hairdressing\runtime\cache\ad\4995b83fecdd30f0f21ee93479e96a.php,D:\phpstudy\WWW\hairdressing\runtime\cache\53\beb397d2a492a7bc412217be382d71.php";
+?>

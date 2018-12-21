@@ -48,7 +48,7 @@ class NsCourseDeletedViewModel extends BaseModel {
             ng.update_time, ng.sort, ng.real_sales, ngc.category_id, ngc.category_name, ');*/
         $viewObj = $this->alias("ng")
             ->join('sys_album_picture ng_sap', 'ng_sap.pic_id = ng.picture', 'left')
-            ->field("ng.goods_id,ng.goods_name,ng.promotion_price,ng.crowd,ng.total_num,ng.market_price,ng.goods_type,ng.introduction,ng.state,ng.is_hot,ng.is_recommend,ng.is_new,ng.sales,ng_sap.pic_cover_micro,ng.create_time,ng.QRcode,ng.price,ng.total_num,ng.real_sales,ng.sort,ng.group_id_array,ng.allow_delete");
+            ->field("ng.goods_id,ng.goods_name,ng.promotion_price,ng.crowd,ng.total_num,ng.market_price,ng.goods_type,ng.introduction,ng.state,ng.is_hot,ng.is_recommend,ng.is_new,ng.sales,ng_sap.pic_cover_micro,ng.create_time,ng.QRcode,ng.price,ng.total_num,ng.release_num,ng.real_sales,ng.sort,ng.group_id_array,ng.allow_delete");
         $list = $this->viewPageQuery($viewObj, $page_index, $page_size, $condition, $order);
         if(!empty($list))
         {

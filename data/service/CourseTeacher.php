@@ -6,6 +6,7 @@ namespace data\service;
  */
 use data\service\BaseService as BaseService;
 use data\model\NsCourseTeacherModel as NsCourseTeacherModel;
+use data\model\NsCourseMechanismModel as NsCourseMechanismModel;
 use data\api\ICourseTeacher as ICourseTeacher;
 use data\model\NsGoodsModel;
 use data\model\NsGoodsBrandModel;
@@ -73,6 +74,8 @@ class CourseTeacher extends BaseService implements ICourseTeacher
         );
         if ($teacher_id == 0) {
             $result = $this->course_teacher->save($data);
+            $course_mechanism_model = new NsCourseMechanismModel();
+            $course_mechanism_model->where("mechanism_id={$mechanism_id}")->setInc('teacher_num',1);
             if ($result) {
                 $res = $this->course_teacher->teacher_id;
             } else {
@@ -98,12 +101,12 @@ class CourseTeacher extends BaseService implements ICourseTeacher
      * (non-PHPdoc)
      * @see \data\api\ICourseTeacher::deleteCourseTeacher()
      */
-    public function deleteCourseTeacher($teacher_id)
+    public function deleteCourseTeacher($mechanism_id,$teacher_id)
     {
         Cache::tag('niu_course_teacher')->clear();
         $res = $this->course_teacher->destroy($teacher_id);
-        // 删除分类商品楼层
-        //$this->deleteCourseTeacherBlock($category_id);
+        $course_mechanism_model = new NsCourseMechanismModel();
+        $course_mechanism_model->where("mechanism_id={$mechanism_id}")->setDec('teacher_num',1);
         hook("CourseTeacherDeleteSuccess", $teacher_id);
         return $res;
         // TODO Auto-generated method stub
@@ -147,6 +150,18 @@ class CourseTeacher extends BaseService implements ICourseTeacher
         } else {
             return $cache;
         }
+    }
+    /**
+     * 修改合作机构 单个字段
+     *
+     * @param unknown $category_id            
+     * @param unknown $order            
+     */
+    public function ModifyCourseTeacherField($teacher_id, $field_name, $field_value)
+    {
+        Cache::tag('niu_course_teacher')->clear();
+        $res = $this->course_teacher->ModifyTableField('teacher_id', $teacher_id, $field_name, $field_value);
+        return $res;
     }
     /*
      * (non-PHPdoc)

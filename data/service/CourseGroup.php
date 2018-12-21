@@ -1,7 +1,7 @@
 <?php
 namespace data\service;
 /**
- * 商品分类服务层
+ * 课程标签服务层
  */
 use data\service\BaseService as BaseService;
 use data\model\NsCourseGroupModel as NsCourseGroupModel;

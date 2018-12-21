@@ -94,6 +94,7 @@ i.hot,i.recommend,i.new{font-size:12px;margin-right:5px;font-style:normal;color:
 				<col width="25%">
 				<col width="12%">
 				<col width="9%">
+				<col width="9%">
 				<col width="8%">
 				<col width="7%">
 				<col width="15%">
@@ -108,6 +109,7 @@ i.hot,i.recommend,i.new{font-size:12px;margin-right:5px;font-style:normal;color:
 					<th style="text-align: left;">课程名称</th>
 					<th style="text-align: right;">价格（元）</td>
 					<th style="text-align: right;">总课数</th>
+					<th class="goods-fields-sort" data-field="stock" style="text-align: right;">发布课数<span class="desc"></span></th>
 					<th style="text-align: right;"> 销量</th>
 					<th style="text-align: center;">排序</th>
 					<th style="text-align: center;">操作</th>
@@ -211,7 +213,11 @@ function LoadingInfo(page_index) {
 								html += '<span class="pro-stock" style="color: #666;" id="moreChangeStock'+ data["data"][i]["goods_id"] + '">' + data["data"][i]["total_num"] + '</span>';
 							html += '</div>';
 						html += '</td>';
-
+						html += '<td style="text-align: right;">';
+							html += '<div class="cell">';
+								html += '<span class="pro-stock" style="color: #666;" id="moreChangeStock'+ data["data"][i]["goods_id"] + '">' + data["data"][i]["release_num"] + '</span>';
+							html += '</div>';
+						html += '</td>';
 						html += '<td style="text-align: right;">';
 							html += '<div class="cell">';
 								html += '<span class="pro-stock" style="color: #666;" id="moreChangeStock'+ data["data"][i]["goods_id"]+'">' + data["data"][i]["real_sales"] + '</span>';
@@ -293,6 +299,8 @@ function deleteGoods(goods_ids){
 							LoadingInfo(getCurrentIndex(goods_ids,'#productTbody','tr[class="tr-title"]'));
 							showTip(data["message"],"success");
 							$("#chek_all").prop("checked", false);
+						}else{
+							showTip(data["message"],"error");
 						}
 					}
 				});
