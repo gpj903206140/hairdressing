@@ -1,0 +1,52 @@
+{include file='course/default_new/header'/}
+<style type="text/css">
+    body{background: #121011}
+</style>
+<div class="topcontent teacher clearfix">
+    <div id="sliderx" class="mui-slider">
+        <div class="mui-slider-group mui-slider-loop">
+            <div class="mui-slider-item mui-slider-item-duplicate">
+                <a href="#">
+                    <img src="{:__IMG($last.introduce_pic)}">
+                </a>
+            </div>
+            <!-- 第一张 -->
+            {volist name="teacher_list" id="teacher" key="k"}
+            <div class="mui-slider-item">
+                <a href="#">
+                    {if condition="$teacher.introduce_pic"}
+                    <img src="{:__IMG($teacher.introduce_pic)}">
+                    {else/}
+                    <img src="__TEMP__/{$style}/public/images/temp/noImg.png">
+                    {/if}
+                </a>
+            </div>
+            {/volist}
+            <div class="mui-slider-item mui-slider-item-duplicate">
+                <a href="#">
+                    <img src="{:__IMG($teacher_list.0.introduce_pic)}">
+                </a>
+            </div>
+        </div>
+        <div class="mui-slider-indicator">
+            {volist name="teacher_list" id="teacher" key="k"}
+            <div class="mui-indicator {if condition='$ks eq 1'}mui-active{/if}"></div>
+            {/volist}
+        </div>
+    </div>
+</div>
+
+<script src="__TEMP__/{$style}/public/mui/js/mui.js"></script>
+<script type="text/javascript">
+    mui('body').on('tap', 'a', function () {
+        document.location.href = this.href;
+    })
+</script>
+<script type="text/javascript" charset="utf-8">
+    var gallery = mui('.mui-slider');
+    gallery.slider({
+        interval: 5000//自动轮播周期，若为0则不自动播放，默认为0；
+    });
+</script>
+</body>
+</html>

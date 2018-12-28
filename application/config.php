@@ -286,6 +286,7 @@ return [
         'PLATFORM_MAIN' => __URL__ . '/platform',
         'ADMIN_MAIN' => __URL__ . '/' . ADMIN_MODULE,
         'APP_MAIN' => __URL__ . '/wap',
+        'COURSE_MAIN' => __URL__ . '/course',
         'SHOP_MAIN' => __URL__ . '',
         '__UPLOAD__' => __ROOT__,
         '__MODULE__' => '/' . ADMIN_MODULE,

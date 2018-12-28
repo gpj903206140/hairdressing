@@ -8,6 +8,7 @@ use data\service\BaseService as BaseService;
 use data\model\NsCourseModel as NsCourseModel;
 use data\model\NsCourseCatalogueModel as NsCourseCatalogueModel;
 use data\model\NsCourseCatalogueVideoModel as NsCourseCatalogueVideoModel;
+use data\model\NsCourseVideoShareModel as videoShare;
 use data\api\ICourseCatalogue as ICourseCatalogue;
 use data\model\NsGoodsModel;
 use data\model\NsGoodsBrandModel;
@@ -102,12 +103,13 @@ class CourseCatalogue extends BaseService implements ICourseCatalogue
      * (non-PHPdoc)
      * @see \data\api\ICourseCatalogue::addOrEditCourseCatalogue()
      */
-    public function addOrEditCourseCatalogueVideo($video_id,$goods_id, $catalogue_id, $video_title, $teacher_id, $teacher_name, $sort, $video_url, $create_time)
+    public function addOrEditCourseCatalogueVideo($video_id,$goods_id, $try_see, $catalogue_id, $video_title, $teacher_id, $teacher_name, $sort, $video_url, $create_time)
     {
         Cache::tag('niu_course_catalogue_video')->clear();
         $course_catalogue_video_model = new NsCourseCatalogueVideoModel();
         $data = array(
             'goods_id' => $goods_id,
+            'try_see' => $try_see,
             'catalogue_id' => $catalogue_id,
             'video_title' => $video_title,
             'teacher_id' => $teacher_id,
@@ -198,7 +200,7 @@ class CourseCatalogue extends BaseService implements ICourseCatalogue
             
             $course_class_one = $course_catalogue_model->getQuery([
                 'goods_id'=>$goods_id
-            ], 'catalogue_id, catalogue_name,catalogue_pic,sort,is_visible,level', 'sort');
+            ], 'catalogue_id, catalogue_name,catalogue_pic,sort,is_visible,level,description', 'sort,catalogue_id');
            // Cache::tag("niu_course_teacher")->set("getteacherTreeUseInAdmin", $course_class_one);
             return $course_class_one;
        // } else {
@@ -273,6 +275,54 @@ class CourseCatalogue extends BaseService implements ICourseCatalogue
         return $res;
         // TODO Auto-generated method stub
     }
+    /*
+     * 带条件获取单条课程目录
+     * @see \data\api\ICourseCatalogue::getCourseCatalogueDetail()
+     */
+    public function getCourseCatalogueInfo($condition,$field='*')
+    {
+        $course_catalogue_model = new NsCourseCatalogueModel();
+        $res = $course_catalogue_model->getInfo($condition,$field);
+        return $res;
+        // TODO Auto-generated method stub
+    }
+
+     /*
+     * 添加分享记录
+     */
+    public function addCourseVideoShare($goods_id,$catalogue_id,$video_id,$uid)
+    {
+        Cache::tag('niu_course_video_share')->clear();
+        $data = array(
+            'goods_id' => $goods_id,
+            'catalogue_id' => $catalogue_id,
+            'video_id' => $video_id,
+            'uid' => $uid,
+            'create_time' => time(),
+        );
+        $videoShare = new videoShare();
+        $result = $videoShare->save($data);
+        /*$course = new NsCourseModel();
+        $course->where("goods_id={$goods_id}")->setInc('release_num',1);*/
+        if ($result) {
+            $res = $videoShare->share_id;
+        } else {
+            $res = $videoShare->getError();
+        }
+        return $res;
+        // TODO Auto-generated method stub
+    }
+
+    /*
+     * 获取用户分享记录数
+     */
+    public function getVideoShareCount($condition)
+    {
+        $videoShare = new videoShare();
+        $result = $videoShare->getCount($condition);
+        return $result;
+    }
+
     
 }
 

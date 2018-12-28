@@ -1,0 +1,158 @@
+{include file='course/default_new/header'/}
+
+<div class="rel">
+    <div class=" mui-content  mui-scroll-wrapper new-course wdgz" id="refreshContainer" style="top:0">
+        <div class="mui-scroll">
+            <ul class="mui-table-view " id="list"></ul>
+        </div>
+    </div>
+    <div id="list_c" style="display:none;">
+        <li class="mui-table-view-cell">
+            <a href="hezuo.html">
+                <div class="l">
+                    <img src="__TEMP__/{$style}/public/images/temp/hz1.jpg" class="photo-img hz-img bk small-img">
+                </div>
+                <div class="ssshool">
+                    时尚艺术造型学院
+                </div>
+                <div class="clearfix"></div>
+            </a>
+        </li>
+        <li class="mui-table-view-cell">
+            <a href="hezuo.html">
+                <div class="l">
+                    <img src="__TEMP__/{$style}/public/images/temp/hz1.jpg" class="photo-img hz-img bk small-img">
+                </div>
+                <div class="ssshool">
+                    时尚艺术造型学院
+                </div>
+                <div class="clearfix"></div>
+            </a>
+        </li>
+        <li class="mui-table-view-cell">
+            <a href="hezuo.html">
+                <div class="l">
+                    <img src="__TEMP__/{$style}/public/images/temp/hz1.jpg" class="photo-img hz-img bk small-img">
+                </div>
+                <div class="ssshool__TEMP__/{$style}/public/images                    时尚艺术造型学院
+                </div>
+                <div class="clearfix"></div>
+            </a>
+        </li>
+        <li class="mui-table-view-cell">
+            <a href="hezuo.html">
+                <div class="l">
+                    <img src="__TEMP__/{$style}/public/images/temp/hz1.jpg" class="photo-img hz-img bk small-img">
+                </div>
+                <div class="ssshool">
+                    时尚艺术造型学院
+                </div>
+                <div class="clearfix"></div>
+            </a>
+        </li>
+        <li class="wsj" style="display: none"><img src="__TEMP__/{$style}/public/images/wtp.png"><br>暂无数据</li>
+    </div>
+</div>
+<input type="hidden" id="page_count">
+<script src="__TEMP__/{$style}/public/mui/js/mui.js"></script>
+<script type="text/javascript">
+    mui('body').on('tap', 'a', function () {
+        document.location.href = this.href;
+    })
+    mui.init();
+    $(function () {
+        var count = 1;
+        mui.init({
+            pullRefresh: {
+                container: '#refreshContainer',
+                down: {
+                    auto: true,
+                    callback: function () {
+                        setTimeout(function () {
+                            count = 0;
+                            //$('#list').html($('#list_c').html());
+                            mui('#refreshContainer').pullRefresh().endPulldownToRefresh();
+                            mui('#refreshContainer').pullRefresh().endPullupToRefresh(false);
+                            ajaxPage(1);
+                            count++;
+                        }, 1000);
+                    }
+                },
+                up: {
+                    height: 50,//可选.默认50.触发上拉加载拖动距离
+                    callback: function () {
+                        setTimeout(function () {
+                            //$('#list').append($('#list_c').html());
+                            var page_count = $("#page_count").val();
+                            count++;
+                            mui('#refreshContainer').pullRefresh().endPullupToRefresh(count > page_count);
+                            ajaxPage();
+                        }, 1000);
+
+                    }
+                }
+            }
+        });
+    })
+    var page=2;
+    function ajaxPage(pages=0){
+        if(pages>0){
+            page=pages;
+        }
+        url="{:__URL('COURSE_MAIN/Index/mechanism_list')}&page_index="+page;
+        $.get(url,function(data){
+            if(data==0){
+                if(page==1){
+                   var wsj = $(".wsj").clone();
+                   $("#list").html("");
+                   $("#list").html(wsj);
+                   var len=$(".wsj").length;
+                   if(len>1){
+                    $(".wsj").eq(1).remove();
+                   }
+                   $(".wsj").show(); 
+                   $(".mui-pull").hide();
+                }
+            }else{
+                var myjson='';
+                eval('myjson='+data+'');
+                var html='';
+                var len=myjson['data'].length;
+                if(len>0){
+                    for(var i=0;i<len;i++){
+                        var item=myjson['data'][i];
+                        html+='<li class="mui-table-view-cell">';
+                            html+='<a href="'+__URL('COURSE_MAIN/Index/mechanismdetail?id='+item.mechanism_id)+'">';
+                                html+='<div class="l">';
+                                if(item.mechanism_pic){
+                                   var mechanism_pic=item.mechanism_pic;
+                                   html+='<img src="'+__IMG(item.mechanism_pic)+'"  class="photo-img hz-img bk small-img">';
+                                }else{
+                                   html+='<img src="__TEMP__/{$style}/public/images/temp/noImg.png"  class="photo-img hz-img bk small-img">'; 
+                                }
+                                html+='</div>';
+                                html+='<div class="ssshool">'+item.mechanism_name+'</div>';
+                                html+='<div class="clearfix"></div>';
+                            html+='</a>';
+                        html+='</li>';
+                    }
+                    page++;
+                }else{
+                    $(".wsj").show();
+                }
+                if(pages==1){
+                    $("#page_count").val(myjson['page_count']);
+                    $("#list").html(html);
+                }else{
+                    $("#list").append(html);
+                }
+                
+            }
+            
+            //$("#pages").html(myjson.page);
+        })
+        return false;
+    }
+</script>
+</body>
+</html>

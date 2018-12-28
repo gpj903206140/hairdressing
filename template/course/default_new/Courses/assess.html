@@ -1,0 +1,65 @@
+{include file='course/default_new/header'/}
+
+<div class="pinlun">
+    <div class="pinstar clearfix">
+        <div class="dafen">给该课程打分：</div>
+        <div class="pinxing">
+            <div id="rank" class="pingjiaxing ">
+                <ul>
+                    <li class="active"></li>
+                    <li class=""></li>
+                    <li class=""></li>
+                    <li class=""></li>
+                    <li class=""></li>
+                </ul>
+                <bdo id="score">2</bdo>
+            </div>
+        </div>
+    </div>
+    <textarea id="content" name="content" class="pinlun-textarea" placeholder="请输入评论内容..." id="content"></textarea>
+</div>
+<a href="javascript:;" class="tjbtn" id="issue">发布</a>
+
+
+<script src="__TEMP__/{$style}/public/mui/js/mui.js"></script>
+<script type="text/javascript">
+    mui('body').on('tap', 'a', function () {
+        document.location.href = this.href;
+    })
+    mui('body').on('tap', '#issue', function () {
+        var goods_id="{$goods_id}";
+        var score=$("#score").text();
+        var content=$("#content").val();
+        if(content==''){
+            layer.msg('请输入评论内容');
+            return false;
+        }
+        var url="{:__URL('COURSE_MAIN/courses/assess')}";
+        $.post(url,{goods_id:goods_id,score:score,content:content},function(result){
+            if(result==1){
+                layer.msg('课程评价成功');
+             }else if(result=2){
+                layer.msg('课程评价失败');
+             }
+             setTimeout(function(){window.history.go(-1);},1000); 
+            //setTimeout(function(){window.location.href="{:__URL('COURSE_MAIN/login')}";},1000);*/
+        })
+    })
+</script>
+<script type="text/javascript">
+    var shuzu = ['2', '4', '6', "8", '10'];
+    $(function () {
+        var liHightCount = 0;
+        $("#rank ul li").mouseover(function () {
+            $("#rank ul li").addClass("active");//给所有的li都高亮
+            $(this).nextAll("#rank li").removeClass("active");  //当前li-->后的li高亮样式类名remove
+            liHightCount = $("#rank ul").find("li.active").length; //获取高亮的li的个数
+            $("#rank bdo:eq(0)").show().html(shuzu[liHightCount - 1]);
+        }).click(function () {
+            $("#rank bdo:eq(0)").show().html(shuzu[liHightCount - 1]);
+
+        });
+    });
+</script>
+</body>
+</html>

@@ -98,6 +98,19 @@ class User extends BaseService implements IUser
          $retval = $this->user->save($data, ['uid' => $userid]);
          return $retval;
      }
+     /**
+      * (non-PHPdoc)
+      * @see \data\api\IUser::updateUsertelByUserid()
+      */
+     public function  updateUsernameSex($userid,$user_name,$sex){
+     
+         $data = array(
+             'nick_name' => $user_name,
+             'sex'=>$sex
+         );
+         $retval = $this->user->save($data, ['uid' => $userid]);
+         return $retval;
+     }
     /**
      * 获取当前登录用户的uid
      */

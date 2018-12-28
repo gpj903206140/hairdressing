@@ -5,6 +5,7 @@
 </style>
 {/block}
 {block name="main"}
+{include file="adminblue/Course/CourseInputCss"}
 <div class="space-10"></div>
 <div class="set-style">
 	<dl>
@@ -48,23 +49,28 @@
 		</dd>
 	</dl>
 	<dl>
+		<dt>介绍图片：</dt>
+		<dd>
+			<div class="upload-btn-common">
+				<div>
+					<input class="input-file" name="file_upload" id="uploadImg2" type="file" onchange="imgUpload2(this);" title="上传">
+					<input type="hidden" id="logo2" value="" />
+				</div>
+				<input type="text" id="text_logo2" class="input-common" readonly="readonly" value="" />
+				<em>上传</em>
+				
+				<img id="preview_logo2" src="__STATIC__/blue/img/upload-common-select.png" data-html="true" data-container="body" data-placement="top" data-trigger="manual"/>
+
+			</div>
+			<p class="hint">
+				<span>建议使用<i class="important-note">宽100</i>像素-<i class="important-note">高50</i>像素内的<i class="important-note">GIF</i>或<i class="important-note">PNG</i>透明图片；点击下方"保存"按钮后生效。</span>
+			</p>
+		</dd>
+	</dl>
+	<dl>
 		<dt>描述：</dt>
 		<dd>
 			<p><textarea id="description" placeholder="请输入描述" class="textarea-common"></textarea></p>
-		</dd>
-	</dl>
-	<!-- <dl>
-		<dt>电脑端分类页面模板：</dt>
-		<dd>
-			{$template_url['pc_template_url']}&nbsp;<input type="text" class="input-common harf" name="" id="pc_custom_template" style="width: 80px;" onkeyup="value=value.replace(/[^\w\.\/]/ig,'')">&nbsp;.html
-			<p class="hint">用户自定义模板必须存放在{$template_url['pc_template_url']}下，模板名只能由英文组成</p>
-		</dd>
-	</dl> -->
-	<dl>
-		<dt>手机端机构老师页面模板：</dt>
-		<dd>
-			{$template_url['wap_template_url']}&nbsp;<input type="text" class="input-common harf" name="" id="wap_custom_template" style="width: 80px;" onkeyup="value=value.replace(/[^\w\.\/]/ig,'')">&nbsp;.html
-			<p class="hint">用户自定义模板必须存放在{$template_url['wap_template_url']}下，模板名只能由英文组成</p>
 		</dd>
 	</dl>
 	<dl>
@@ -94,7 +100,22 @@ function imgUpload(event) {
 		}
 	});
 }
-
+//老师介绍图片
+function imgUpload2(event) {
+	var fileid = $(event).attr("id");
+	var id = $(event).next().attr("id");
+	var data = { 'file_path' : UPLOADGOODSCATEGORY };
+	uploadFile(fileid,data,function(res){
+		if(res.code){
+			$("#"+id).val(res.data);
+			$("#text_" + id).val(res.data);
+			$("#preview_" + id).attr("data-src",__IMG(res.data));
+			showTip(res.message,"success");
+		}else{
+			showTip(res.message,"error");
+		}
+	});
+}
 //模块输入信息验证
 function verify( teacher_name, sort, description){
 	if(teacher_name == '' || teacher_name.length>30){
@@ -114,13 +135,12 @@ function addGoodsCategoryAjax() {
 	var sort = $("#sort").val();
 	var description = $("#description").val();
 	var teacher_pic = $("#logo").val();
+	var introduce_pic = $("#logo2").val();
 	if($("#is_visible").prop("checked")){
 		var is_visible = 1;
 	}else{
 		var is_visible = 0;
 	}
-	var pc_custom_template = $("#pc_custom_template").val();
-	var wap_custom_template = $("#wap_custom_template").val();
 	if(verify(teacher_name, sort, description)){
 		if(flag) return;
 		flag = true;
@@ -134,8 +154,7 @@ function addGoodsCategoryAjax() {
 				'description' : description,
 				'is_visible' : is_visible,
 				"teacher_pic" : teacher_pic,
-				"pc_custom_template" : pc_custom_template,
-				"wap_custom_template" : wap_custom_template
+				"introduce_pic" : introduce_pic,
 			},
 			success : function(data) {
 				if (data["code"] > 0) {

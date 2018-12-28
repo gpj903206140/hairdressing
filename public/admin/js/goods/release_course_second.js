@@ -1145,7 +1145,6 @@ function SubmitProductInfo(type, ADMIN_MAIN,SHOP_MAIN) {//alert("1111");
 		$("#btnSave,#btnSavePreview").attr("disabled", "disabled");
 		var productViewObj = PackageProductInfo();
 		var $qrcode = $("#hidQRcode").val();
-		var $goods_kind = $("#goods_kind").val();
 		var $allow_delete = $("input[name='allow_delete']:checked").val();
 		if(flag) return;
 		flag = true;
@@ -1157,7 +1156,7 @@ function SubmitProductInfo(type, ADMIN_MAIN,SHOP_MAIN) {//alert("1111");
 			url : __URL(ADMINMAIN + "/course/CourseCreateOrUpdate"),
 			type : "post",
 			async : false,
-			data : { "product" : JSON.stringify(productViewObj) , "is_qrcode" : $qrcode , "goods_kind" : $goods_kind,"allow_delete":$allow_delete},
+			data : { "product" : JSON.stringify(productViewObj) , "is_qrcode" : $qrcode ,"allow_delete":$allow_delete},
 			dateType : "json",
 			success : function(res) {
 				var url = __URL(ADMIN_MAIN + "/course/courselist");
@@ -1210,9 +1209,10 @@ function PackageProductInfo() {
 	productViewObj.price = $("#txtProductSalePrice").val().replace(/^\s*/g, "").replace(/\s*$/g, "") == "" ? 0 : $("#txtProductSalePrice").val().replace(/^\s*/g, "").replace(/\s*$/g, "");// 销售价
 	productViewObj.libiary_goodsid = $("#libiary_goodsid").val(); // 课程库id
 	productViewObj.base_sales = $("#BasicSales").val() == '' ? 0 : $("#BasicSales").val();// 基础销量
-	productViewObj.base_good = $("#BasicPraise").val() == '' ? 0 : $("#BasicPraise").val();// 基础点赞数
-	productViewObj.base_share = $("#BasicShare").val() == '' ? 0 : $("#BasicShare").val();// 基础分享数
+	//productViewObj.base_good = $("#BasicPraise").val() == '' ? 0 : $("#BasicPraise").val();// 基础点赞数
+	//productViewObj.base_share = $("#BasicShare").val() == '' ? 0 : $("#BasicShare").val();// 基础分享数
 	productViewObj.is_sale = $("input[name='shelves']:checked").val();// 上下架标记
+	productViewObj.is_showprice = $("input[name='is_showprice']:checked").val();// 是否显示价格
 	productViewObj.key_words = $("#txtKeyWords").val().replace(/^\s*/g, "").replace(/\s*$/g, "");//课程关键词
 	productViewObj.description = UE.getEditor('editor').getContent().replace(/\n*/g, "").replace(/\r*/g, "");// 课程详情描述
 	productViewObj.pc_custom_template = $("#pc_custom_template").val();
@@ -1221,7 +1221,7 @@ function PackageProductInfo() {
     productViewObj.mechanism_id = $("#mechanism_id  option:selected").val();
 	productViewObj.teacher_id = $("#teacher_id  option:selected").val();
 	productViewObj.crowd = $("#crowd").val();
-	productViewObj.score = $("#BasicScore").val();
+	productViewObj.course_type = $("#course_type option:selected").val();
 	productViewObj.total_num = $("#total_num").val();
 	//alert(JSON.stringify(productViewObj));
 	// var shopCategoryText = "";

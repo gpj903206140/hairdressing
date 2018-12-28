@@ -22,7 +22,7 @@
 			
 			<li data-c="block-photo-video-setting"><a href="javascript:;">媒体设置</a></li>
 			<li data-c="block-goods-detail-setting"><a href="javascript:;">课程详情</a></li>
-			<li data-c="block-template-setting"><a href="javascript:;">模板设置</a></li>
+			<!-- <li data-c="block-template-setting"><a href="javascript:;">模板设置</a></li> -->
 		</ul>
 	</nav>
 	<!-- 基础设置 -->
@@ -113,7 +113,7 @@
 		</dl>
 		
 		<dl>
-			<dt>课程促销语：</dt>
+			<dt>课程副标题：</dt>
 			<dd>
 				<input class="productname input-common long" type="text" id="txtIntroduction" placeholder="请输入促销语，不能超过100个字符" {if condition="$goods_info"}value="{$goods_info.introduction}"{/if} oninput='if(value.length>100){value=value.slice(0,100);$(this).next().text("促销语不能超过100个字符").show();}else{$(this).next().hide();}'/>
 				<span class="help-inline">请输入课程促销语，不能超过100个字符</span>
@@ -166,7 +166,22 @@
 				</div>
 			</dd>
 		</dl>
-		
+		<dl>
+			<dt>课程类型：</dt>
+			<dd>
+			    <select class="productname input-common" id="course_type">
+			        {if condition="$goods_info"}
+                    <option value="0" {if condition="$goods_info.course_type eq 0"}selected{/if}>线上课程</option>
+                    <option value="1" {if condition="$goods_info.course_type eq 1"}selected{/if}>线下课程</option>
+                    <option value="2" {if condition="$goods_info.course_type eq 2"}selected{/if}>产品课程</option>
+                    {else /}
+                    <option value="0">线上课程</option>
+                    <option value="1">线下课程</option>
+                    <option value="2">产品课程</option>
+                    {/if}
+			    </select>
+			</dd>
+		</dl>
 		<dl>
 			<dt>基础销量：</dt>
 			<dd>
@@ -175,7 +190,7 @@
 				<span class="help-inline">基础销量必须是数字，且不能为负数</span>
 			</dd>
 		</dl>
-		<dl>
+		<!-- <dl>
 			<dt>基础点击数：</dt>
 			<dd>
 				<input type="number" class="span1 input-common harf" id="BasicPraise" placeholder="0" {if condition="$goods_info"}value="{$goods_info.clicks}"{/if} 
@@ -190,15 +205,15 @@
 				/><em class="unit">次</em>
 				<span class="help-inline">基础分享数必须是数字，且不能为负数</span>
 			</dd>
-		</dl>
-        <dl>
-			<dt>基础评分数：</dt>
-			<dd>
-				<input type="number" class="span1 input-common harf" id="BasicScore" placeholder="0" {if condition="$goods_info"}value="{$goods_info.score}"{/if} 
-				/><em class="unit">次</em>
-				<span class="help-inline">基础分享数必须是数字，且不能为负数</span>
-			</dd>
-		</dl>
+		</dl> -->
+        <!-- <dl>
+        			<dt>基础评分数：</dt>
+        			<dd>
+        				<input type="number" class="span1 input-common harf" id="BasicScore" placeholder="0" {if condition="$goods_info"}value="{$goods_info.score}"{/if} 
+        				/><em class="unit">次</em>
+        				<span class="help-inline">基础分享数必须是数字，且不能为负数</span>
+        			</dd>
+        		</dl> -->
 		<dl>
 			<dt>总课数：</dt>
 			<dd>
@@ -258,7 +273,56 @@
 		</dl>
 		
 		<h4>购买信息</h4>
-		
+		<dl>
+			<dt><i class="required">*</i>价格显示：</dt>
+			<dd>
+				<div class="controls">
+					{if condition="$goods_info"}
+						{if condition = "$goods_info.is_showprice eq 1"}
+						
+						<label class="radio inline normal">
+							<i class="radio-common">
+								<input type="radio" name="is_showprice" value="0" />
+							</i>
+							<span>不显示价格</span>
+						</label>
+						<label class="radio inline normal">
+							<i class="radio-common selected">
+								<input type="radio" name="is_showprice" value="1" checked="checked" />
+							</i>
+							<span>显示价格</span>
+						</label>
+						{else /}
+						<label class="radio inline normal">
+							<i class="radio-common selected">
+								<input type="radio" name="is_showprice" value="0" checked="checked" />
+							</i>
+							<span>不显示价格</span>
+						</label>
+						<label class="radio inline normal">
+							<i class="radio-common">
+								<input type="radio" name="is_showprice" value="1" />
+							</i>
+							<span>显示价格</span>
+						</label>
+						{/if}
+					{else/}
+						<label class="radio inline normal">
+							<i class="radio-common selected">
+								<input type="radio" name="is_showprice" value="0" checked="checked" />
+							</i>
+							<span>不显示价格</span>
+						</label>
+						<label class="radio inline normal">
+							<i class="radio-common">
+								<input type="radio" name="is_showprice" value="1" />
+							</i>
+							<span>显示价格</span>
+						</label>
+					{/if}
+				</div>
+			</dd>
+		</dl>
 		<dl>
 			<dt>市场价格：</dt>
 			<dd>
@@ -429,17 +493,17 @@
 		</div>
 	</div>
 	
-	<div class="block-template-setting">
+	<!-- <div class="block-template-setting">
 	
-		<!-- 模板设置 -->
+		模板设置
 		<h4>模板设置</h4>
-		<!-- <dl>
+		<dl>
 			<dt>电脑端：</dt>
 			<dd>
 				{$template_url['pc_template_url']}&nbsp;<input type="text" class="input-common harf" name="" id="pc_custom_template" value="{$goods_info.pc_custom_template}" style="width: 80px;" onkeyup="value=value.replace(/[^\w\.\/]/ig,'')">&nbsp;.html
 				<p class="hint">用户自定义模板必须存放在{$template_url['pc_template_url']}下，模板名只能由英文组成</p>
 			</dd>
-		</dl> -->
+		</dl>
 		<dl>
 			<dt>手机端：</dt>
 			<dd>
@@ -447,7 +511,7 @@
 				<p class="hint">用户自定义模板必须存放在{$template_url['wap_template_url']}下，模板名只能由英文组成</p>
 			</dd>
 		</dl>
-	</div>
+	</div> -->
 	
 	<div class="js-mask-category" style="position: fixed; width: 100%; height: 100%; top: 0px; left: 0px; right: 0px; bottom: 0px; z-index: 90; display: none; background: rgba(0, 0, 0, 0);"></div>
 	

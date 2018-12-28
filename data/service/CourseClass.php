@@ -86,7 +86,7 @@ class CourseClass extends BaseService implements ICourseClass
      * (non-PHPdoc)
      * @see \data\api\IGoodsCategory::addOrEditGoodsCategory()
      */
-    public function addOrEditGoodsCategory($category_id, $category_name, $short_name, $pid, $is_visible, $keywords = '', $description = '', $sort = 0, $category_pic, $attr_id = 0, $attr_name = '', $pc_custom_template, $wap_custom_template)
+    public function addOrEditGoodsCategory($category_id, $category_name, $short_name, $pid, $is_special, $is_visible, $keywords = '', $description = '', $sort = 0, $category_pic, $attr_id = 0, $attr_name = '', $pc_custom_template, $wap_custom_template)
     {
         Cache::tag('niu_course_class')->clear();
         if ($pid == 0) {
@@ -99,6 +99,7 @@ class CourseClass extends BaseService implements ICourseClass
             'short_name' => $short_name,
             'pid' => $pid,
             'level' => $level,
+            'is_special' => $is_special,
             'is_visible' => $is_visible,
             'keywords' => $keywords,
             'description' => $description,
@@ -736,7 +737,7 @@ class CourseClass extends BaseService implements ICourseClass
             
             $course_class_one = $course_class_model->getQuery([
                 'level' => 1
-            ], 'category_id, category_name,short_name,pid,category_pic,sort,attr_name,is_visible,level', 'sort');
+            ], 'category_id, category_name,short_name,pid,category_pic,sort,attr_name,is_special,is_visible,level', 'sort');
             if (! empty($course_class_one)) {
                 foreach ($course_class_one as $k_cat_one => $v_cat_one) {
                     $course_class_two_list = $course_class_model->getQuery([

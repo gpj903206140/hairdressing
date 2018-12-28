@@ -1,0 +1,259 @@
+{include file='course/default_new/header'/}
+<div class="bgwh gap gdpj">
+    <div class="cousetop ">
+        <div class="wzbt">课程评价（{$course_info.evaluates}）</div>
+    </div>
+    <div class="clearfix kcpfml">
+        <div class="dafen">课程评分：</div>
+        <div class="pinxing">
+            <div id="rank" class="pingjiaxing ">
+                <ul>
+                    <li class="{if condition='$course_info.score egt 2'}active{/if}"></li>
+                    <li class="{if condition='$course_info.score egt 4'}active{/if}"></li>
+                    <li class="{if condition='$course_info.score egt 6'}active{/if}"></li>
+                    <li class="{if condition='$course_info.score egt 8'}active{/if}"></li>
+                    <li class="{if condition='$course_info.score egt 10'}active{/if}"></li>
+                </ul>
+                <bdo id="score">{$course_info.score}</bdo>
+            </div>
+        </div>
+    </div>
+    <div class="pl-people clearfix">
+        <ul>
+            <li>收听人数（{$course_info.tune_num}）</li>
+            <li>购买人数（{$course_info.sales}）</li>
+        </ul>
+    </div>
+</div>
+<div class="rel">
+    <div class=" mui-content  mui-scroll-wrapper new-course pfym " id="refreshContainer">
+        <div class="mui-scroll">
+            <ul class="mui-table-view " id="list"></ul>
+        </div>
+    </div>
+    <div id="list_c" style="display:none;">
+        <li class="mui-table-view-cell">
+            <div class="txinform">
+                <div class="pinxing">
+                    <div  class="pingjiaxing ">
+                        <ul>
+                            <li class="active"></li>
+                            <li class="active"></li>
+                            <li class="active"></li>
+                            <li class="active"></li>
+                            <li class=""></li>
+                        </ul>
+                        <bdo >9</bdo>
+                    </div>
+                </div>
+                <div class="l"><img src="__TEMP__/{$style}/public/images/temp/tx.jpg" class="yjimg "></div>
+                <div class="plzl">
+                    <div class="txname">铥铥</div>
+                    <div class="date">10月20日 9:22</div>
+                    <div>只要剪女发时间超过5年、经过专业系统培训过的发型师，听这课程就懂了，何必在乎广告和造型呢?
+                    </div>
+                </div>
+            </div>
+        </li>
+        <li class="mui-table-view-cell">
+            <div class="txinform">
+                <div class="pinxing">
+                    <div  class="pingjiaxing ">
+                        <ul>
+                            <li class="active"></li>
+                            <li class="active"></li>
+                            <li class="active"></li>
+                            <li class="active"></li>
+                            <li class=""></li>
+                        </ul>
+                        <bdo >9</bdo>
+                    </div>
+                </div>
+                <div class="l"><img src="__TEMP__/{$style}/public/images/temp/tx.jpg" class="yjimg "></div>
+                <div class="plzl">
+                    <div class="txname">铥铥</div>
+                    <div class="date">10月20日 9:22</div>
+                    <div>只要剪女发时间超过5年、经过专业系统培训过的发型师，听这课程就懂了，何必在乎广告和造型呢?
+                    </div>
+                </div>
+            </div>
+        </li>
+        <li class="mui-table-view-cell">
+            <div class="txinform">
+                <div class="pinxing">
+                    <div  class="pingjiaxing ">
+                        <ul>
+                            <li class="active"></li>
+                            <li class="active"></li>
+                            <li class="active"></li>
+                            <li class="active"></li>
+                            <li class=""></li>
+                        </ul>
+                        <bdo >9</bdo>
+                    </div>
+                </div>
+                <div class="l"><img src="__TEMP__/{$style}/public/images/temp/tx.jpg" class="yjimg "></div>
+                <div class="plzl">
+                    <div class="txname">铥铥</div>
+                    <div class="date">10月20日 9:22</div>
+                    <div>只要剪女发时间超过5年、经过专业系统培训过的发型师，听这课程就懂了，何必在乎广告和造型呢?
+                    </div>
+                </div>
+            </div>
+        </li>
+
+        <li class="wsj" style="display: none"><img src="__TEMP__/{$style}/public/images/wtp.png"><br>暂无数据</li>
+    </div>
+</div>
+<input type="hidden" id="page_count">
+<script src="__TEMP__/{$style}/public/mui/js/mui.js"></script>
+<script type="text/javascript">
+    /*var shuzu = ['6', '7', '8', "9", '10'];
+    $(function () {
+        var liHightCount = 0;
+        $("#rank ul li").mouseover(function () {
+            $("#rank ul li").addClass("active");//给所有的li都高亮
+            $(this).nextAll("#rank li").removeClass("active");  //当前li-->后的li高亮样式类名remove
+            liHightCount = $("#rank ul").find("li.active").length; //获取高亮的li的个数
+            $("#rank bdo:eq(0)").show().html(shuzu[liHightCount - 1]);
+        }).click(function () {
+            $("#rank bdo:eq(0)").show().html(shuzu[liHightCount - 1]);
+
+        });
+    });*/
+</script>
+<script type="text/javascript">
+    mui('body').on('tap', 'a', function () {
+        document.location.href = this.href;
+    })
+    mui.init();
+    $(function () {
+        var count = 1;
+        mui.init({
+            pullRefresh: {
+                container: '#refreshContainer',
+                down: {
+                    auto: true,
+                    callback: function () {
+                        setTimeout(function () {
+                            count = 0;
+                            //$('#list').html($('#list_c').html());
+                            mui('#refreshContainer').pullRefresh().endPulldownToRefresh();
+                            mui('#refreshContainer').pullRefresh().endPullupToRefresh(false);
+                            ajaxPage(1);
+                            count++;
+                        }, 1000);
+                    }
+                },
+                up: {
+                    height: 50,//可选.默认50.触发上拉加载拖动距离
+                    callback: function () {
+                        setTimeout(function () {
+                            //$('#list').append($('#list_c').html());
+                            var page_count = $("#page_count").val();
+                            count++;
+                            mui('#refreshContainer').pullRefresh().endPullupToRefresh(count > page_count);
+                            ajaxPage();
+                        }, 1000);
+
+                    }
+                }
+            }
+        });
+    })
+    var page=2;
+    function ajaxPage(pages=0){
+        if(pages>0){
+            page=pages;
+        }
+        var goods_id="{$goods_id}";
+        url="{:__URL('COURSE_MAIN/courses/assessList')}";
+        $.post(url,{page_index:page,goods_id:goods_id},function(data){
+            if(data==0){
+                if(page==1){
+                   var wsj = $(".wsj").clone();
+                   $("#list").html("");
+                   $("#list").html(wsj);
+                   var len=$(".wsj").length;
+                   if(len>1){
+                    $(".wsj").eq(1).remove();
+                   }
+                   $(".wsj").show(); 
+                   $(".mui-pull").hide();
+                }
+            }else{
+                var myjson='';
+                eval('myjson='+data+'');
+                var html='';
+                var len=myjson['data'].length;
+                if(len>0){
+                    for(var i=0;i<len;i++){
+                        var item=myjson['data'][i];
+                        html+='<li class="mui-table-view-cell">';
+                            html+='<div class="txinform">';
+                                html+='<div class="pinxing">';
+                                    html+='<div  class="pingjiaxing ">';
+                                        html+='<ul>';
+                                            var active1='';
+                                            if(item.score>=2){
+                                                active1='active';
+                                            }
+                                            var active2='';
+                                            if(item.score>=4){
+                                                active2='active';
+                                            }
+                                            var active3='';
+                                            if(item.score>=6){
+                                                active3='active';
+                                            }
+                                            var active4='';
+                                            if(item.score>=8){
+                                                active4='active';
+                                            }
+                                            var active5='';
+                                            if(item.score>=10){
+                                                active5='active';
+                                            }
+                                            html+='<li class="'+active1+'"></li>';
+                                            html+='<li class="'+active2+'"></li>';
+                                            html+='<li class="'+active3+'"></li>';
+                                            html+='<li class="'+active4+'"></li>';
+                                            html+='<li class="'+active5+'"></li>';
+                                        html+='</ul>';
+                                        html+='<bdo >'+item.score+'</bdo>';
+                                    html+='</div>';
+                                html+='</div>';
+                                if(item.head_img!=''){
+                                    html+='<div class="l"><img src="'+item.head_img+'" class="yjimg "></div>';
+                                }else{
+                                    html+='<div class="l"><img src="__TEMP__/{$style}/public/images/temp/none-header.png" class="yjimg "></div>';
+                                }
+                                
+                                html+='<div class="plzl">';
+                                    html+='<div class="txname">'+item.member_name+'</div>';
+                                    html+='<div class="date">'+timeStampTurnTime(item.addtime)+'</div>';
+                                    html+='<div>'+item.content+'</div>';
+                                html+='</div>';
+                            html+='</div>';
+                        html+='</li>';
+                    }
+                    page++;
+                }else{
+                    $(".wsj").show();
+                }
+                if(pages==1){
+                    $("#page_count").val(myjson['page_count']);
+                    $("#list").html(html);
+                }else{
+                    $("#list").append(html);
+                }
+                
+            }
+            
+            //$("#pages").html(myjson.page);
+        })
+        return false;
+    }
+</script>
+</body>
+</html>

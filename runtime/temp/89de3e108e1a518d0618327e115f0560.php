@@ -1,4 +1,4 @@
-<?php if (!defined('THINK_PATH')) exit(); /*a:8:{s:41:"template/adminblue\Course\courseList.html";i:1545293749;s:28:"template/adminblue\base.html";i:1545011442;s:45:"template/adminblue\controlCommonVariable.html";i:1530933188;s:32:"template/adminblue\urlModel.html";i:1531183408;s:50:"template/adminblue\Course\courseThreeCategory.html";i:1545211966;s:50:"template/adminblue\Goods\batchProcessingModal.html";i:1522665946;s:34:"template/adminblue\pageCommon.html";i:1538099192;s:34:"template/adminblue\openDialog.html";i:1522669943;}*/ ?>
+<?php if (!defined('THINK_PATH')) exit(); /*a:8:{s:41:"template/adminblue\Course\courseList.html";i:1545633928;s:28:"template/adminblue\base.html";i:1545011442;s:45:"template/adminblue\controlCommonVariable.html";i:1530933188;s:32:"template/adminblue\urlModel.html";i:1531183408;s:50:"template/adminblue\Course\courseThreeCategory.html";i:1545211966;s:50:"template/adminblue\Goods\batchProcessingModal.html";i:1522665946;s:34:"template/adminblue\pageCommon.html";i:1538099192;s:34:"template/adminblue\openDialog.html";i:1522669943;}*/ ?>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -663,9 +663,9 @@ function __IMG(img_path){
 			<a class="btn-common-white recommend" href="javascript:ShowRecommend()" data-html="true" id="setRecommend" title="推荐"
 			data-container="body" data-placement="bottom"  data-trigger="manual"
 			data-content="<div class='edit-group' id='recommendType'>
-				<label class='checkbox-inline'><i class='checkbox-common'><input type='checkbox' value='1' /></i> 热卖 </label>
-				<label class='checkbox-inline'><i class='checkbox-common'><input type='checkbox' value='2' /></i> 精品 </label>
-				<label class='checkbox-inline'><i class='checkbox-common'><input type='checkbox' value='3' /></i> 新品 </label>
+				<label class='checkbox-inline'><i class='checkbox-common'><input type='checkbox' value='1' /></i> 热门 </label>
+				<label class='checkbox-inline'><i class='checkbox-common'><input type='checkbox' value='2' /></i> 推荐 </label>
+				<label class='checkbox-inline'><i class='checkbox-common'><input type='checkbox' value='3' /></i> 最新 </label>
 				</div>
 				<button class='btn-common btn-small' onclick='setRecommend();'>保存</button>
 				<button class='btn btn-small' onclick='hideSetRecommend()'>取消</button>
@@ -688,7 +688,7 @@ function __IMG(img_path){
 				<button class='btn btn-small' onclick='hideEditGroup()'>取消</button>
 				">
 				课程标签</a>
-			<a href="javascript:batchUpdateGoodsQrcode();;" class="btn-common-white fun-a category" title="更新二维码">更新二维码</a>
+			<!-- <a href="javascript:batchUpdateGoodsQrcode();;" class="btn-common-white fun-a category" title="更新二维码">更新二维码</a> -->
 			<input type='hidden' id='goods_type_ids'/>
 		</th>
 		<th style="position: relative;">
@@ -1905,12 +1905,12 @@ function LoadingInfo(page_index) {
 							html += '<div style="display: inline-block; width: 100%;font-size:12px;color:#666;" class="pro-code">';
 								html += '<span></span>';
 								html += '<span class="pro-code" style="margin-left:10px;">创建时间：'+timeStampTurnTime(data["data"][i]["create_time"]);
-									html += '<span class="div-flag-style" style="display: inline-block;margin:0 20px;position:relative">';
+									/*html += '<span class="div-flag-style" style="display: inline-block;margin:0 20px;position:relative">';
 										html += '<i class="icon-qrcode"style="background: none; color: #555; font-size: 20px; margin-right: 0;"></i>';
 										html += '<div class="QRcode" style="display: none; position: absolute;width:110px;top:28px;left:0;z-index:10;"id="qrcode">';
 											html += '<p><img src="'+ __IMG(data["data"][i]["QRcode"])+'" style="width:110px;"></p>';
 										html += '</div>';
-									html += '</span>';
+									html += '</span>';*/
 								html += '</span>';
 							html += '</div>';
 						html += '</td>';
@@ -1946,7 +1946,7 @@ function LoadingInfo(page_index) {
 									}
 									html += '<div style="position: relative;margin-left: 75px;">';
 										html += data["data"][i]["is_hot"] == 1 ? '<i class="hot">热</i>' : '';
-										html += data["data"][i]["is_recommend"] == 1 ? '<i class="recommend">精</i>' : '';
+										html += data["data"][i]["is_recommend"] == 1 ? '<i class="recommend">推</i>' : '';
 										html += data["data"][i]["is_new"] == 1 ? '<i class="new">新</i>' : '';
 										if(data["data"][i]['goods_group_name'] != '' && data["data"][i]['goods_group_name'] != undefined){
 											var tmp_array = data["data"][i]['goods_group_name'].split(",");
@@ -2005,8 +2005,9 @@ function LoadingInfo(page_index) {
 								if(data["data"][i]["allow_delete"]==1){
 									html += '<a href="javascript:deleteGoods(' + data["data"][i]["goods_id"] + ')" title="删除课程">删除</a>';
 								}
+								html += '<br/><a href="' + __URL("ADMIN_MAIN/course/addCourseCatalogue?goods_id="+ data["data"][i]["goods_id"]) + '" title="添加目录" >添加目录</a>';
 								if(data["data"][i]["state"] == 1){
-									html += '<br/><a href="javascript:modifyGoodsOnline('+data["data"][i]["goods_id"]+',\'offline\')">下架</a>';
+									html += '<a href="javascript:modifyGoodsOnline('+data["data"][i]["goods_id"]+',\'offline\')">下架</a>';
 								}else{
 									html += '<br/><a href="javascript:modifyGoodsOnline('+data["data"][i]["goods_id"]+',\'online\')" style="color:#999;">上架</a>';
 								}
@@ -2306,7 +2307,7 @@ function changeSort(event){
 	var goods_id = $(event).attr("goods_id");
 	$.ajax({
 		type : "post",
-		url : "<?php echo __URL('ADMIN_MAIN/course/updateGoodsSortAjax'); ?>",
+		url : "<?php echo __URL('ADMIN_MAIN/course/updateCourseSortAjax'); ?>",
 		data : { "sort" : sort, "goods_id" : goods_id },
 		success : function(data){
 			if(data.code>0){

@@ -1,0 +1,194 @@
+{include file='course/default_new/header'/}
+
+<div class="rel">
+    <div id="segmentedControl" class="mui-segmented-control mui-segmented-control-inverted switch">
+        <a class="mui-control-item {if condition='$course_type eq 0'}mui-active{/if}" href="{:__URL('COURSE_MAIN/Member/my_collect&course_type=0')}">线上课程 <span></span></a>
+        <a class="mui-control-item {if condition='$course_type eq 1'}mui-active{/if}" href="{:__URL('COURSE_MAIN/Member/my_collect&course_type=1')}">线下课程<span></span></a>
+        <a class="mui-control-item {if condition='$course_type eq 2'}mui-active{/if}" href="{:__URL('COURSE_MAIN/Member/my_collect&course_type=2')}">产品课程<span></span></a>
+    </div>
+    <div class=" mui-content  mui-scroll-wrapper new-course " id="refreshContainer">
+        <div class="mui-scroll">
+            <ul class="mui-table-view " id="list"></ul>
+        </div>
+    </div>
+    <div id="list_c" style="display:none;">
+        <li class="mui-table-view-cell">
+            <a  href="kc_jieshao.html">
+                <div class="img-jq l" style="background-image: url('__TEMP__/{$style}/public/images/temp/new.jpg')"></div>
+                <div class="juli">
+                    <div class="ssbt">
+                        <div class="l"><span class="fashion-tab">时尚美发</span></div>
+                       <!-- <div class="r"><i class="icon icon-star"></i><span class="juse">8.6</span></div>-->
+                    </div>
+                    <div class="course-bt">国际联盟美发师顶尖强化班</div>
+                    <div class="zhineng">这是美业史上最简单易学，最成体系的造宝典</div>
+                    <div class="clearfix rel">
+                        <div class="listen">4201人收藏</div>
+                        <div class="price">￥79.00</div>
+                    </div>
+                </div>
+            </a>
+        </li>
+        <li class="mui-table-view-cell">
+            <a  href="kc_jieshao.html">
+                <div class="img-jq l" style="background-image: url('__TEMP__/{$style}/public/images/temp/new.jpg')"></div>
+                <div class="juli">
+                    <div class="ssbt">
+                        <div class="l"><span class="fashion-tab">时尚美发</span></div>
+                        <!--<div class="r"><i class="icon icon-star"></i><span class="juse">8.6</span></div>-->
+                    </div>
+                    <div class="course-bt">国际联盟美发师顶尖强化班</div>
+                    <div class="zhineng">这是美业史上最简单易学，最成体系的造宝典</div>
+                    <div class="clearfix rel">
+                        <div class="listen">4201人收藏</div>
+                        <div class="price">￥79.00</div>
+                    </div>
+                </div>
+            </a>
+        </li>
+
+        <li class="wsj" style="display: none"><img src="__TEMP__/{$style}/public/images/wtp.png"><br>暂无数据</li>
+    </div>
+</div>
+<input type="hidden" id="page_count">
+{include file='course/default_new/footer'/}
+<script type="text/javascript">
+    mui('body').on('tap', 'a', function () {
+        document.location.href = this.href;
+    })
+    mui('body').on('tap', '.follow', function () {
+        var ai=$(this);
+        var cover_id=$(this).attr('data-id');
+        var cover_name=$(this).attr('data-name');
+        var state=0;
+        var url="{:__URL('COURSE_MAIN/Courses/follow')}";
+        $.post(url,{cover_id:cover_id,cover_name:cover_name,state:state},function(reslut){
+            if(reslut==1){
+                layer.msg('收藏成功');
+                ai.addClass("active");
+            }else if(reslut==2){
+                layer.msg('收藏失败');
+            }else if(reslut==3){
+                layer.msg('取消收藏成功');
+                ai.parents('li').remove();
+            }else if(reslut==4){
+                layer.msg('取消收藏失败');
+            }else if(reslut==5){
+                layer.msg('你还未登录,请先登录!');
+                
+                setTimeout(function(){window.location.href="{:__URL('COURSE_MAIN/login')}";},1000);
+            }
+        })
+    })
+    mui.init();
+    $(function () {
+        var count = 1;
+        mui.init({
+            pullRefresh: {
+                container: '#refreshContainer',
+                down: {
+                    auto: true,
+                    callback: function () {
+                        setTimeout(function () {
+                            count = 0;
+                            //$('#list').html($('#list_c').html());
+                            mui('#refreshContainer').pullRefresh().endPulldownToRefresh();
+                            mui('#refreshContainer').pullRefresh().endPullupToRefresh(false);
+                            ajaxPage(1);
+                            count++;
+                        }, 1000);
+                    }
+                },
+                up: {
+                    height: 50,//可选.默认50.触发上拉加载拖动距离
+                    callback: function () {
+                        setTimeout(function () {
+                            //$('#list').append($('#list_c').html());
+                            var page_count = $("#page_count").val();
+                            count++;
+                            mui('#refreshContainer').pullRefresh().endPullupToRefresh(count > page_count);
+                            ajaxPage();
+                        }, 1000);
+
+                    }
+                }
+            }
+        });
+    })
+    var page=2;
+    function ajaxPage(pages=0){
+        if(pages>0){
+            page=pages;
+        }
+        course_types="&course_type={$course_type}";
+        url="{:__URL('COURSE_MAIN/member/my_collect')}&page_index="+page+course_types;
+        $.get(url,function(data){
+            if(data==0){
+                if(page==1){
+                   var wsj = $(".wsj").clone();
+                   $("#list").html("");
+                   $("#list").html(wsj);
+                   var len=$(".wsj").length;
+                   if(len>1){
+                    $(".wsj").eq(1).remove();
+                   }
+                   $(".wsj").show(); 
+                   $(".mui-pull").hide();
+                }
+            }else{
+                var myjson='';
+                eval('myjson='+data+'');
+                var html='';
+                var len=myjson['data'].length;
+                if(len>0){
+                    for(var i=0;i<len;i++){
+                        var item=myjson['data'][i];
+                        html+='<li class="mui-table-view-cell" data-id="'+item.goods_id+'" style="position:relative;">';
+                            html+='<a  href="'+__URL('COURSE_MAIN/courses/coursedetail?id='+item.goods_id)+'">';
+                            //html+='<a  href="javascript:;">';
+                                if(item.picture_info.pic_cover){
+                                   var pic_cover=item.picture_info.pic_cover;
+                                   html+='<div class="img-jq l link" style="background-image: url('+__IMG(item.picture_info.pic_cover)+')"></div>';
+                                }else{ 
+                                   html+='<div class="img-jq l link" style="background-image: url("__TEMP__/{$style}/public/images/temp/noImg.png")"></div>';
+                                }
+                                html+='<div class="juli">';
+                                    html+='<div class="ssbt">';
+                                        html+='<div class="l"><span class="fashion-tab">'+item['goods_group_name'][0]+'</span></div>';
+                                        
+                                    html+='</div>';
+                                    html+='<div class="course-bt link">'+item.goods_name+'</div>';
+                                    html+='<div class="zhineng link">'+item.introduction+'</div>';
+                                    html+='<div class="clearfix rel">';
+                                        html+='<div class="listen">'+item.collects+'人收藏</div>';
+                                        html+='<div class="price" style="height: 1.5rem;">';
+                                        if(item.is_showprice==1){
+                                        html+='￥'+item.price;
+                                        }
+                                        html+='</div>';
+                                    html+='</div>';
+                                html+='</div>';
+                            html+='</a>';
+                            html+='<div class="r follow" style="color:#ff8f00;position: absolute;right:5%;top:16px;" data-id="'+item.goods_id+'">取消收藏</div>';
+                       html+='</li>';
+                    }
+                    page++;
+                }else{
+                    $(".wsj").show();
+                }
+                if(pages==1){
+                    $("#page_count").val(myjson['page_count']);
+                    $("#list").html(html);
+                }else{
+                    $("#list").append(html);
+                }
+                
+            }
+            
+            //$("#pages").html(myjson.page);
+        })
+        return false;
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+{include file='course/default_new/header'/}
+
+<div class="rel">
+    <div class=" mui-content  mui-scroll-wrapper new-course " id="refreshContainer" style="top:0" >
+        <div class="mui-scroll">
+            <ul class="mui-table-view " id="list"></ul>
+        </div>
+    </div>
+    <div id="list_c" style="display:none;">
+        {if condition="count($withdraws) neq 0 "}
+            {volist name="withdraws.data" id="vo"}
+            <li class="mui-table-view-cell">
+                <div class="l">
+                    <div class="lq">{$vo['bank_name']}({$vo['status']})  {$vo['account_number']}</div>
+                    <div class="lqdate">{$vo['ask_for_date'] | getTimeStampTurnTime}</div>
+                </div>
+                <div class="r">
+                    {$vo['cash']}
+                </div>
+                <div class="clearfix"></div>
+            </li>
+            {/volist}
+            {else/}
+            <li class="wsj" style="display: none"><img src="__TEMP__/{$style}/public/images/wtp.png"><br>暂无数据</li>
+            {/if}
+
+        <li class="wsj" style="display: none"><img src="__TEMP__/{$style}/public/images/wtp.png"><br>暂无数据</li>
+    </div>
+</div>
+{include file='course/default_new/footer'/}
+<script type="text/javascript">
+    mui('body').on('tap', 'a', function () {
+        document.location.href = this.href;
+    })
+    mui.init();
+    $(function () {
+        var count = 1;
+        mui.init({
+            pullRefresh: {
+                container: '#refreshContainer',
+                down: {
+                    auto: true,
+                    callback: function () {
+                        setTimeout(function () {
+                            count = 0;
+                            $('#list').html($('#list_c').html());
+                            mui('#refreshContainer').pullRefresh().endPulldownToRefresh();
+                            mui('#refreshContainer').pullRefresh().endPullupToRefresh(false);
+                            count++;
+                        }, 1000);
+                    }
+                }/*,
+                up: {
+                    height: 50,//可选.默认50.触发上拉加载拖动距离
+                    callback: function () {
+                        setTimeout(function () {
+                            $('#list').append($('#list_c').html());
+                            count++;
+                            mui('#refreshContainer').pullRefresh().endPullupToRefresh(count > 3);
+                        }, 1000);
+
+                    }
+                }*/
+            }
+        });
+    })
+</script>
+</body>
+</html>

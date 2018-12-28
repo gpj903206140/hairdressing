@@ -13,6 +13,7 @@
 </style>
 {/block}
 {block name="main"}
+{include file="adminblue/Course/CourseInputCss"}
 <div class="space-10"></div>
 <div class="set-style">
 	<input id="goods_id" type="hidden"value="{$goods_id}">
@@ -79,14 +80,14 @@
 						<span class="del-video hide" onclick="del_video()"></span>
 					{/if}
 				</div>
-				<input class="input-file" name="file_upload" id="videoupload" type="file" onchange="fileUpload_video(this);" title="视频上传" style="position: absolute;left: 0;width: 290px;height: 140px;opacity: 0;cursor: pointer;z-index:10;" />
+				<input class="input-file" name="file_upload" id="videoupload" type="file" onchange="fileUpload_video(this);" title="视频上传" style="position: absolute;left: 0;height: 140px;opacity: 0;cursor: pointer;z-index:10;" />
 			</div>
 		</dd>
 	</dl>
     <dl>
 		<dt>输入网址：</dt>
 		<dd>
-			<input type="text" id="video_url" class="input-common" style="width: 290px !important;" placeholder="在此输入外链视频地址" value="{if condition="$data.video_url"}{$data.video_url}{/if}"/>
+			<input type="text" id="video_url" class="input-common" style="" placeholder="在此输入外链视频地址" value="{if condition="$data.video_url"}{$data.video_url}{/if}"/>
 			<p class="hint">
 				<span>展示视频<i class="important-note">支持手动输入外链视频地址</i>或者<i class="important-note">上传本地视频</i></span>
 			</p>
@@ -98,20 +99,7 @@
 			<p><textarea id="description" placeholder="请输入描述" class="textarea-common">{$data.description}</textarea></p>
 		</dd>
 	</dl>
-	<!-- <dl>
-		<dt>电脑端分类页面模板：</dt>
-		<dd>
-			{$template_url['pc_template_url']}&nbsp;<input type="text" class="input-common harf" name="" value="{$data.pc_custom_template}" id="pc_custom_template" style="width: 80px;" onkeyup="value=value.replace(/[^\w\.\/]/ig,'')">&nbsp;.html
-			<p class="hint">用户自定义模板必须存放在{$template_url['pc_template_url']}下，模板名只能由英文组成</p>
-		</dd>
-	</dl> -->
-	<dl>
-		<dt>手机端课程目录页面模板：</dt>
-		<dd>
-			{$template_url['wap_template_url']}&nbsp;<input type="text" class="input-common harf" name="" value="{$data.wap_custom_template}" id="wap_custom_template" style="width: 80px;" onkeyup="value=value.replace(/[^\w\.\/]/ig,'')">&nbsp;.html
-			<p class="hint">用户自定义模板必须存放在{$template_url['wap_template_url']}下，模板名只能由英文组成</p>
-		</dd>
-	</dl>
+	
 	<dl>
 		<dt></dt>
 		<dd>
@@ -193,8 +181,6 @@ function updateGoodsCategoryAjax() {
 	}else{
 		var is_visible = 0;
 	}
-	var pc_custom_template = $("#pc_custom_template").val();
-	var wap_custom_template = $("#wap_custom_template").val();
 	if(verify(catalogue_name, sort, description)){
 		$.ajax({
 			type : "post",
@@ -209,8 +195,6 @@ function updateGoodsCategoryAjax() {
 				"catalogue_pic" : catalogue_pic,
 				"video_url" : video_url,
 				//'goods_category_quick' : JSON.stringify(getCookieGoodsCategory(catalogue_id)),
-				"pc_custom_template" : pc_custom_template,
-				"wap_custom_template" : wap_custom_template
 			},
 			success : function(data) {
 				if (data["code"] > 0) {

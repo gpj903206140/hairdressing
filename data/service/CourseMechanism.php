@@ -217,6 +217,26 @@ class CourseMechanism extends BaseService implements ICourseMechanism
         // TODO Auto-generated method stub
     }
     
+    /**
+     * 单个字段数值加或减
+     * @param  [type] $goods_id   [description]
+     * @param  [type] $field_name [description]
+     * @param  [type] $status     [description]
+     * @return [type]             [description]
+     */
+    public function updateFiledNum($mechanism_id,$field_name,$status=1,$num=1)
+    {
+        $course_mechanism_model = new NsCourseMechanismModel();
+        if($status==1){ //加
+            $return = $course_mechanism_model->where(['mechanism_id'=>$mechanism_id])->setInc($field_name,$num);
+            return $return;
+        }elseif($status==2){ //减
+            $return = $course_mechanism_model->where(['mechanism_id'=>$mechanism_id])->setDec($field_name,$num);
+            return $return;
+        }
+        return false;
+    }
+    
 }
 
 ?>

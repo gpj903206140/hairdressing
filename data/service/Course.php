@@ -23,7 +23,9 @@ use data\model\NsCourseDeletedViewModel;
 use data\model\NsGoodsEvaluateModel;
 use data\model\NsGoodsGroupModel as NsGoodsGroupModel;
 use data\model\NsCourseModel as NsCourseModel;
+use data\model\NsCourseViewModel as NsCourseViewModel;
 use data\model\NsCourseClassModel as NsCourseClassModel;
+use data\model\NsCourseAssessModel as NsCourseAssessModel;
 use data\model\NsGoodsSkuDeletedModel;
 use data\model\NsGoodsSkuModel as NsGoodsSkuModel;
 use data\model\NsGoodsSkuPictureDeleteModel;
@@ -144,7 +146,6 @@ class Course extends BaseService implements ICourse
     {
         
     }
-
     /**
      * 直接查询课程列表
      *
@@ -155,8 +156,9 @@ class Course extends BaseService implements ICourse
      */
     public function getGoodsViewList($page_index = 1, $page_size = 0, $condition = '', $order = 'ng.sort asc')
     {
-        $goods_view = new NsGoodsViewModel();
-        $list = $goods_view->getGoodsViewList($page_index, $page_size, $condition, $order);
+        $goods_view = new NsCourseViewModel();
+        $list = $goods_view->getCourseViewList($page_index, $page_size, $condition, $order);
+
         return $list;
     }
 
@@ -265,13 +267,12 @@ class Course extends BaseService implements ICourse
     public function addOrEditGoods(
         $goods_id, $goods_name, $shopid, $category_id, $category_id_1
         ,$category_id_2, $category_id_3, $group_id_array, $goods_type, $market_price
-        , $price, $clicks, $sales, $collects, $star
-        , $evaluates, $shares, $picture, $keywords, $introduction
-        , $description, $QRcode, $is_hot, $is_recommend, $is_new
-        , $sort, $image_array, $sort, $extend_category_id, $state
-        , $pc_custom_template, $wap_custom_template,$allow_delete
-        ,$mechanism_id, $teacher_id,$crowd, $score,$total_num,$release_num
-        ,$promotion_price,$goods_video_address
+        , $price, $is_showprice, $collects, $evaluates, $shares
+        , $picture, $keywords, $introduction, $description, $QRcode
+        , $is_hot, $is_recommend, $is_new, $sort, $image_array
+        , $extend_category_id, $state, $pc_custom_template, $wap_custom_template,$allow_delete
+        ,$mechanism_id, $teacher_id,$crowd, $course_type,$total_num
+        ,$release_num,$promotion_price,$goods_video_address
     )
     {
         Cache::tag("niu_course_group")->clear();
@@ -320,10 +321,8 @@ class Course extends BaseService implements ICourse
                 'goods_type' => $goods_type,
                 'market_price' => $market_price,
                 'price' => $price,
-                'clicks' => $clicks,
-                'sales' => $sales,
+                'is_showprice' => $is_showprice,
                 'collects' => $collects,
-                'star' => $star,
                 'evaluates' => $evaluates,
                 'shares' => $shares,
                 'picture' => $picture,
@@ -347,7 +346,7 @@ class Course extends BaseService implements ICourse
                 'mechanism_id' => $mechanism_id,
                 'teacher_id' => $teacher_id,
                 'crowd' => $crowd,
-                'score' => $score,
+                'course_type' => $course_type,
                 'total_num'=>$total_num,
                 'release_num'=>$release_num,
                 'promotion_price'=>$promotion_price,
@@ -979,7 +978,7 @@ class Course extends BaseService implements ICourse
     private function getGoodsCategoryId($category_id)
     {
         // 获取分类层级
-        $goods_category = new NsGoodsCategoryModel();
+        $goods_category = new NsCourseClassModel();
         $info = $goods_category->get($category_id);
         if ($info['level'] == 1) {
             return array(
@@ -1049,7 +1048,31 @@ class Course extends BaseService implements ICourse
      */
     public function getSearchGoodsList($page_index = 1, $page_size = 0, $condition = '', $order = '', $field = '*')
     {
-        
+        $result = $this->course->pageQuery($page_index, $page_size, $condition, $order, $field);
+        foreach ($result['data'] as $k => $v) {
+            $picture = new AlbumPictureModel();
+            $pic_info = array();
+            $pic_info['pic_cover'] = '';
+            if (! empty($v['picture'])) {
+                $pic_info = $picture->get($v['picture']);
+            }
+            $result['data'][$k]['picture_info'] = $pic_info;
+            // 根据商品分组id，查询标签名称
+            if (! empty($v['group_id_array'])) {
+                $goods_group_id = explode(',', $v['group_id_array']);
+                $goods_group_name = '';
+                foreach ($goods_group_id as $key => $val) {
+                    $course_group = new CourseGroup();
+                    $goods_group_info = $course_group->getGoodsGroupDetail($val);
+                    if (! empty($goods_group_info)) {
+                        $goods_group_name .= $goods_group_info['group_name'] . ',';
+                    }
+                }
+                $goods_group_name = rtrim($goods_group_name, ',');
+                $result["data"][$k]['goods_group_name'] = explode(',',$goods_group_name);
+            }
+        }
+        return $result;
     }
 
     /**
@@ -1215,13 +1238,14 @@ class Course extends BaseService implements ICourse
     }
 
     /**
-     * (non-PHPdoc)
+     * (non-PHPdoc) 课程评价
      *
      * @see \data\api\IGoods::getGoodsEvaluateList()
      */
     public function getGoodsEvaluateList($page_index = 1, $page_size = 0, $condition = array(), $order = '', $field = '*')
     {
-        
+        $courseAssessModel = new NsCourseAssessModel();
+        return $courseAssessModel->pageQuery($page_index, $page_size, $condition, $order, $field);
     }
 
     /**
@@ -1447,17 +1471,50 @@ class Course extends BaseService implements ICourse
 
     public function addGoodsEvaluateReply($id, $replyContent, $replyType)
     {
-        
+        $goodsEvaluate = new NsCourseAssessModel();
+        if ($replyType == 1) {
+            return $goodsEvaluate->save([
+                'explain_first' => $replyContent
+            ], [
+                'id' => $id
+            ]);
+        } elseif ($replyType == 2) {
+            return $goodsEvaluate->save([
+                'again_explain' => $replyContent
+            ], [
+                'id' => $id
+            ]);
+        }
     }
 
     public function setEvaluateShowStatu($id)
     {
-        
+        $goodsEvaluate = new NsCourseAssessModel();
+        $showStatu = $goodsEvaluate->getInfo([
+            'id' => $id
+        ], 'is_show');
+        if ($showStatu['is_show'] == 1) {
+            return $goodsEvaluate->save([
+                'is_show' => 0
+            ], [
+                'id' => $id
+            ]);
+        } elseif ($showStatu['is_show'] == 0) {
+            return $goodsEvaluate->save([
+                'is_show' => 1
+            ], [
+                'id' => $id
+            ]);
+        }
     }
 
     public function deleteEvaluate($id)
     {
-        
+        $goodsEvaluate = new NsCourseAssessModel();
+        $info = $goodsEvaluate->getInfo(['id'=>$id],'goods_id');
+        $res =  $goodsEvaluate->destroy($id);
+        $this->course->where("goods_id={$info['goods_id']}")->setDec('evaluates',1);
+        return $res;
     }
 
     /**
@@ -1788,17 +1845,17 @@ class Course extends BaseService implements ICourse
 
 , $goods_detail["category_id_2"], $goods_detail["category_id_3"], $goods_detail["group_id_array"], $goods_detail['goods_type'], $goods_detail["market_price"]
 
-, $goods_detail["price"], $goods_detail["clicks"], $goods_detail["sales"], $goods_detail["collects"], $goods_detail["star"]
+, $goods_detail["price"], $goods_detail["is_showprice"], $goods_detail["collects"], $goods_detail["evaluates"], $goods_detail["shares"]
 
-  , $goods_detail["evaluates"], $goods_detail["shares"], $goods_detail["picture"], $goods_detail['keywords'], $goods_detail["introduction"]
+, $goods_detail["picture"], $goods_detail['keywords'], $goods_detail["introduction"],$goods_detail["description"], $goods_detail['QRcode']
 
-,$goods_detail["description"], $goods_detail['QRcode'], $goods_detail["is_hot"], $goods_detail["is_recommend"], $goods_detail["is_new"]
+, $goods_detail["is_hot"], $goods_detail["is_recommend"], $goods_detail["is_new"],$goods_detail['sort'], $goods_detail["img_id_array"]
 
- ,$goods_detail['sort'], $goods_detail["img_id_array"], '', $goods_detail['extend_category_id'], $goods_detail["state"]
+ , $goods_detail['extend_category_id'], $goods_detail["state"], $goods_detail['pc_custom_template'], $goods_detail['wap_custom_template'],$goods_detail['allow_delete']
 
- , $goods_detail['pc_custom_template'], $goods_detail['wap_custom_template'],$goods_detail['allow_delete'],$goods_detail['mechanism_id'], $goods_detail['teacher_id']
+ ,$goods_detail['mechanism_id'], $goods_detail['teacher_id'],$goods_detail['crowd'], $goods_detail['course_type'],$goods_detail['total_num']
 
- ,$goods_detail['crowd'], $goods_detail['score'],$goods_detail['total_num'],$goods_detail['release_num'],$goods_detail['price'],$goods_detail['goods_video_address']);
+ ,$goods_detail['release_num'],$goods_detail['price'],$goods_detail['goods_video_address']);
         return $res;
     }
     
@@ -1880,7 +1937,12 @@ class Course extends BaseService implements ICourse
      */
     public function updateGoodsSort($goods_id, $sort)
     {
-        
+        $goods = new NsCourseModel();
+        return $goods->save([
+            'sort' => $sort
+        ], [
+            'goods_id' => $goods_id
+        ]);
     }
     
     /*
@@ -2107,11 +2169,10 @@ class Course extends BaseService implements ICourse
         $goods_model = new NsCourseModel();
         // 针对课程分类
         if (! empty($condition['ng.category_id'])) {
-            $goods_category = new GoodsCategory();
+            $goods_category = new CourseClass();
             
             // 获取当前课程分类的子分类
             $category_list = $goods_category->getCategoryTreeList($condition['ng.category_id']);
-            
             unset($condition['ng.category_id']);
             $query_goods_ids = "";
             $goods_list = $this->getGoodsViewQueryField($condition, "ng.goods_id", "");
@@ -2135,10 +2196,9 @@ class Course extends BaseService implements ICourse
                 $condition = " ng.goods_id in (" . $query_goods_ids . ") and ( ng.category_id in (" . $category_list . ") or " . $extend_query . ")";
             }
         }
-        
         $viewObj = $goods_model->alias("ng")
             ->join('sys_album_picture ng_sap', 'ng_sap.pic_id = ng.picture', 'left')
-            ->field("ng.goods_id,ng.goods_name,ng.promotion_price,ng.crowd,ng.total_num,ng.release_num,ng.market_price,ng.goods_type,ng.introduction,ng.state,ng.is_hot,ng.is_recommend,ng.is_new,ng.sales,ng_sap.pic_cover_micro,ng.create_time,ng.QRcode,ng.price,ng.real_sales,ng.sort,ng.group_id_array,ng.allow_delete");
+            ->field("ng.goods_id,ng.goods_name,ng.promotion_price,ng.crowd,ng.total_num,ng.release_num,ng.market_price,ng.goods_type,ng.introduction,ng.state,ng.is_hot,ng.score,ng.is_recommend,ng.is_new,ng.is_showprice,ng.sales,ng_sap.pic_cover,ng_sap.pic_cover_micro,ng.create_time,ng.QRcode,ng.price,ng.real_sales,ng.sort,ng.group_id_array,ng.allow_delete");
         $queryList = $goods_model->viewPageQuery($viewObj, $page_index, $page_size, $condition, $order);
         $queryCount = $this->getGoodsQueryCount($condition);
         $list = $goods_model->setReturnList($queryList, $queryCount, $page_size);
@@ -2229,5 +2289,25 @@ class Course extends BaseService implements ICourse
     public function deleteSpecValue($condition)
     {
         
+    }
+    
+    /**
+     * 单个字段数值加或减
+     * @param  [type] $goods_id   [description]
+     * @param  [type] $field_name [description]
+     * @param  [type] $status     [description]
+     * @return [type]             [description]
+     */
+    public function updateFiledNum($goods_id,$field_name,$status=1,$num=1)
+    {
+        $course = new NsCourseModel();
+        if($status==1){ //加
+            $return = $course->where(['goods_id'=>$goods_id])->setInc($field_name,$num);
+            return $return;
+        }elseif($status==2){ //减
+            $return = $course->where(['goods_id'=>$goods_id])->setDec($field_name,$num);
+            return $return;
+        }
+        return false;
     }
 }

@@ -1,0 +1,283 @@
+{include file='course/default_new/header'/}
+
+<div class="mybg">
+    <div class="txinform">
+        <div class="l">
+        {if condition="$member_info['user_info']['user_headimg'] eq ''"}
+            <img src="{:__IMG($default_headimg)}" class="yjimg "/>
+        {else/}
+            <img src="{:__IMG($member_info['user_info']['user_headimg'])}" class="yjimg "/>
+        {/if}
+        </div>
+        <div class="txname">{$member_info["user_info"]['nick_name']}</div>
+    </div>
+</div>
+<div class="mui-content  ">
+    <ul class="mui-table-view zxun gap my ">
+        <li class="mui-table-view-cell ">
+             <a   href="{:__URL('COURSE_MAIN/Member/means')}" class="mui-navigate-right">
+                 <i class="icon icon-my icon-my1"></i>
+                个人信息
+             </a>
+        </li>
+        <li class="mui-table-view-cell ">
+            <a  href="javascript:;" class="mui-navigate-right" id="shows">
+                <div class="l">
+                <i class="icon icon-my icon-my2"></i>
+                绑定手机
+                </div>
+                <div class="r jyjt">请绑定手机</div>
+            </a>
+        </li>
+    </ul>
+    <ul class="mui-table-view zxun my ">
+        <li class="mui-table-view-cell ">
+            <a  href="{:__URL('COURSE_MAIN/Member/wirelower_order')}" class="mui-navigate-right">
+                <i class="icon icon-my icon-my3"></i>
+                线下课订单
+            </a>
+        </li>
+        <li class="mui-table-view-cell ">
+            <a   href="{:__URL('COURSE_MAIN/Member/my_collect')}" class="mui-navigate-right">
+                <i class="icon icon-my icon-my4"></i>
+                我的收藏
+            </a>
+        </li>
+        <li class="mui-table-view-cell ">
+            <a  href="{:__URL('COURSE_MAIN/Member/my_attention')}" class="mui-navigate-right">
+                <i class="icon icon-my icon-my5"></i>
+                我的关注
+            </a>
+        </li>
+        <li class="mui-table-view-cell ">
+            <a  href="{:__URL('COURSE_MAIN/Member/my_wallet')}" class="mui-navigate-right">
+                <i class="icon icon-my icon-my6"></i>
+                我的钱包
+            </a>
+        </li>
+    </ul>
+    <div class="xialk "  data_s="sendto">
+        <div class="photo ">
+            <a href="javascript:;" data_c="c1">
+                <img src="__TEMP__/{$style}/public/images/qiandao.jpg">
+            </a>
+        </div>
+        <div class="tmbg"></div>
+    </div>
+</div>
+<div class="xialk bgw " style="display: lock" >
+    <div class="photo ">
+        <div class="r"><a href="javascript:;"><span class="mui-icon mui-icon-closeempty"></span></a></div>
+        <div class="clearfix"></div>
+        <div class="nr">
+            <div class="word">绑定手机号，听课更安心</div>
+            <div class="word1">还可以获得专人服务和粉丝福利</div>
+            <form id='login-form' class="mui-input-group login ">
+                <ul >
+                    <li>
+                        <input type="text" class="mui-input yjbk" value="{$member_info.user_info.user_tel}" placeholder="请输入手机号码" id="mobile">
+                        <input type="hidden" id="oldMobile" value="{$member_info.user_info.user_tel}">
+                    </li>
+                    {if condition="$login_verify_code['pc'] eq 1"}
+                    <li >
+                        <input type="text" class="mui-input yjbk" placeholder="请输入图形验证码" id="input_mobile_code">
+                        <div class="dtmdw">
+                            <img src="{:__URL('SHOP_MAIN/captcha')}" class="tx-yzm" alt="captcha" onclick="this.src='{:__URL('SHOP_MAIN/captcha?tag=1')}'+'&send='+Math.random()" >
+                        </div>
+                    </li>
+                    {/if}
+                    {if condition="$notice['noticeMobile'] eq 1"}
+                    <li >
+                        <input type="password" class=" mui-input yjbk" id="mobile_code" placeholder="请输入验证码">
+                        <div class="dtmdw">
+                            <a href="javascript:;" class="dtm" id="send_mobile" value="{:lang('get_dynamic_code')}">获取验证码</a>
+                           <!-- <span class="time">10s</span>-->
+                        </div>
+                    </li>
+                    {/if}
+                </ul>
+                <div class="dl">
+                    <a href="javascript:;" class="tjbtn " id="btnsave">确认</a>
+                </div>
+            </form>
+
+        </div>
+    </div>
+    <div class="tmbg"></div>
+</div>
+{include file='course/default_new/footer'/}
+<script src="__TEMP__/{$style}/public/mui/js/mui.picker.js"></script>
+<script src="__TEMP__/{$style}/public/mui/js/mui.poppicker.js"></script>
+<script>
+    mui('body').on('tap', '#shows', function () {
+        $(".bgw").show();
+    });
+    mui('body').on('tap', '.mui-icon-closeempty', function () {
+        $(".bgw").hide();
+    });
+    mui('body').on('tap', '#btnsave', function () {
+        btnsave()
+    });
+    function btnsave() {
+    var url = "APP_MAIN";
+    var value = "";
+    
+    var oldMobile = $.trim($("#oldMobile").val());
+    var value = $.trim($("#mobile").val());
+    var vertification = $("#input_mobile_code").val();
+    var code = $("#mobile_code").val();
+    var result = '';
+    var res ='';
+    var mobile_not_exits = 0;
+    if (value == oldMobile) {
+        layer.msg("{:lang('consistent_with_the_original_mobile_phone_number_without_modification')}");
+        return false;
+    }
+    if (value == "") {
+        layer.msg("{:lang('mobile_phones_must_not_be_empty')}");
+        return false;
+    }else{
+
+        if(value.search(/^1(3|4|5|7|8)\d{9}$/) == -1){
+            $("#mobile").trigger("focus");
+            layer.msg("{:lang('phone_is_not_right_format')}");
+            return false;
+        }
+        {if condition="$notice['noticeMobile'] neq 1"}
+            $.ajax({
+                type: "post",
+                url: "{:__URL('APP_MAIN/login/mobile')}",
+                data: {"mobile":value},
+                async: false,
+                success: function(data){
+                    if(data) mobile_not_exits = 1;
+                }
+            });
+        {/if}
+    }
+    {if condition="$login_verify_code['pc'] eq 1"}
+        if (vertification == "") {
+            layer.msg("{:lang('please_enter_verification_code')}");
+            return false;
+        }
+        {if condition="$notice['noticeMobile'] neq 1"}
+            $.ajax({
+                url: "{:__URL('APP_MAIN/member/check_code')}",
+                data: { "vertification": vertification},
+                type: "post",
+                async : false,
+                success : function(data){
+                    if(data['code'] < 0){
+                        layer.msg(data['message']);
+                        res = true;
+                    }
+                    return res;
+                }
+            });
+            if(res){
+                return false;
+            }
+        {/if}
+    {/if}
+    //判断手机号是否已被绑定
+    if(mobile_not_exits == 1){
+        layer.msg("{:lang('the_phone_number_already_exists')}");
+        return false;
+    }
+    {if condition="$notice['noticeMobile'] eq 1"}
+        if(code.length == 0){
+            layer.msg("{:lang('member_enter_mobile_verification_code')}");
+            return false;
+        }else{
+            $.ajax({
+                url: "{:__URL('APP_MAIN/member/check_dynamic_code')}",
+                data: { "vertification": code },
+                type: "post",
+                async : false,
+                success : function(data){
+                    if(data['code'] < 0){
+                        layer.msg(data['message']);
+                        result = true;
+                    }
+                    return result;
+                }
+            })
+            if(result){
+                return false;
+            }
+        }
+        {/if}
+        $.ajax({
+            url: "{:__URL('APP_MAIN/member/modifymobile')}",
+            data: { "mobilephone": value },
+            type: "post",
+            success: function (res) {
+                if (res["code"] > 0) {
+                    $("#mobilephone").text(value);
+                    backPage();
+                } else {
+                    layer.msg(res["message"]);
+                }
+            }
+        });
+}
+//发送短信验证码
+mui('body').on('tap', '#send_mobile', function () {
+    var mobile = $("#mobile").val();
+    var mobile_code = $("#input_mobile_code").val();
+    //验证手机格式是否正确
+    if(mobile.search(/^1(3|4|5|7|8)\d{9}$/) == -1){
+        $("#mobile").trigger("focus");
+        layer.msg("{:lang('phone_is_not_right_format')}");
+        return false;
+    }
+    //验证手机号是否已经注册
+    $.ajax({
+        type: "post",
+        url: "{:__URL('APP_MAIN/login/mobile')}",
+        data: {"mobile":mobile},
+        async: false,
+        success: function(data){
+            if(data){
+                layer.msg("{:lang('the_phone_number_already_exists')}");
+                return false;
+            }else{
+                //判断输入的验证码是否正确 
+                $.ajax({
+                    type: "post",
+                    url: "{:__URL('APP_MAIN/member/sendbindcode')}",
+                    data: {"mobile":mobile,"vertification":mobile_code,"type":"mobile"},
+                    success: function(data){
+                        if(data['code']== 0){
+                            time();
+                        }else{
+                            layer.msg(data["message"]);
+                            $(".verifyimg").attr("src","{:__URL('SHOP_MAIN/captcha')}");
+                            return false;
+                        }
+                    }
+                });
+            }
+        }
+    });
+});
+
+var wait=120;
+function time() {
+    if (wait == 0) {
+        $(".sendOutCode").removeAttr("disabled");
+        $(".sendOutCode").val("{:lang('get_validation_code')}");
+        wait = 120; 
+    } else { 
+        $(".sendOutCode").attr("disabled", 'disabled');
+        $(".sendOutCode").val(wait+"s{:lang('post_resend')}");
+        wait--; 
+        setTimeout(function() {
+            time();
+        },1000);
+    }
+}
+</script>
+
+</body>
+</html>

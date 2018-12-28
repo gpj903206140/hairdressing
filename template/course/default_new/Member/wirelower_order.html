@@ -1,0 +1,94 @@
+{include file='course/default_new/header'/}
+
+<div class="rel">
+    <div id="segmentedControl" class="mui-segmented-control mui-segmented-control-inverted switch">
+        <a class="mui-control-item mui-active" href="#item1">全部 <span></span></a>
+        <a class="mui-control-item" href="#item2">待支付<span></span></a>
+        <a class="mui-control-item" href="#item3">待填表<span></span></a>
+        <a class="mui-control-item" href="#item4">待上课<span></span></a>
+        <a class="mui-control-item" href="#item5">待评价<span></span></a>
+    </div>
+    <div class=" mui-content  mui-scroll-wrapper new-course " id="refreshContainer">
+        <div class="mui-scroll">
+            <ul class="mui-table-view " id="list"></ul>
+        </div>
+    </div>
+    <div id="list_c" style="display:none;">
+        <li class="mui-table-view-cell">
+            <a href="kc_jieshao.html">
+                <div class="img-jq l" style="background-image: url('__TEMP__/{$style}/public/images/temp/new.jpg')"></div>
+                <div class="juli">
+                    <div class="ssbt">
+                        <div class="l"><span class="fashion-tab">时尚美发</span></div>
+                       <!-- <div class="r"><i class="icon icon-star"></i><span class="juse">8.6</span></div>-->
+                    </div>
+                    <div class="course-bt">国际联盟美发师顶尖强化班</div>
+                    <div class="zhineng">这是美业史上最简单易学，最成体系的造宝典</div>
+                    <div class="clearfix rel">
+                        <div class="listen-btn"><span class="tkbtn">待听课</span> </div>
+                        <div class="price">￥79.00</div>
+                    </div>
+                </div>
+            </a>
+        </li>
+        <li class="mui-table-view-cell">
+            <a href="kc_jieshao.html">
+                <div class="img-jq l" style="background-image: url('__TEMP__/{$style}/public/images/temp/new.jpg')"></div>
+                <div class="juli">
+                    <div class="ssbt">
+                        <div class="l"><span class="fashion-tab">时尚美发</span></div>
+                        <!--<div class="r"><i class="icon icon-star"></i><span class="juse">8.6</span></div>-->
+                    </div>
+                    <div class="course-bt">国际联盟美发师顶尖强化班</div>
+                    <div class="zhineng">这是美业史上最简单易学，最成体系的造宝典</div>
+                    <div class="clearfix rel">
+                        <div class="listen-btn"><span class="tkbtn redbk">待听课</span> </div>
+                        <div class="price">￥79.00</div>
+                    </div>
+                </div>
+            </a>
+        </li>
+
+        <li class="wsj" style="display: none"><img src="__TEMP__/{$style}/public/images/wtp.png"><br>暂无数据</li>
+    </div>
+</div>
+{include file='course/default_new/footer'/}
+<script type="text/javascript">
+    mui('body').on('tap', 'a', function () {
+        document.location.href = this.href;
+    })
+    mui.init();
+    $(function () {
+        var count = 1;
+        mui.init({
+            pullRefresh: {
+                container: '#refreshContainer',
+                down: {
+                    auto: true,
+                    callback: function () {
+                        setTimeout(function () {
+                            count = 0;
+                            $('#list').html($('#list_c').html());
+                            mui('#refreshContainer').pullRefresh().endPulldownToRefresh();
+                            mui('#refreshContainer').pullRefresh().endPullupToRefresh(false);
+                            count++;
+                        }, 1000);
+                    }
+                },
+                up: {
+                    height: 50,//可选.默认50.触发上拉加载拖动距离
+                    callback: function () {
+                        setTimeout(function () {
+                            $('#list').append($('#list_c').html());
+                            count++;
+                            mui('#refreshContainer').pullRefresh().endPullupToRefresh(count > 3);
+                        }, 1000);
+
+                    }
+                }
+            }
+        });
+    })
+</script>
+</body>
+</html>

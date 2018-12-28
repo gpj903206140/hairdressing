@@ -156,10 +156,9 @@ class Course extends BaseController
                 // 默认时间排序
                 $order['ng.create_time'] = 'desc';
             }
-            //print_r($condition);exit;
             $result = $courseervice->getBackStageGoodsList($page_index, $page_size, $condition, $order);
             
-            // 根据商品分组id，查询标签名称
+            // 根据课程分组id，查询标签名称
             foreach ($result['data'] as $k => $v) {
                 if (! empty($v['group_id_array'])) {
                     $goods_group_id = explode(',', $v['group_id_array']);
@@ -192,7 +191,7 @@ class Course extends BaseController
             $this->assign("goods_group", $groupList['data']);
             $search_info = request()->get('search_info', '');
             $this->assign("search_info", $search_info);
-            // 查找一级商品分类
+            // 查找一级课程分类
             $courseClass = new CourseClass();
             $oneGoodsCategory = $courseClass->getGoodsCategoryListByParentId(0);
             $this->assign("oneGoodsCategory", $oneGoodsCategory);
@@ -275,7 +274,20 @@ class Course extends BaseController
         }
     }
     /**
-     * 生成商品二维码
+     * 更改商品排序
+     */
+    public function updateCourseSortAjax()
+    {
+        if (request()->isAjax()) {
+            $goods_id = request()->post("goods_id", "");
+            $sort = request()->post("sort", "");
+            $goods = new CourseService();
+            $res = $goods->updateGoodsSort($goods_id, $sort);
+            return AjaxReturn($res);
+        }
+    }
+    /**
+     * 生成课程二维码
      */
     public function updateCourseQrcode()
     {
@@ -296,7 +308,7 @@ class Course extends BaseController
         return AjaxReturn($result);
     }
     /**
-     * 添加商品
+     * 添加课程
      */
     public function addCourse()
     {
@@ -316,21 +328,21 @@ class Course extends BaseController
         $supplier_list = $supplier->getSupplierList();
         $this->assign("supplier_list", $supplier_list['data']);
         
-        $goods_attr_id = 0; // 商品类目关联id
+        $goods_attr_id = 0; // 课程类目关联id
         if (isset($_COOKIE["goods_category_id"])) {
             $this->assign("goods_category_id", $_COOKIE["goods_category_id"]);
             $name = str_replace(":", "&gt;", $_COOKIE["goods_category_name"]);
             $this->assign("goods_category_name", $name);
             $goods_attr_id = $_COOKIE["goods_attr_id"];
         } else {
-            $this->assign("goods_category_id", 0); // 修改商品时，会进行查询赋值 2016年12月9日 10:54:07
+            $this->assign("goods_category_id", 0); // 修改课程时，会进行查询赋值 2016年12月9日 10:54:07
             $this->assign("goods_category_name", "");
         }
         $this->assign("goods_attr_id", $goods_attr_id);
         $goods_attribute_list = $course->getAttributeServiceList(1, 0, [
             'is_use' => 1
         ], "", "attr_id,attr_name");
-        $this->assign("goods_attribute_list", $goods_attribute_list['data']); // 商品类型
+        $this->assign("goods_attribute_list", $goods_attribute_list['data']); // 课程类型
         $this->assign("shipping_list", $express->shippingFeeQuery("")); // 物流
         $this->assign("group_list", $groupList['data']); // 分组
         if (empty($groupList['data'])) {
@@ -345,14 +357,6 @@ class Course extends BaseController
         $detault_album_detail = $album->getDefaultAlbumDetail();
         $this->assign('detault_album_id', $detault_album_detail['album_id']);
         
-        $template_url = array();
-        $config = new ConfigService();
-        $pc_template = $config->getUsePCTemplate($this->instance_id);
-        $wap_template = $config ->getUseWapTemplate($this->instance_id);
-
-        $template_url["pc_template_url"] = "template/shop/".$pc_template['value'].'/Course/';
-        $template_url["wap_template_url"] = "template/wap/".$wap_template['value'].'/Course/';
-        $this->assign("template_url", $template_url);
         //合作机构
         $coursecate = new CourseMechanism();
         $mechanism_list = $coursecate->getCourseMechanismTree(0);
@@ -378,7 +382,7 @@ class Course extends BaseController
                 }
                 $this->assign("goods_info", $goods_info);
             } else {
-                $this->error("商品不存在");
+                $this->error("课程不存在");
             }
         }
         return view($this->style . "course/editCourse");
@@ -394,7 +398,7 @@ class Course extends BaseController
         echo json_encode($one_list);
     }
     /**
-     * 功能说明：添加或更新商品时 ajax调用的函数
+     * 功能说明：添加或更新课程时 ajax调用的函数
      */
     public function CourseCreateOrUpdate()
     {
@@ -407,27 +411,28 @@ class Course extends BaseController
             $product['goods_type'] = 1;
             $shopId = $this->instance_id;
             $courseService = new CourseService();
-            $res = $courseService->addOrEditGoods($product["goodsId"], // 商品Id         
-$product["title"], // 商品标题
-$shopId, $product["categoryId"], // 商品类目
+            $res = $courseService->addOrEditGoods($product["goodsId"], // 课程Id         
+$product["title"], // 课程标题
+$shopId, $product["categoryId"], // 课程类目
 $category_id_1 = 0
 
-, $category_id_2 = 0, $category_id_3 = 0, $product["groupArray"], // 商品分组
+, $category_id_2 = 0, $category_id_3 = 0, $product["groupArray"], // 课程分组
 $product['goods_type'], $product["market_price"]
 
-, $product["price"], // 商品现价
-    $product["base_good"], $product["base_sales"], $collects = 0, $star = 0
+, $product["price"], // 课程现价
+    $product["is_showprice"], $collects = 0, $evaluates = 0, $product["base_share"]
 
-  , $evaluates = 0, $product["base_share"], $product["picture"], $product['key_words'], $product["introduction"], // 商品简介，促销语
+, $product["picture"], $product['key_words'], $product["introduction"], // 课程简介，促销语
+$product["description"], $product['qrcode'], // 课程二维码
+ 
 
-$product["description"], $product['qrcode'], // 商品二维码
- $is_hot = 0, $is_recommend = 0, $is_new = 0, 
+ $is_hot = 0, $is_recommend = 0, $is_new = 0, $sort = $product['sort'], $product["imageArray"]
 
- $sort = $product['sort'], $product["imageArray"], '', $product['categoryExtendId'], $product["is_sale"]
+ , $product['categoryExtendId'], $product["is_sale"], $product['pc_custom_template'], $product['wap_custom_template'],$allow_delete
 
- , $product['pc_custom_template'], $product['wap_custom_template'],$allow_delete,
+ ,$product['mechanism_id'], $product['teacher_id'],$product['crowd'], $product['course_type'],$product['total_num']
 
- $product['mechanism_id'], $product['teacher_id'],$product['crowd'], $product['score'],$product['total_num'],0,$product['price'],$product['goods_video_address']);
+ ,0,$product['price'],$product['goods_video_address']);
             
             // sku编码分组
             
@@ -443,7 +448,7 @@ $product["description"], $product['qrcode'], // 商品二维码
         return $res;
     }
     /**
-     * 商品回收站列表
+     * 课程回收站列表
      */
     public function recycleList()
     {
@@ -502,7 +507,7 @@ $product["description"], $product['qrcode'], // 商品二维码
         } else {
             $search_info = request()->post('search_info', '');
             $this->assign("search_info", $search_info);
-            // 查找一级商品分类
+            // 查找一级课程分类
             $CourseClass = new CourseClass();
             $oneGoodsCategory = $CourseClass->getGoodsCategoryListByParentId(0);
             $this->assign("oneGoodsCategory", $oneGoodsCategory);
@@ -530,7 +535,7 @@ $product["description"], $product['qrcode'], // 商品二维码
     }
 
     /**
-     * 回收站商品恢复
+     * 回收站课程恢复
      */
     public function regainCoursDeleted()
     {
@@ -543,7 +548,7 @@ $product["description"], $product['qrcode'], // 商品二维码
     }
 
     /**
-     * 拷贝商品
+     * 拷贝课程
      */
     public function copyCourse()
     {
@@ -561,7 +566,17 @@ $product["description"], $product['qrcode'], // 商品二维码
         return AjaxReturn($res);
     }
     /**
-     * 删除商品
+     * 功能说明：通过节点的ID查询得到某个节点下的子集
+     */
+    public function getChildCateGory()
+    {
+        $categoryID = request()->post('categoryID', '');
+        $course_category = new CourseClass();
+        $list = $course_category->getGoodsCategoryListByParentId($categoryID);
+        return $list;
+    }
+    /**
+     * 删除课程
      */
     public function deleteCourse()
     {
@@ -572,7 +587,7 @@ $product["description"], $product['qrcode'], // 商品二维码
     }
 
     /**
-     * 删除回收站商品
+     * 删除回收站课程
      */
     public function emptyDeleteCourse()
     {
@@ -582,7 +597,7 @@ $product["description"], $product['qrcode'], // 商品二维码
         return AjaxReturn($res);
     }
     /**
-     * 商品上架
+     * 课程上架
      */
     public function ModifyCorseOnline()
     {
@@ -593,7 +608,7 @@ $product["description"], $product['qrcode'], // 商品二维码
     }
 
     /**
-     * 商品下架
+     * 课程下架
      */
     public function ModifyCorseOffline()
     {
@@ -614,7 +629,7 @@ $product["description"], $product['qrcode'], // 商品二维码
         return AjaxReturn($result);
     }
     /**
-     * 修改推荐商品
+     * 修改推荐课程
      */
     public function ModifyGoodsRecommend()
     {
@@ -625,7 +640,7 @@ $product["description"], $product['qrcode'], // 商品二维码
         return AjaxReturn($result);
     }
     /**
-     * 商品分组列表
+     * 课程分组列表
      */
     public function courseGroupList()
     {
@@ -643,7 +658,7 @@ $product["description"], $product['qrcode'], // 商品二维码
     }
 
     /**
-     * 添加商品分组
+     * 添加课程分组
      */
     public function addCourseGroup()
     {
@@ -665,7 +680,7 @@ $product["description"], $product['qrcode'], // 商品二维码
     }
 
     /**
-     * 修改商品分组
+     * 修改课程分组
      */
     public function updateCourseGroup()
     {
@@ -692,7 +707,7 @@ $product["description"], $product['qrcode'], // 商品二维码
     }
 
     /**
-     * 删除商品分组
+     * 删除课程分组
      */
     public function deleteCourseGroup()
     {
@@ -702,7 +717,7 @@ $product["description"], $product['qrcode'], // 商品二维码
         return AjaxReturn($res);
     }
     /**
-     * 修改 商品 分组 单个字段
+     * 修改 课程 分组 单个字段
      */
     public function modifyCourseGroupField()
     {
@@ -714,7 +729,7 @@ $product["description"], $product['qrcode'], // 商品二维码
         return $res;
     }
     /**
-     * 商品分类选择
+     * 课程分类选择
      *
      * @return Ambigous <\think\response\View, \think\response\$this, \think\response\View>
      */
@@ -761,9 +776,9 @@ $product["description"], $product['qrcode'], // 商品二维码
      */
     public function SelectCateGetData()
     {
-        $goods_category_id = request()->post("goods_category_id", ''); // 商品类目用
-        $goods_category_name = request()->post("goods_category_name", ''); // 商品类目名称显示用
-        $goods_attr_id = request()->post("goods_attr_id", ''); // 关联商品类型ID
+        $goods_category_id = request()->post("goods_category_id", ''); // 课程类目用
+        $goods_category_name = request()->post("goods_category_name", ''); // 课程类目名称显示用
+        $goods_attr_id = request()->post("goods_attr_id", ''); // 关联课程类型ID
         $quick = request()->post("goods_category_quick", ''); // JSON格式
         setcookie("course_class_id", $goods_category_id, time() + 3600 * 24);
         setcookie("course_class_name", $goods_category_name, time() + 3600 * 24);
@@ -790,6 +805,7 @@ $product["description"], $product['qrcode'], // 商品二维码
             $category_name = request()->post("category_name", '');
             $pid = request()->post("pid", '');
             $is_visible = request()->post('is_visible', '');
+            $is_special = request()->post('is_special', '');
             $keywords = request()->post("keywords", '');
             $description = request()->post("description", '');
             $sort = request()->post("sort", '');
@@ -799,7 +815,7 @@ $product["description"], $product['qrcode'], // 商品二维码
             $short_name = request()->post("short_name", '');
             $pc_custom_template = request()->post("pc_custom_template", "");
             $wap_custom_template = request()->post("wap_custom_template", "");
-            $result = $coursecate->addOrEditGoodsCategory(0, $category_name, $short_name, $pid, $is_visible, $keywords, $description, $sort, $category_pic, $attr_id, $attr_name, $pc_custom_template, $wap_custom_template);
+            $result = $coursecate->addOrEditGoodsCategory(0, $category_name, $short_name, $pid, $is_special, $is_visible, $keywords, $description, $sort, $category_pic, $attr_id, $attr_name, $pc_custom_template, $wap_custom_template);
             return AjaxReturn($result);
         } else {
             $category_list = $coursecate->getGoodsCategoryTree(0);
@@ -808,13 +824,6 @@ $product["description"], $product['qrcode'], // 商品二维码
             $goodsAttributeList = $goods->getAttributeServiceList(1, 0);
             $this->assign("goodsAttributeList", $goodsAttributeList['data']);
             
-            $template_url = array();
-            $config = new ConfigService();
-            $pc_template = $config->getUsePCTemplate($this->instance_id);
-            $wap_template = $config ->getUseWapTemplate($this->instance_id);
-            $template_url["pc_template_url"] = "template/shop/".$pc_template['value'].'/Course/';
-            $template_url["wap_template_url"] = "template/wap/".$wap_template['value'].'/Course/';
-            $this->assign("template_url", $template_url);
             
             return view($this->style . "Course/addCourseClass");
         }
@@ -830,6 +839,7 @@ $product["description"], $product['qrcode'], // 商品二维码
             $category_name = request()->post("category_name", '');
             $short_name = request()->post("short_name", '');
             $pid = request()->post("pid", '');
+            $is_special = request()->post('is_special', '');
             $is_visible = request()->post('is_visible', '');
             $keywords = request()->post("keywords", '');
             $description = request()->post("description", '');
@@ -844,7 +854,7 @@ $product["description"], $product['qrcode'], // 商品二维码
             if ($goods_category_quick != '') {
                 setcookie("goods_category_quick", $goods_category_quick, time() + 3600 * 24);
             }
-            $result = $coursecate->addOrEditGoodsCategory($category_id, $category_name, $short_name, $pid, $is_visible, $keywords, $description, $sort, $category_pic, $attr_id, $attr_name, $pc_custom_template, $wap_custom_template,$goods_type);
+            $result = $coursecate->addOrEditGoodsCategory($category_id, $category_name, $short_name, $pid, $is_special, $is_visible, $keywords, $description, $sort, $category_pic, $attr_id, $attr_name, $pc_custom_template, $wap_custom_template,$goods_type);
             return AjaxReturn($result);
         } else {
             $category_id = request()->get('category_id', '');
@@ -901,14 +911,6 @@ $product["description"], $product['qrcode'], // 商品二维码
             $goods = new CourseService();
             $goodsAttributeList = $goods->getAttributeServiceList(1, 0);
             $this->assign("goodsAttributeList", $goodsAttributeList['data']);
-            
-            $template_url = array();
-            $config = new ConfigService();
-            $pc_template = $config->getUsePCTemplate($this->instance_id);
-            $wap_template = $config ->getUseWapTemplate($this->instance_id);
-            $template_url["pc_template_url"] = "template/shop/".$pc_template['value'].'/Course/';
-            $template_url["wap_template_url"] = "template/wap/".$wap_template['value'].'/Course/';
-            $this->assign("template_url", $template_url);
             
             return view($this->style . "course/updateCourseClass");
         }
@@ -999,13 +1001,6 @@ $product["description"], $product['qrcode'], // 商品二维码
             $goodsAttributeList = $goods->getAttributeServiceList(1, 0);
             $this->assign("goodsAttributeList", $goodsAttributeList['data']);
             
-            $template_url = array();
-            $config = new ConfigService();
-            $pc_template = $config->getUsePCTemplate($this->instance_id);
-            $wap_template = $config ->getUseWapTemplate($this->instance_id);
-            $template_url["pc_template_url"] = "template/shop/".$pc_template['value'].'/Course/';
-            $template_url["wap_template_url"] = "template/wap/".$wap_template['value'].'/Course/';
-            $this->assign("template_url", $template_url);
             return view($this->style . "Course/addCourseMechanism");
         }
     }
@@ -1035,14 +1030,6 @@ $product["description"], $product['qrcode'], // 商品二维码
             $mechanism_id = request()->get('mechanism_id', '');
             $result = $coursecate->getCourseMechanismDetail($mechanism_id);
             $this->assign("data", $result);
-            
-            $template_url = array();
-            $config = new ConfigService();
-            $pc_template = $config->getUsePCTemplate($this->instance_id);
-            $wap_template = $config ->getUseWapTemplate($this->instance_id);
-            $template_url["pc_template_url"] = "template/shop/".$pc_template['value'].'/Course/';
-            $template_url["wap_template_url"] = "template/wap/".$wap_template['value'].'/Course/';
-            $this->assign("template_url", $template_url);
             
             return view($this->style . "course/updateCourseMechanism");
         }
@@ -1084,7 +1071,7 @@ $product["description"], $product['qrcode'], // 商品二维码
 
 
     /**
-     * 课程课程老师
+     * 课程老师
      */
     public function courseTeacherList()
     {
@@ -1109,22 +1096,16 @@ $product["description"], $product['qrcode'], // 商品二维码
             $description = request()->post("description", '');
             $sort = request()->post("sort", '');
             $teacher_pic = request()->post('teacher_pic', '');
+            $introduce_pic = request()->post('introduce_pic', '');
             $pc_custom_template = request()->post("pc_custom_template", "");
             $wap_custom_template = request()->post("wap_custom_template", "");
-            $result = $coursecate->addOrEditCourseTeacher($mechanism_id, 0, $teacher_name, $is_visible, $description, $sort, $teacher_pic, $pc_custom_template, $wap_custom_template);
+            $result = $coursecate->addOrEditCourseTeacher($mechanism_id, 0, $teacher_name, $is_visible, $description, $sort, $teacher_pic, $introduce_pic, $pc_custom_template, $wap_custom_template);
             return AjaxReturn($result);
         } else {
             $category_list = $coursecate->getCourseTeacherTree(0);
             $this->assign('category_list', $category_list);
             
-            $template_url = array();
-            $config = new ConfigService();
-            $pc_template = $config->getUsePCTemplate($this->instance_id);
-            $wap_template = $config ->getUseWapTemplate($this->instance_id);
-            $template_url["pc_template_url"] = "template/shop/".$pc_template['value'].'/Course/';
-            $template_url["wap_template_url"] = "template/wap/".$wap_template['value'].'/Course/';
             $this->assign("mechanism_id", $mechanism_id);
-            $this->assign("template_url", $template_url);
             return view($this->style . "Course/addCourseTeacher");
         }
     }
@@ -1143,9 +1124,10 @@ $product["description"], $product['qrcode'], // 商品二维码
             $description = request()->post("description", '');
             $sort = request()->post("sort", '');
             $teacher_pic = request()->post('teacher_pic', '');
+            $introduce_pic = request()->post('introduce_pic', '');
             $pc_custom_template = request()->post("pc_custom_template", "");
             $wap_custom_template = request()->post("wap_custom_template", "");
-            $result = $coursecate->addOrEditCourseTeacher($mechanism_id, $teacher_id, $teacher_name, $is_visible, $description, $sort, $teacher_pic, $pc_custom_template, $wap_custom_template);
+            $result = $coursecate->addOrEditCourseTeacher($mechanism_id, $teacher_id, $teacher_name, $is_visible, $description, $sort, $teacher_pic, $introduce_pic, $pc_custom_template, $wap_custom_template);
             return AjaxReturn($result);
         } else {
             $mechanism_id = request()->get('mechanism_id', '');
@@ -1153,13 +1135,6 @@ $product["description"], $product['qrcode'], // 商品二维码
             $result = $coursecate->getCourseTeacherDetail($teacher_id);
             $this->assign("data", $result);
             
-            $template_url = array();
-            $config = new ConfigService();
-            $pc_template = $config->getUsePCTemplate($this->instance_id);
-            $wap_template = $config ->getUseWapTemplate($this->instance_id);
-            $template_url["pc_template_url"] = "template/shop/".$pc_template['value'].'/Course/';
-            $template_url["wap_template_url"] = "template/wap/".$wap_template['value'].'/Course/';
-            $this->assign("template_url", $template_url);
             $this->assign("mechanism_id", $mechanism_id);
             return view($this->style . "course/updateCourseTeacher");
         }
@@ -1222,18 +1197,8 @@ $product["description"], $product['qrcode'], // 商品二维码
             $result = $coursecate->addOrEditCourseCatalogue($goods_id, 0, $catalogue_name, $is_visible, $description, $sort, $catalogue_pic,$video_url, $pc_custom_template, $wap_custom_template);
             return AjaxReturn($result);
         } else {
-            /*$category_list = $coursecate->getCourseCatalogueTree(0);
-            print_r($category_list);
-            $this->assign('category_list', $category_list);*/
-            
-            $template_url = array();
-            $config = new ConfigService();
-            $pc_template = $config->getUsePCTemplate($this->instance_id);
-            $wap_template = $config ->getUseWapTemplate($this->instance_id);
-            $template_url["pc_template_url"] = "template/shop/".$pc_template['value'].'/Course/';
-            $template_url["wap_template_url"] = "template/wap/".$wap_template['value'].'/Course/';
+
             $this->assign("goods_id", $goods_id);
-            $this->assign("template_url", $template_url);
             return view($this->style . "Course/addCourseCatalogue");
         }
     }
@@ -1263,13 +1228,6 @@ $product["description"], $product['qrcode'], // 商品二维码
             $result = $coursecate->getCourseCatalogueDetail($catalogue_id);
             $this->assign("data", $result);
             
-            $template_url = array();
-            $config = new ConfigService();
-            $pc_template = $config->getUsePCTemplate($this->instance_id);
-            $wap_template = $config ->getUseWapTemplate($this->instance_id);
-            $template_url["pc_template_url"] = "template/shop/".$pc_template['value'].'/Course/';
-            $template_url["wap_template_url"] = "template/wap/".$wap_template['value'].'/Course/';
-            $this->assign("template_url", $template_url);
             $this->assign("goods_id", $goods_id);
             return view($this->style . "course/updateCourseCatalogue");
         }
@@ -1303,6 +1261,7 @@ $product["description"], $product['qrcode'], // 商品二维码
         $catalogue_id = request()->get("catalogue_id", 0);
         if (request()->isAjax()) {
             $goods_id = request()->post("goods_id", 0);
+            $try_see = request()->post("try_see", 0);
             $catalogue_id = request()->post("catalogue_id", 0);
             $video_title = request()->post('video_title', '');
             $teacher_id = request()->post('teacher_id', 0);
@@ -1310,7 +1269,7 @@ $product["description"], $product['qrcode'], // 商品二维码
             $sort = request()->post("sort", '');
             $video_url = request()->post('video_url', '');
             $create_time = time();
-            $result = $coursecate->addOrEditCourseCatalogueVideo(0,$goods_id, $catalogue_id, $video_title, $teacher_id, $teacher_name, $sort, $video_url, $create_time);
+            $result = $coursecate->addOrEditCourseCatalogueVideo(0,$goods_id, $try_see, $catalogue_id, $video_title, $teacher_id, $teacher_name, $sort, $video_url, $create_time);
             return AjaxReturn($result);
         } else {
             $course = new CourseService();
@@ -1342,5 +1301,108 @@ $product["description"], $product['qrcode'], // 商品二维码
         $video_id = request()->get('id', '');
         $res = $coursecate->deleteCourseCatalogueVideo($video_id);
         return AjaxReturn($res);
+    }
+
+    /**
+     * 商品评论
+     */
+    public function assessList()
+    {
+        if (request()->isAjax()) {
+            $page_index = request()->post('page_index');
+            $page_size = request()->post('page_size');
+            
+            $search = request()->post('search');
+            $condition['goods_name'] = array(
+                'like',
+                "%" . $search . "%"
+            );
+            
+            $member_name = request()->post('member_name', '');
+            $start_date = request()->post('start_date') == '' ? 0 : getTimeTurnTimeStamp(request()->post('start_date'));
+            $end_date = request()->post('end_date') == '' ? 0 : getTimeTurnTimeStamp(request()->post('end_date'));
+            $explain_type = request()->post('explain_type', '');
+            if ($start_date != 0 && $end_date != 0) {
+                $condition["addtime"] = [
+                    [
+                        ">",
+                        $start_date
+                    ],
+                    [
+                        "<",
+                        $end_date
+                    ]
+                ];
+            } elseif ($start_date != 0 && $end_date == 0) {
+                $condition["addtime"] = [
+                    [
+                        ">",
+                        $start_date
+                    ]
+                ];
+            } elseif ($start_date == 0 && $end_date != 0) {
+                $condition["addtime"] = [
+                    [
+                        "<",
+                        $end_date
+                    ]
+                ];
+            }
+            if ($explain_type != "") {
+                $condition["explain_type"] = $explain_type;
+            }
+            if (! empty($member_name)) {
+                $condition["member_name"] = array(
+                    "like",
+                    "%" . $member_name . "%"
+                );
+            }
+            
+            $course = new CourseService();
+            $goodsEvaluateList = $course->getGoodsEvaluateList($page_index, $page_size, $condition, 'addtime desc');
+            return $goodsEvaluateList;
+        }
+        return view($this->style . "Course/assessList");
+    }
+
+    /**
+     * 添加商品评价回复
+     */
+    public function replyEvaluateAjax()
+    {
+        if (request()->isAjax()) {
+            $id = request()->post('evaluate_id');
+            $replyType = request()->post('replyType');
+            $replyContent = request()->post('evaluate_reply');
+            $course = new CourseService();
+            $res = $course->addGoodsEvaluateReply($id, $replyContent, $replyType);
+            return AjaxReturn($res);
+        }
+    }
+
+    /**
+     * 设置评价的显示状态
+     */
+    public function setEvaluteShowStatuAjax()
+    {
+        if (request()->isAjax()) {
+            $id = request()->post('evaluate_id');
+            $course = new CourseService();
+            $res = $course->setEvaluateShowStatu($id);
+            return AjaxReturn($res);
+        }
+    }
+
+    /**
+     * 删除评价
+     */
+    public function deleteEvaluateAjax()
+    {
+        if (request()->isAjax()) {
+            $id = request()->post('evaluate_id');
+            $goods = new CourseService();
+            $res = $goods->deleteEvaluate($id);
+            return AjaxReturn($res);
+        }
     }
 }

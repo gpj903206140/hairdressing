@@ -1,0 +1,270 @@
+{include file='course/default_new/header'/}
+<div class="tophei">
+    <div class="r">
+        <a href="{$customservice_config['value']['service_addr']}"><i class="icon icon-kf"></i></a>
+    </div>
+    <div class="search">
+        <i class="icon fdj" id="submint"></i>
+        <a href="javascript:;"><i class="icon gb"></i></a>
+        <input type="text" placeholder="输入关键字" value="" class="lz-input" id="search_keyword">
+    </div>
+    <div class="mui-scroll-wrapper mui-slider-indicator mui-segmented-control mui-segmented-control-inverted nav">
+        <div class="mui-scroll">
+            <a href="{:__URL('COURSE_MAIN/Index/Index')}" class="mui-control-item">
+                推荐
+            </a>
+            {volist name="class_list" id="vo"}
+            <a href="{:__URL('COURSE_MAIN/Index/class_index&category_id='.$vo.category_id)}" class="mui-control-item {if condition='$category_id eq $vo.category_id'}mui-active{/if}">
+                {$vo.category_name}
+            </a>
+            {/volist}
+        </div>
+    </div>
+</div>
+<div class="topcontent clearfix">
+    <div id="sliderx" class="mui-slider">
+        <div class="mui-slider-group mui-slider-loop">
+            <div class="mui-slider-item mui-slider-item-duplicate">
+                <a href="{$adv.adv_url}">
+                    <img src="{$adv.adv_image}">
+                </a>
+            </div>
+            <!-- 第一张 -->
+            {if condition="$plat_adv_list['is_use'] eq 1"}
+                {if condition="$plat_adv_list['adv_list'][0]['adv_image'] neq ''"}
+                    {foreach name="plat_adv_list['adv_list']" item="v"}
+                    <div class="mui-slider-item">
+                        <a href="{$v.adv_url}">
+                            <img src="{:__IMG($v.adv_image)}" alt="{:lang('carousel_figure')}">
+                        </a>
+                    </div>
+                    {/foreach}
+                {/if}
+            {/if}
+            <div class="mui-slider-item mui-slider-item-duplicate">
+                <a href="{$plat_adv_list.adv_list.0.adv_image}">
+                    <img src="{:__IMG($plat_adv_list.adv_list.0.adv_image)}">
+                </a>
+            </div>
+        </div>
+        <div class="mui-slider-indicator">
+            {if condition="$plat_adv_list['is_use'] eq 1"}
+                {if condition="$plat_adv_list['adv_list'][0]['adv_image'] neq ''"}
+                    {foreach name="plat_adv_list['adv_list']" item="v" key="k"}
+                       <div class="mui-indicator {if $k eq 0}mui-active{/if}"></div>
+                   {/foreach}
+                {/if}
+            {/if}
+        </div>
+    </div>
+</div>
+<div class="classify clearfix  ">
+    <ul>
+        <li><a href="{:__URL('COURSE_MAIN/courses/kc_more&name=is_recommend')}"><img src="__TEMP__/{$style}/public/images/course1.png"><br>推荐课程 </a></li>
+        <li><a href="{:__URL('COURSE_MAIN/courses/kc_more&name=is_hot')}"><img src="__TEMP__/{$style}/public/images/course2.png"><br>热门课程</a></li>
+        <li><a href="{:__URL('COURSE_MAIN/courses/kc_more&name=is_new')}"><img src="__TEMP__/{$style}/public/images/course3.png"><br>最新课程</a></li>
+        <li><a href="{:__URL('COURSE_MAIN/Index/mechanism_list')}"><img src="__TEMP__/{$style}/public/images/course4.png"><br>合作机构</a></li>
+        <li><a href="{:__URL('COURSE_MAIN/courses/special_list')}"><img src="__TEMP__/{$style}/public/images/course5.png"><br>专题课程</a></li>
+    </ul>
+</div>
+<div class="rush-buy ">
+    <div class="cousetop">
+        <a href="kc_more.html">
+            <div class="wzbt">推荐课程</div>
+            <div class="more"><a href="{:__URL('COURSE_MAIN/courses/kc_more&name=is_recommend&category_id='.$category_id)}">更多></a></div>
+        </a>
+    </div>
+    <div class="mui-slider cg">
+        <div class="mui-scroll-wrapper mui-slider-indicator mui-segmented-control mui-segmented-control-inverted">
+            <div class="mui-scroll">
+                {volist name="recommend_list.data" id="recommend" key="k" }
+                <a href="{:__URL('COURSE_MAIN/courses/coursedetail&id='.$recommend.goods_id)}" class="mui-control-item {if condition='$k eq 1'}mui-active{/if}">
+                    {if condition="$recommend.picture_info"}
+                    <img src="{:__IMG($recommend.picture_info.pic_cover)}" class="photo-img">
+                    {else/}
+                    <img src="__TEMP__/{$style}/public/images/temp/noImg.png" class="photo-img">
+                    {/if}
+                    <div class="juli">
+                        <div class="ssbt">
+                            <div class="l"><span class="fashion-tab">{$recommend.goods_group_name.0}</span></div>
+                            <div class="r"><i class="icon icon-star"></i><span class="juse">{$recommend.score}</span></div>
+                        </div>
+                        <div class="course-bt">{$recommend.goods_name}</div>
+                        <div class="zhineng">{$recommend.introduction}</div>
+                        <div class="clearfix rel">
+                            <div class="listen">{$recommend.tune_num}人收听</div>
+                            <div class="price" style="height: 1.5rem;">{if condition="$recommend.is_showprice eq 1"}￥{$recommend.price}{/if}</div>
+                        </div>
+                    </div>
+                </a>
+                {/volist}
+
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+.clearfix .mui-active {
+    border-bottom: 1px solid #000;
+}
+</style>
+<div class="cousetop">
+    <a href="kc_more.html">
+        <div class="wzbt">分类课程</div>
+        <div class="more"><a href="{:__URL('COURSE_MAIN/courses/kc_more&category_id='.$category_id)}">更多></a></div>
+    </a>
+</div>
+<div id="segmentedControl" class="mui-segmented-control mui-segmented-control-inverted cropqh">
+    <a class="mui-control-item mui-active" href="#item1" data-type="0">线上课程 </a>
+    <a class="mui-control-item" href="#item2" data-type="1">线下课程</a>
+</div>
+<div class="paixu  clearfix">
+    <ul>
+        <li><a href="javascript:;" class="mui-active" data-state="0">默认</a></li>
+        <li><a href="javascript:;" data-state="1">销量</a></li>
+        <li><a href="javascript:;" data-state="2">排序</a></li>
+    </ul>
+</div>
+
+<div class="rush-buy ">
+
+    <div class="new-course">
+        <ul>
+           <div class="content"></div>
+           <li class="wsj" style="display: none" ><img src="__TEMP__/{$style}/public/images/wtp.png" class=""><br>暂无数据</li> 
+        </ul>
+    </div>
+
+</div>
+<div class="danpin">
+    <div class="cousetop">
+        <a href="ztkc.html">
+            <div class="wzbt">专题课程</div>
+            <div class="more"><a href="{:__URL('COURSE_MAIN/courses/special_list')}">更多></a></div>
+        </a>
+    </div>
+    <div class="mui-slider  cg zt">
+        <div class="mui-scroll-wrapper mui-slider-indicator mui-segmented-control mui-segmented-control-inverted">
+            <div class="mui-scroll">
+                {volist name="special_list.data" id="special" key="ks" }
+                <a href="{:__URL('COURSE_MAIN/courses/specialdetail&id='.$special.category_id)}" class="mui-control-item {if condition='$ks eq 1'}mui-active{/if}">
+                    {if condition="$special.category_pic"}
+                    <img src="{:__IMG($special.category_pic)}" class="photo-img">
+                    {else/}
+                    <img src="__TEMP__/{$style}/public/images/temp/noImg.png" class="photo-img">
+                    {/if}
+
+                </a>
+                {/volist}
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="danpin">
+    <div class="cousetop">
+        <div class="wzbt">合作机构</div>
+    </div>
+    <div class="mui-slider  cg hz">
+        <div class="mui-scroll-wrapper mui-slider-indicator mui-segmented-control mui-segmented-control-inverted">
+            <div class="mui-scroll">
+                {volist name="mechanism_list" id="mechanism" key="km" }
+                <a href="{:__URL('COURSE_MAIN/Index/mechanismdetail&id='.$mechanism.mechanism_id)}" class="mui-control-item {if condition='$km eq 1'}mui-active{/if}">
+                    {if condition="$mechanism.mechanism_pic"}
+                    <img src="{:__IMG($mechanism.mechanism_pic)}" class="photo-img hz-img">
+                    {else/}
+                    <img src="__TEMP__/{$style}/public/images/temp/noImg.png" class="photo-img hz-img">
+                    {/if}
+                    {$mechanism.mechanism_name}
+
+                </a>
+                {/volist}
+            </div>
+        </div>
+    </div>
+</div>
+
+{include file='course/default_new/footer'/}
+<script>
+mui('body').on('tap', '.clearfix ul li a', function () {
+    $(".clearfix ul li a").removeClass("mui-active");
+    var course_type=$("#segmentedControl .mui-active").attr('data-type');
+    $(this).addClass("mui-active");
+    var state=$(this).attr('data-state');
+    getCourse(1,course_type,state);
+})
+mui('body').on('tap', '#segmentedControl .mui-control-item', function () {
+    var course_type=$(this).attr('data-type');
+    var state=$(".clearfix li a.mui-active").attr('data-state');
+    getCourse(1,course_type,state);
+})
+$(function(){
+    var course_type=$("#segmentedControl .mui-active").attr('data-type');
+    var state=$(".clearfix li a.mui-active").attr('data-state');
+    getCourse(1,course_type,state);
+})
+var page=2;
+function getCourse(pages=0,course_type,state){
+    if(pages>0){
+        page=pages;
+    }
+    var category_id="{$category_id}";
+    var url="{:__URL('COURSE_MAIN/Index/class_index')}";
+    $.post(url,{page_index:page,category_id:category_id,course_type:course_type,state:state},function(data){
+          if(data==0){
+                if(page==1){
+                   $(".new-course ul .content").html("");
+                   $(".wsj").show(); 
+                }
+            }else{
+                var myjson='';
+                eval('myjson='+data+'');
+                var html='';
+                var len=myjson['data'].length;
+                if(len>0){
+                    for(var i=0;i<len;i++){
+                        var item=myjson['data'][i];
+                        html+='<li class="mui-table-view-cell">';
+                            html+='<a href="'+__URL('COURSE_MAIN/courses/coursedetail?id='+item.goods_id)+'">';
+                                if(item.picture_info.pic_cover){
+                                   var pic_cover=item.picture_info.pic_cover;
+                                   html+='<div class="img-jq l" style="background-image: url('+item.picture_info.pic_cover+')"></div>';
+                                }else{
+                                   html+='<div class="img-jq l" style="background-image: url("__TEMP__/{$style}/public/images/temp/noImg.png")"></div>'; 
+                                }
+                                html+='<div class="juli">';
+                                    html+='<div class="ssbt">';
+                                        html+='<div class="l"><span class="fashion-tab">'+item['goods_group_name'][0]+'</span></div>';
+                                        html+='<div class="r"><i class="icon icon-star"></i><span class="juse">'+item.score+'</span></div>';
+                                    html+='</div>';
+                                    html+='<div class="course-bt">'+item.goods_name+'</div>';
+                                    html+='<div class="zhineng">'+item.introduction+'</div>';
+                                    html+='<div class="clearfix rel">';
+                                        html+='<div class="listen">'+item.sales+'人购买</div>';
+                                        html+='<div class="price" style="height: 1.5rem;">';
+                                        if(item.is_showprice==1){
+                                        html+='￥'+item.price;
+                                        }
+                                    html+='</div>';
+                                html+='</div>';
+                           //html+='</a>';
+                        html+='</li>';
+                    }
+                    page++;
+                    $(".wsj").hide(); 
+                }else{
+                    $(".wsj").show();
+                }
+                if(pages==1){
+                    $("#page_count").val(myjson['page_count']);
+                    $(".new-course ul .content").html(html);
+                }else{
+                    $(".new-course ul .content").append(html);
+                }
+                
+            }
+    })
+}
+</script>
+</body>
+</html>

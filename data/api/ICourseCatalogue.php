@@ -47,4 +47,10 @@ interface ICourseCatalogue
      * @param unknown $goods_classid
      */
     function getCourseCatalogueDetail($catalogue_id);
+
+    /*
+     * 添加分享记录
+     */
+    function addCourseVideoShare($goods_id,$catalogue_id,$video_id,$uid);
+
 }

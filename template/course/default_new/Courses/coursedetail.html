@@ -1,0 +1,325 @@
+{include file='course/default_new/header'/}
+<div class="rel">
+    <header class="arrow">
+        <a class="mui-action-back mui-icon mui-icon-left-nav mui-pull-left" onclick="window.history.go(-1)" ></a>
+    </header>
+    <iframe frameborder="0" src="{$course_info.goods_video_address}" allowFullScreen="true"
+            class="video"></iframe>
+</div>
+<div class="bgwh kcjj-about gap">
+    <div class="bdline rel">
+        <div class="favor">
+            <a href="javascript:;" class="follow" data-state="0">
+                <i class="icon icon-favor sc {if condition='$state eq 1'}active{/if}"></i>收藏
+            </a>
+        </div>
+        <!-- <div class="guanzhubt"><a  href="kc_invit.html">+邀请好友</a></div> -->
+        <div class="price kcbtzt">{if condition="$course_info.is_showprice eq 1"}￥{$course_info.price}{/if}</div>
+        <div class=" clearfix">
+            <div class="l mftab">
+            {if condition="$course_info.group_name"} 
+            {volist name="course_info.group_name" id="group"}
+            <span class="fashion-tab">{$group}</span>
+            {/volist}
+            {/if}
+            </div>
+            <div class="pinxing" style="width:100%">
+                <div class="pingjiaxing ">
+                    <ul>
+                        <li class="{if condition='$course_info.score egt 2'}active{/if}"></li>
+                        <li class="{if condition='$course_info.score egt 4'}active{/if}"></li>
+                        <li class="{if condition='$course_info.score egt 6'}active{/if}"></li>
+                        <li class="{if condition='$course_info.score egt 8'}active{/if}"></li>
+                        <li class="{if condition='$course_info.score egt 10'}active{/if}"></li>
+                    </ul>
+                    <bdo>{$course_info.score}</bdo>
+                </div>
+            </div>
+        </div>
+        <div class="course-bt kcbtzt" style="width:70%">{$course_info.goods_name}</div>
+    </div>
+    <div class="kcjj-down">
+        <div class="kcjj-down1 clearfix">
+            <ul>
+                <li><i class="icon icon-rq"></i> {$course_info.crowd}</li>
+                <li><i class="icon icon-gm"></i> {$course_info.sales}人已购买</li>
+            </ul>
+        </div>
+        <div>
+            <i class="icon icon-bfa"></i> 共{$course_info.total_num}节课<span class="red ml10">已更新{$course_info.release_num}节课</span></div>
+    </div>
+</div>
+{if condition="$course_info.teacher"}
+<div class="bgwh mfteacher">
+    <div class="cousetop ">
+        <div class="wzbt">课程老师</div>
+    </div>
+    
+    <div class="txinform">
+        <div class="l">
+        {if condition="$course_info.teacher.teacher_pic"}
+        <img src="{:__IMG($course_info.teacher.teacher_pic)}" class="yjimg ">
+        {else/}
+        <img src="__TEMP__/{$style}/public/images/temp/noImg.png" class="yjimg ">
+        {/if}
+        </div>
+        <div class="plzl">
+            <div class="txname">{$course_info.teacher.teacher_name}</div>
+            <p>{$course_info.teacher.description}
+            </p>
+        </div>
+    
+    </div>
+    
+</div>
+{/if}
+<div class="rel">
+    <div id="segmentedControl" class="mui-segmented-control mui-segmented-control-inverted switch">
+        <a class="mui-control-item mui-active" href="#item1">课程介绍<span></span> </a>
+        <a class="mui-control-item" href="#item2">课程目录<span></span></a>
+        <a class="mui-control-item" href="#item3">课程评价<span></span></a>
+    </div>
+    <div class="wdzp">
+        <div id="item1" class="mui-control-content mui-active">
+            <div class="p10">
+                {$course_info.description}
+            </div>
+        </div>
+        <div id="item2" class="mui-control-content">
+            <div class=" new-course meifa ">
+                <ul>
+                    {volist name="course_info.catalogue" id="catalogue" key="ck"}
+                    <li>
+                        <a href="{:__URL('COURSE_MAIN/courses/video_view&goods_id='.$course_info.goods_id.'&id='.$catalogue.catalogue_id)}">
+                            <div class="bofang"><i class="icon icon-bf"></i></div>
+                            <div class="zhezhao"></div>
+                            <div class="photo-hair l">
+                            {if condition="$catalogue.catalogue_pic"}
+                            <img src="{:__IMG($catalogue.catalogue_pic)}">
+                            {else/}
+                            <img src="__TEMP__/{$style}/public/images/temp/noImg.png">
+                            {/if}
+                            </div>
+                            <div class="juli">
+                                <div class="course-bt">{$catalogue.catalogue_name}</div>
+                                <div class="zhineng">{$catalogue.description}</div>
+                            </div>
+                        </a>
+                    </li>
+                    {/volist}
+                    
+                    <li class="wsj" style="display: none"><img src="__TEMP__/{$style}/public/images/wtp.png"><br>暂无数据</li>
+                </ul>
+            </div>
+        </div>
+        <div id="item3" class="mui-control-content">
+            <div class="new-course pfym">
+                <ul>
+                    {volist name="assessList" id="assess"}
+                    <li>
+                        <div class="txinform">
+                            <div class="pinxing">
+                                <div class="pingjiaxing ">
+                                    <ul>
+                                        <li class="{if condition='$assess.score egt 2'}active{/if}"></li>
+                                        <li class="{if condition='$assess.score egt 4'}active{/if}"></li>
+                                        <li class="{if condition='$assess.score egt 6'}active{/if}"></li>
+                                        <li class="{if condition='$assess.score egt 8'}active{/if}"></li>
+                                        <li class="{if condition='$assess.score egt 10'}active{/if}"></li>
+                                    </ul>
+                                    <bdo>{$assess.score}</bdo>
+                                </div>
+                            </div>
+                            <div class="l">
+                            {if condition="$assess.head_img"}
+                            <img src="{:__IMG($assess.head_img)}" class="yjimg ">
+                            {else/}
+                            <img src="__TEMP__/{$style}/public/images/temp/none-header.png" class="yjimg ">
+                            {/if}
+                            </div>
+                            <div class="plzl">
+                                <div class="txname">{$assess.member_name}</div>
+                                <div class="date">{$assess.addtime|date="Y-m-d H:i:s",###}</div>
+                                <div>{$assess.content}
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    {/volist}
+                    
+                    <li class="wsj" style="display: none"><img src="__TEMP__/{$style}/public/images/wtp.png"><br>暂无数据</li>
+                </ul>
+            </div>
+            <div class="cyplbar clearfix">
+                <div class="l cyplbar1">
+                    {if condition="$uid"}
+                    <a href="{:__URL('COURSE_MAIN/courses/assess&id='.$course_info.goods_id)}">
+                        <i class="icon icon-comment"></i>参与评论
+                    </a>
+                    {else/}
+                    <a href="javascript:;" class='logins'>
+                        <i class="icon icon-comment"></i>参与评论
+                    </a>
+                    {/if}
+                    
+                </div>
+                <a href="{:__URL('COURSE_MAIN/courses/assessList&id='.$course_info.goods_id)}" class="chakan">查看更多评论</a>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+<div class="rush-buy ">
+    <div class="cousetop">
+        <div class="wzbt">相关课程</div>
+    </div>
+    <div class="mui-slider cg">
+        <div class="mui-scroll-wrapper mui-slider-indicator mui-segmented-control mui-segmented-control-inverted">
+            <div class="mui-scroll">
+                {volist name="submit_list.data" id="submit" key="k"}
+                <a href="{:__URL('COURSE_MAIN/courses/coursedetail&id='.$submit.goods_id)}" class="mui-control-item {if condition='$k eq 1'}mui-active{/if}"">
+                    {if condition="$submit.picture_info"}
+                    <img src="{:__IMG($submit.picture_info.pic_cover)}" class="photo-img">
+                    {else/}
+                    <img src="__TEMP__/{$style}/public/images/temp/noImg.png" class="photo-img">
+                    {/if}
+                    <div class="juli">
+                        <div class="ssbt">
+                            <div class="l"><span class="fashion-tab">{$submit.goods_group_name.0}</span></div>
+                            <div class="r"><i class="icon icon-star"></i><span class="juse">{$submit.score}</span></div>
+                        </div>
+                        <div class="course-bt">{$submit.goods_name}</div>
+                        <div class="zhineng">{$submit.introduction}</div>
+                        <div class="clearfix rel">
+                            <div class="listen">{$submit.sales}人收听</div>
+                            <div class="price">￥{$submit.price}</div>
+                        </div>
+                    </div>
+                </a>
+                {/volist}
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="foot-gap"></div>
+<div class="foot gmft ">
+    <ul>
+        <li>
+            <a href="{:__URL('COURSE_MAIN/Index/Index')}" class="active">
+                <span class="icon icon-ft1"></span>
+                <div class="mui-media-body">首页</div>
+            </a>
+        </li>
+        <li>
+            <a href="javascript:;">
+                <span class="icon icon-ft4"></span>
+                <div class="mui-media-body">客服</div>
+            </a>
+        </li>
+        <li class="ljgm">
+            <a href="kc_buy.html">
+                <div class="mui-media-body">立即购买</div>
+            </a>
+        </li>
+
+    </ul>
+</div>
+
+<script src="__TEMP__/{$style}/public/mui/js/mui.js"></script>
+
+<script type="text/javascript">
+    var shuzu = ['6', '7', '8', "9", '10'];
+    $(function () {
+        var liHightCount = 0;
+        $("#rank ul li").mouseover(function () {
+            $("#rank ul li").addClass("active");//给所有的li都高亮
+            $(this).nextAll("#rank li").removeClass("active");  //当前li-->后的li高亮样式类名remove
+            liHightCount = $("#rank ul").find("li.active").length; //获取高亮的li的个数
+            $("#rank bdo:eq(0)").show().html(shuzu[liHightCount - 1]);
+        }).click(function () {
+            $("#rank bdo:eq(0)").show().html(shuzu[liHightCount - 1]);
+
+        });
+    });
+    mui('body').on('tap', '.logins', function () {
+        layer.msg('你还未登录,请先登录!');
+        setTimeout(function(){window.location.href="{:__URL('COURSE_MAIN/login')}";},1000);
+    })
+</script>
+<script type="text/javascript">
+    mui('body').on('tap', '.follow', function () {
+        var ai=$(this).find("i");
+        var cover_id="{$course_info.goods_id}";
+        var cover_name="{$course_info.goods_name}";
+        var state=$(this).attr('data-state');
+        var url="{:__URL('COURSE_MAIN/Courses/follow')}";
+        $.post(url,{cover_id:cover_id,cover_name:cover_name,state:state},function(reslut){
+            if(reslut==1){
+                layer.msg('收藏成功');
+                ai.addClass("active");
+            }else if(reslut==2){
+                layer.msg('收藏失败');
+            }else if(reslut==3){
+                layer.msg('取消收藏成功');
+                ai.removeClass("active");
+            }else if(reslut==4){
+                layer.msg('取消收藏失败');
+            }else if(reslut==5){
+                layer.msg('你还未登录,请先登录!');
+                
+                setTimeout(function(){window.location.href="{:__URL('COURSE_MAIN/login')}";},1000);
+            }
+        })
+    })
+    mui('body').on('tap', 'a', function () {
+        document.location.href = this.href;
+    })
+   /* $(document).ready(function () {
+        mui('.favor').on('tap', 'a', function () {
+            if ($(this).parent().find(".sc").length > 0) {
+                $(this).parent().find('.icon').removeClass('sc');
+                $(this).parent().find('.icon').addClass('active');
+            } else {
+                $(this).parent().find('.icon').addClass('sc');
+                $(this).parent().find('.icon').removeClass('active');
+            }
+        });
+    });*/
+
+    mui.init();
+    $(function () {
+        var count = 1;
+        mui.init({
+            pullRefresh: {
+                container: '#refreshContainer',
+                down: {
+                    auto: true,
+                    callback: function () {
+                        setTimeout(function () {
+                            count = 0;
+                            $('#list').html($('#list_c').html());
+                            mui('#refreshContainer').pullRefresh().endPulldownToRefresh();
+                            mui('#refreshContainer').pullRefresh().endPullupToRefresh(false);
+                            count++;
+                        }, 1000);
+                    }
+                },
+                up: {
+                    height: 50,//可选.默认50.触发上拉加载拖动距离
+                    callback: function () {
+                        setTimeout(function () {
+                            $('#list').append($('#list_c').html());
+                            count++;
+                            mui('#refreshContainer').pullRefresh().endPullupToRefresh(count > 3);
+                        }, 1000);
+
+                    }
+                }
+            }
+        });
+    })
+</script>
+</body>
+</html>

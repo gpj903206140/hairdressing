@@ -19,7 +19,7 @@ interface ICourseTeacher
      * @param unknown $goods_classid  添加时$goods_classid=0
      * @param unknown $data
      */
-    function addOrEditCourseTeacher($mechanism_id, $teacher_id, $teacher_name, $is_visible, $description='', $sort=0, $teacher_pic, $pc_custom_template, $wap_custom_template);
+    function addOrEditCourseTeacher($mechanism_id, $teacher_id, $teacher_name, $is_visible, $description='', $sort=0, $teacher_pic, $introduce_pic, $pc_custom_template, $wap_custom_template);
     /**
      * 删除合作老师信息
      * @param unknown $goods_classid_array

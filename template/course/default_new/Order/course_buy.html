@@ -1,0 +1,77 @@
+{include file='course/default_new/header'/}
+
+<div class="mui-content  ">
+    <div class="cousetop buy">
+        <div class="wzbt">订单详情</div>
+    </div>
+    <ul class="mui-table-view zxun">
+        <li class="mui-table-view-cell ">
+            <div class=" mui-pull-left">订单编号</div>
+            <div class="r ">
+               {$order_no}
+            </div>
+        </li>
+        <li class="mui-table-view-cell ">
+            <div class=" mui-pull-left">订单信息</div>
+            <div class="r ">
+               {$course_info.goods_name}
+            </div>
+        </li>
+        <li class="mui-table-view-cell ">
+            <div class=" mui-pull-left">课程金额</div>
+            <div class="r ">
+                ￥{$course_info.price}元
+            </div>
+        </li>
+        <li class="mui-table-view-cell ">
+            <div class=" mui-pull-left">预付红包</div>
+            <div class="r ">
+                抵扣&nbsp;￥5.00元
+            </div>
+        </li>
+        <li class="mui-table-view-cell ">
+            <div class=" mui-pull-left">需付款</div>
+            <div class="r red ">
+                ￥{$course_info.price}元
+            </div>
+        </li>
+        <li class="mui-table-view-cell ">
+            <div class=" mui-pull-left">账号余额</div>
+            <div class="r ">
+                ￥{$sum}元
+            </div>
+        </li>
+    </ul>
+</div>
+<div class="mui-content  ">
+    <div class="cousetop buy">
+        <div class="wzbt">支付方法</div>
+    </div>
+    <ul class="mui-table-view zxun dx">
+        <li class="mui-table-view-cell ">
+            <div class="mui-input-row mui-radio">
+                <label><i class="icon icon-pay1"></i> 余额支付</label>
+                <input name="radio1" type="radio">
+            </div>
+        </li>
+        <li class="mui-table-view-cell ">
+            <div class="mui-input-row mui-radio">
+                <label><i class="icon icon-pay2"></i>微信支付</label>
+                <input name="radio1" type="radio">
+            </div>
+        </li>
+    </ul>
+</div>
+<div class="zhifu">
+<a href="javascript:;" class="tjbtn ">立即支付</a>
+</div>
+
+<script src="__TEMP__/{$style}/public/mui/js/mui.js"></script>
+<script type="text/javascript">
+    mui('body').on('tap', 'a', function () {
+        document.location.href = this.href;
+    })
+</script>
+
+</body>
+</html>

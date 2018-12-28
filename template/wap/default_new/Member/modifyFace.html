@@ -101,7 +101,8 @@ $(".upload_face").click(function(){
 		data : {"user_headimg" : user_headimg},
 		success : function(data){
 			if(data['code']>0){
-				location.href=__URL("APP_MAIN/member/personalData");
+				setTimeout(function(){window.history.go(-1);},1000); 
+				//location.href=__URL("APP_MAIN/member/personalData");
 			}
 		}
 	})

@@ -1,0 +1,445 @@
+{include file='course/default_new/header'/}
+<style type="text/css">
+        .xialk{position:fixed; top:0; right:0;width: 100vw;height: 100vh; z-index: 1000; display: none }
+        .tmbg{  width: 100vw;height: 100vh; background: #000; opacity: .5;position: absolute}
+        .xialk .photo{z-index: 100;position: absolute; text-align: center;top:30vh}
+        .xialk .photo .nr{width:100%; margin:1rem auto 2rem }
+        .xialk .photo .nr .mui-radio input[type="radio"]{right: 66px;top:8px;}
+        .xiaozs li{
+             position: relative;
+        }
+        .watch{
+            width:100%;
+            height:100%;
+            position: absolute;
+            left:0;
+            top:0;
+            /*background:rgba(255,255,255,0.5);*/
+        }
+        .show_share,.login_share,.lastopacity{
+            opacity: 0.2;
+        }
+        .nowatch{
+            display:none;
+        }
+        .kcxqfix .icon-left {
+            background-image: url(__TEMP__/{$style}/public/images/return2.png);
+        }
+        .txname span{
+            float:right;
+            font-size:8px;
+        }
+    </style>
+<div class="kcxqfix">
+    <ul>
+        <li>
+            <a href="{:__URL('COURSE_MAIN/courses/coursedetail&id='.$goods_id)}" ><i class="icon icon-left"></i><br>课程 </a>
+        </li>
+        <li id="back-to-top">
+            <a href="javascript:;" ><i class="icon icon-up"></i><br>顶部 </a>
+        </li>
+        <li id="back-to-bottom">
+            <a href="javascript:;"><i class="icon icon-down"></i><br>底部 </a>
+        </li>
+        <li>
+            <a href="javascript:;" class="wechat"><i class="icon icon-wechat"></i><br>客服 </a>
+        </li>
+    </ul>
+</div>
+<!-- <div class="kcxqgmfix"><a href="kc_buy.html"><img src="__TEMP__/{$style}/public/images/goumai.png"></a> </div>
+<a href="kc_invit.html" class="tjbtn djyq">点击邀请</a>
+
+<div class="tc">邀请好友一起来听课</div> -->
+<div class="fufeiye">
+    <div class="bikan">课前必看！</div>
+    <div class="bkvideo">
+
+        <!-- <iframe frameborder="0" src="{$catalogue_info.video_url}" allowFullScreen="true"
+                class="video"></iframe> -->
+         <video controls="" autoplay:true name="media"><source src="{$catalogue_info.video_url}" type="video/mp4" ></video>
+
+    </div>
+    <div class="xiaozs">
+        <ul>
+            <li>
+                <div class="txinform">
+                    <div class="l"><img src="__TEMP__/{$style}/public/images/zs.jpg" class="yjimg zs "></div>
+                    <div class="txname zs">小助手</div>
+                </div>
+                <div class="bkvideo width1">
+                    <div class="mui-content-padded zoom" id="imgContainer">
+                    <img src="__TEMP__/{$style}/public/images/temp/wei.jpg" class="imgb " data-preview-src="" data-preview-group="1" onload="onReady(this)">
+                    </div>
+                </div>
+            </li>
+            <li>
+                <div class="txinform">
+                    <div class="l"><img src="__TEMP__/{$style}/public/images/zs.jpg" class="yjimg zs "></div>
+                    <div class="txname zs">小助手</div>
+                </div>
+                <div class="bkvideo ">
+                    {$catalogue_info.description}
+                </div>
+            </li>
+        </ul>
+    </div>
+    <div class="cichusf"><span>{if condition="$course_info.price gt 0"}此处开始收费{else/}分享之后可观看{/if}</span></div>
+    <div class="xiaozs gray" style="opacity: 1;">
+        <a href="javascript:;">
+        <ul>
+            {volist name="res" id="video"}
+            <li class="{if condition='$video.share_num eq 0'}{if condition='$uid'}show_share{else/}login_share{/if}{/if}" data-id="{$video.video_id}" data-see="{$video.try_see}">
+                {if condition="$video.teacher_id"}
+                <div class="txinform">
+                    <div class="l">
+                    {if condition="$video.teacher_pic"}
+                    <img src="{:__IMG($video.teacher_pic)}" class="yjimg zs ">
+                    {else/}
+                    <img src="{:__IMG($default_headimg)}" class="yjimg zs ">
+                    {/if}
+                    </div>
+                    <div class="txname zs">{$video.teacher_name}{if condition='$video.share_num eq 0'}<span>可试看:{$video.try_see}分钟</span>{/if}</div>
+                </div>
+                {/if}
+                <div class="bkvideo ">
+                    <div class="bofang tup">{if condition='$video.share_num eq 0'}<i class="icon icon-bf"></i>{/if}</div>
+                    <!-- <img src="__TEMP__/{$style}/public/images/temp/xqt2.jpg" class="imgb"> -->
+                    <div class="iframe"><!-- <iframe frameborder="0" src="{:__IMG($video.video_url)}" allowFullScreen="false"
+                            class="video"></iframe> --><video controls="" autoplay:true name="media"><source src="{:__IMG($video.video_url)}" type="video/mp4" ></video></div>
+                </div>
+                <div class="watch {if condition='$video.share_num gt 0'}nowatch{/if}"></div>
+            </li>
+            {/volist}
+        </ul>
+        </a>
+        {if condition="$lastInfo eq ''"}
+        <a href="javascript:;" class="tjbtn  yj {if condition='$last eq 0'}lastopacity{else/}yeslastopacity{/if}">下一节：没有了</a>
+        {else/}
+        <a href="{:__URL('COURSE_MAIN/courses/video_view&goods_id='.$goods_id.'&id='.$lastInfo.catalogue_id)}" class="tjbtn  yj lastLink {if condition='$last eq 0'}lastopacity{else/}yeslastopacity{/if}" data-link="{if condition='$last eq 0'}0{else/}1{/if}">下一节：{$lastInfo.catalogue_name}</a>
+        {/if}
+    </div>
+
+</div>
+<style>
+.tips{
+    width:100%;
+    height:120px;
+    line-height:120px;
+    font-size:14px;
+    color:#4c4c4c;
+    text-align:center;
+
+}
+.purchase{
+    width:50%;
+    float:left;
+    height:50px;
+    line-height:50px;
+    font-size:14px;
+    color:#5a5a5a;
+    text-align:center;
+    background: #f1f1f1;
+}
+.yespurchase{
+    color:#fff;
+    background: #fa2a28;
+}
+.share_img {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 99999;
+    display: none;
+    background: #000;
+    opacity: 0.8;
+    filter: alpha(opacity=80);
+    width: 100%;
+    height: 100%;
+    text-align: right;
+}
+.share_img p {
+    color: #fff;
+    line-height: 30px;
+    font-size: 16px;
+}
+.wxphoto{
+    padding:60px 0 40px 0;
+    position:relative;
+}
+.wxphoto p{
+    margin-top:20px;
+    color:#000;
+    font-size:16px;
+}
+.wxphoto span{
+    font-size:22px;
+    color:#333;
+    position: absolute;
+    right:15px;
+    top:15px;
+}
+.wxphoto span img{
+    width:15px;
+    height:15px;
+}
+.try{
+    color:#f00;
+}
+</style>
+
+{if condition="$course_info.price gt 0"}
+<div class="xialk bgw showdiv" style="display: lock" >
+    <div class="photo ">
+        <div class="nr">
+            <p class="tips">购买之后,精彩内容才能呈现哦!</p>
+            <a href="javascript:;" class="purchase nopurchase">暂不购买</a>
+            <a href="{:__URL('COURSE_MAIN/Order/course_buy&goods_id='.$goods_id)}" class="purchase yespurchase">立即购买</a>
+            <input type="hidden" id="video_id">
+        </div>
+    </div>
+    <div class="tmbg"></div>
+</div>
+{else/}
+<div class="xialk bgw showdiv" style="display: lock" >
+    <div class="photo ">
+        <div class="nr">
+            <p class="tips"><span class='try'></span>分享之后,精彩内容才能呈现哦!</p>
+            <a href="javascript:;" class="purchase nopurchase">暂不分享</a>
+            <a href="javascript:;" class="purchase yespurchase data-icon-share">立即分享</a>
+            <input type="hidden" id="video_id">
+        </div>
+    </div>
+    <div class="tmbg"></div>
+</div>
+{/if}
+<div id="share_img" class="share_img" onclick="document.getElementById('share_img').style.display='none';" style="display: lock;">
+    <p><img class="arrowss" src="__TEMP__/{$style}/public/images/temp/goods_share.png"></p>
+    <p style="margin-top:30px; margin-right:50px;">点击右上角</p>
+    <p style="margin-right:50px;">将此课程分享给好友</p>
+</div>
+<div class="xialk bgw showwx " style="display: lock;" >
+    <div class="photo wxphoto">
+        <div class="nr">
+            <img src="__TEMP__/{$style}/public/images/temp/wxkf.png" width="40%">
+            <p>长按识别二唯码咨询客服</p>
+        </div>
+        <span class="clickHide"><img class="arrowss" src="__TEMP__/{$style}/public/images/temp/close.png"></span>
+    </div>
+    <div class="tmbg"></div>
+</div>
+<div class="xialk bgw trysee" style="display: lock" >
+    <div class="photo " style="width:94%;left:3%;">
+        <div class="nr" style="margin:0;">
+            <p class=""><video id="video1" autoplay="autoplay" controls style="width:100%;"></video><input type="text" id="showTime"/></p>
+            <a href="javascript:;" class="purchase nopurchase">暂不分享</a>
+            <a href="javascript:;" class="purchase yespurchase data-icon-share">立即分享</a>
+            <input type="hidden" id="video_id">
+        </div>
+    </div>
+    <div class="tmbg"></div>
+</div>
+<script src="__TEMP__/{$style}/public/mui/js/mui.js"></script>
+<script src="__TEMP__/{$style}/public/mui/js/mui.zoom.js" type="text/javascript" charset="utf-8"></script>
+<script src="__TEMP__/{$style}/public/mui/js/mui.previewimage.js"></script>
+<script>
+    //试看
+    mui('body').on('tap', '.try', function () {
+       var video_id=$("#video_id").val();
+        var url=$(".xiaozs li[data-id='"+video_id+"']").find(".iframe video source").attr('src');
+        var endTime=$(".xiaozs li[data-id='"+video_id+"']").attr('data-see');
+        $("#video1").attr(url);
+        //playMedia(0,endTime,url);
+        playMedia(5,10,url);
+        $(".trysee").show();
+        $(".showdiv").hide();
+    })
+    var myVid=document.getElementById("video1");
+    myVid.addEventListener("timeupdate",timeupdate);
+ 
+    var _endTime;
+ 
+     //视频播放
+    function playMedia(startTime,endTime,url){
+        //设置结束时间
+        _endTime = endTime*60;
+       /*var file = document.getElementById("file").files[0];
+       if(!file){
+        alert("请指定视频路径");
+        return false;
+       }
+       var url = (window.URL) ? window.URL.createObjectURL(file) : window.webkitURL.createObjectURL(file);*/
+       myVid.src = url;
+       myVid.controls = true;
+       setTimeout("setCurrentTime('"+startTime+"')",200);
+    }
+    //设置视频开始播放事件
+    function setCurrentTime(startTime){
+        myVid.currentTime=startTime;
+        myVid.play();
+    }
+    function timeupdate(){
+        //因为当前的格式是带毫秒的float类型的如：12.231233，所以把他转成String了便于后面分割取秒
+        var time = myVid.currentTime+"";
+        document.getElementById("showTime").value=time;
+        var ts = time.substring(0,time.indexOf("."));
+        if(ts==_endTime){
+            layer.msg('试看结束!');
+            myVid.pause();
+        }
+    }
+</script>
+<script type="text/javascript">
+    //回到底部
+    mui('body').on('tap', '#back-to-bottom', function () {
+       $("html,body").animate({
+            scrollTop: document.body.clientHeight
+        },1500);
+
+        return false;
+        
+    })
+   //回到顶部
+    mui('body').on('tap', '#back-to-top', function () {
+       // html,body 都写是为了兼容浏览器
+        $('html,body').animate({
+            scrollTop: 0
+        }, 700);
+
+        return false;
+        
+    })
+   //显示客服二唯码
+    mui('body').on('tap', '.wechat', function () {
+       $(".showwx").show();
+        
+    })
+     mui('body').on('tap', '.showwx span', function () {
+       $(".showwx").hide();
+        
+    })
+    //点击查看下一节
+    mui('body').on('tap', '.lastLink', function () {
+        var url=this.href;
+        var link=$(this).attr('data-link');
+        if(link==1){
+            window.location.href=url;
+        }
+        
+    })
+    //点击视频还未登录提示并跳到登录页面
+    mui('body').on('tap', '.login_share', function () {
+        layer.msg('你还未登录,请先登录!');
+        setTimeout(function(){window.location.href="{:__URL('COURSE_MAIN/login')}";},1000);
+    })
+    //立即分享
+    mui('body').on('tap', '.data-icon-share', function () {
+        $("#share_img").show();
+        $(".showdiv").hide();
+        
+        var goods_id="{$goods_id}";
+        var catalogue_id="{$catalogue_id}";
+        var video_id=$("#video_id").val();
+        var url="{:__URL('COURSE_MAIN/courses/video_view')}";
+        var li=$(".xiaozs li[data-id='"+video_id+"']");
+        //li.removeClass("show_share");return false;
+        $.post(url,{goods_id:goods_id,catalogue_id:catalogue_id,video_id:video_id},function(reslut){
+             if(reslut>0){
+                li.removeClass("show_share");
+                li.find(".watch").addClass("nowatch");
+                li.find(".bofang.tup .icon-bf").hide();
+                if($(".show_share").length==0){
+                    $(".tjbtn").removeClass("lastopacity");
+                    $(".tjbtn").addClass("yeslastopacity");
+                    $(".tjbtn").attr('data-link',1);
+                }
+             }else{
+
+             }
+        })
+    })
+    //点击立即分享后提示
+    mui('body').on('tap', '#share_img', function () {
+        $("#share_img").hide();
+    })
+    //显示分享&购买提示框
+    mui('body').on('tap', '.show_share', function () {
+        var video_id = $(this).attr('data-id');
+        var see = $(this).attr('data-see');
+        if(see>0){
+            $(".tips span.try").html("去试看, ");
+        }
+        $("#video_id").val(video_id);
+        $(".showdiv").show();
+    })
+    //关闭立即购买提示框
+    mui('body').on('tap', '.nopurchase', function () {
+        $(".showdiv").hide();
+    })
+    mui('body').on('tap', 'a', function () {
+        document.location.href = this.href;
+    })
+    mui.init();
+    var imageRenderTemplate = '<p><img src="{0}" data-preview-src="" data-preview-group="1" onload="onReady(this)"/></p>';
+    var imgContainer = document.getElementById("imgContainer");
+    imgContainer.addEventListener("tap",pickPhotos);
+    String.prototype.fillData = function(key, value) {
+        return this.replace(new RegExp("\\{" + key + "\\}", "g"), value);
+    }
+    mui.previewImage();
+    function onReady(item){
+        var scaleX = 60 / item.width;
+        var scaleY = 60 / item.height;
+        var scale = Math.max(scaleX , scaleY );
+
+        item.width = Math.ceil( item.width * scale);
+
+    }
+    function pickPhotos(item){
+        var btns = [{title:"拍照"},{title:"从相册选择"}];
+        plus.nativeUI.actionSheet({cancel:"取消",buttons:btns},
+            function(e){
+                var i=e.index;
+                if(i>0){
+                    photoAction(i-1);
+                }
+            }
+        );
+    }
+
+    function photoAction(index){
+        if( index == 0 ){
+            getImage();
+        }else{
+            galleryImgs();
+        }
+    }
+
+    //拍照
+    function getImage() {
+        var cmr = plus.camera.getCamera();
+        cmr.captureImage( function (p) {
+            plus.io.resolveLocalFileSystemURL( p, function ( entry ) {
+                var localurl = entry.toLocalURL();
+                addImage(localurl);
+            });
+        });
+    }
+    //相册选取
+    function galleryImgs(){
+        plus.gallery.pick( function(e){
+            for(var i in e.files){
+                addImage(e.files[i]);
+            }
+        }, function ( e ) {
+        },{filter:"image",multiple:true});
+    }
+
+    function addImage(url){
+        var render = imageRenderTemplate;
+        render = render.fillData(0,url);
+        imgContainer.innerHTML += render;
+    }
+</script>
+
+</body>
+</html>

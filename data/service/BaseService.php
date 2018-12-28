@@ -103,7 +103,7 @@ class BaseService
      */
     public function getRequestModel(){
         $model = Request::instance()->module();
-        if($model == 'shop'||$model == 'wap')
+        if($model == 'shop'||$model == 'wap'||$model == 'course')
         {
             $model = 'app';
         }

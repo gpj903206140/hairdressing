@@ -1043,6 +1043,7 @@ function __URL($url, $param = '')
 {
     $url = \str_replace('SHOP_MAIN', '', $url);
     $url = \str_replace('APP_MAIN', 'wap', $url);
+    $url = \str_replace('COURSE_MAIN', 'course', $url);
     $url = \str_replace('ADMIN_MAIN', ADMIN_MODULE, $url);
     // 处理后台页面
     $url = \str_replace(__URL__ . '/wap', 'wap', $url);

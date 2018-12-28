@@ -5,6 +5,7 @@
 </style>
 {/block}
 {block name="main"}
+{include file="adminblue/Course/CourseInputCss"}
 <div class="space-10"></div>
 <div class="set-style">
 	<dl>
@@ -24,7 +25,7 @@
 	<dl>
 		<dt>上级分类：</dt>
 		<dd>
-			<select name="search_type" id="pid" class="select-common">
+			<select name="search_type" id="pid" class="input-common">
 				<option value="0">顶级分类</option>
 				{foreach name="category_list" item="v1"}
 				<option value="{$v1['category_id']}">{$v1['category_name']}</option>
@@ -45,6 +46,13 @@
 			</select>
 		</dd>
 	</dl> -->
+	<dl>
+		<dt>专题课程：</dt>
+		<dd>
+			<input id="is_special" type="checkbox" class="checkbox" />
+			<span class="help-inline" id="is_menuPrompt" style="display: none;"></span>
+		</dd>
+	</dl>
 	<dl>
 		<dt>是否可见：</dt>
 		<dd>
@@ -91,20 +99,7 @@
 			<p><textarea id="description" placeholder="请输入描述" class="textarea-common"></textarea></p>
 		</dd>
 	</dl>
-	<!-- <dl>
-		<dt>电脑端分类页面模板：</dt>
-		<dd>
-			{$template_url['pc_template_url']}&nbsp;<input type="text" class="input-common harf" name="" id="pc_custom_template" style="width: 80px;" onkeyup="value=value.replace(/[^\w\.\/]/ig,'')">&nbsp;.html
-			<p class="hint">用户自定义模板必须存放在{$template_url['pc_template_url']}下，模板名只能由英文组成</p>
-		</dd>
-	</dl> -->
-	<dl>
-		<dt>手机端分类页面模板：</dt>
-		<dd>
-			{$template_url['wap_template_url']}&nbsp;<input type="text" class="input-common harf" name="" id="wap_custom_template" style="width: 80px;" onkeyup="value=value.replace(/[^\w\.\/]/ig,'')">&nbsp;.html
-			<p class="hint">用户自定义模板必须存放在{$template_url['wap_template_url']}下，模板名只能由英文组成</p>
-		</dd>
-	</dl>
+	
 	<dl>
 		<dt></dt>
 		<dd>
@@ -171,14 +166,17 @@ function addGoodsCategoryAjax() {
 	}else{
 		var is_visible = 0;
 	}
+	if($("#is_special").prop("checked")){
+		var is_special = 1;
+	}else{
+		var is_special = 0;
+	}
 	/*var attr_id = $("#attr_id").val();
 	if(attr_id.length>0){
 		var attr_name = $("#attr_id").find("option:selected").text();
 	}else{
 		var attr_name = '';
 	}*/
-	var pc_custom_template = $("#pc_custom_template").val();
-	var wap_custom_template = $("#wap_custom_template").val();
 	if(verify(category_name,short_name, keywords, sort, description)){
 		if(flag) return;
 		flag = true;
@@ -191,13 +189,12 @@ function addGoodsCategoryAjax() {
 				'keywords' : keywords,
 				'sort' : sort,
 				'description' : description,
+				'is_special' : is_special,
 				'is_visible' : is_visible,
 				"category_pic" : category_pic,
 				"short_name" : short_name,
 				//"attr_id" : attr_id,
 				//"attr_name" : attr_name,
-				"pc_custom_template" : pc_custom_template,
-				"wap_custom_template" : wap_custom_template
 			},
 			success : function(data) {
 				if (data["code"] > 0) {

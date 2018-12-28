@@ -59,7 +59,7 @@ class CourseTeacher extends BaseService implements ICourseTeacher
      * (non-PHPdoc)
      * @see \data\api\ICourseTeacher::addOrEditCourseTeacher()
      */
-    public function addOrEditCourseTeacher($mechanism_id, $teacher_id, $teacher_name, $is_visible,  $description = '', $sort = 0, $teacher_pic, $pc_custom_template, $wap_custom_template)
+    public function addOrEditCourseTeacher($mechanism_id, $teacher_id, $teacher_name, $is_visible,  $description = '', $sort = 0, $teacher_pic, $introduce_pic, $pc_custom_template, $wap_custom_template)
     {
         Cache::tag('niu_course_teacher')->clear();
         $data = array(
@@ -69,6 +69,7 @@ class CourseTeacher extends BaseService implements ICourseTeacher
             'description' => $description,
             'sort' => $sort,
             'teacher_pic' => $teacher_pic,
+            'introduce_pic' => $introduce_pic,
             'pc_custom_template' => $pc_custom_template, 
             'wap_custom_template' => $wap_custom_template
         );
@@ -87,7 +88,7 @@ class CourseTeacher extends BaseService implements ICourseTeacher
             ]);
             if ($res !== false) {
                 //$this->addCourseTeacherBlock($teacher_id);
-                $this->addUserLog($this->uid, 1, '课程', '修改合作机构', '修改合作机构:'.$teacher_name);
+                $this->addUserLog($this->uid, 1, '课程', '修改机构老师', '修改机构老师:'.$teacher_name);
                 return $res;
             } else {
                 $res = $this->course_teacher->getError();
@@ -124,7 +125,7 @@ class CourseTeacher extends BaseService implements ICourseTeacher
             
             $course_class_one = $course_teacher_model->getQuery([
                 'mechanism_id'=>$mechanism_id
-            ], 'teacher_id, teacher_name,teacher_pic,sort,is_visible,level', 'sort');
+            ], 'teacher_id, teacher_name,teacher_pic,introduce_pic,sort,is_visible,level', 'sort');
             
            // Cache::tag("niu_course_teacher")->set("getteacherTreeUseInAdmin", $course_class_one);
             return $course_class_one;

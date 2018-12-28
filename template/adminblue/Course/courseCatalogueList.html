@@ -54,7 +54,10 @@
 				
 			</td>
 			<td></td>
-			<td align="center"><a href="javascript:void(0);" onclick="showEditBg({$v1['catalogue_id']});">查看</a>   <a href="{:__URL('ADMIN_MAIN/course/addCourseCatalogueVideo','goods_id='.$goods_id.'&catalogue_id='.$v1['catalogue_id'])}">添加</a></td>
+			<td align="center">
+			<a href="javascript:void(0);" onclick="showEditBg({$v1['catalogue_id']});">查看</a>   
+			<a href="{:__URL('ADMIN_MAIN/course/addCourseCatalogueVideo','goods_id='.$goods_id.'&catalogue_id='.$v1['catalogue_id'])}">添加</a>
+			</td>
 			<td style="text-align: center;">{$v1['is_visible'] ? '是' : '否'}</td>
 			<td style="text-align: center;"><input type="number" class="sort input-common input-common-sort" fieldid="{$v1['catalogue_id']}" fieldname="sort" value="{$v1['sort']}" size="1"></td>
 			<td style="text-align: center;">
@@ -78,7 +81,7 @@
 .modal-dl2 dd{
 	margin-left:0;
 }
-.modal-dl2 dd span{
+.modal-dl2 dd span.spanvideo{
 	width:215px;
 	heigh:60px;
 	display:inline-block;
@@ -86,19 +89,35 @@
 	margin:10px 10px 0 0;
 	float:left;
 }
-.modal-dl2 dd span a{
+.modal-dl2 dd span.spanvideo a{
 	width:10px;
 	height:10px;
 	display:block;
 	position: absolute;
-	/*right:0;*/
+	right:0;
 	top:0px;
 	background: url(ADMIN_IMG/close.png) no-repeat;
 	background-size:10px 10px;
 }
-.modal-dl2 dd span video{
+.modal-dl2 dd span.spanvideo video{
 	width:215px;
 	
+}
+.modal-dl2 dd span.spanvideo{
+	position:relative;
+}
+.try_see{
+	position:absolute;
+	left:0;
+	bottom:55px;
+	width:100%;
+	height:35px;
+	line-height:35px;
+	color:#fff;
+	font-size:13px;
+	z-index:1000;
+	display:inline-block;
+	background:rgba(0,0,0,0.5);
 }
 </style>
 <!-- 照片墙开始 -->
@@ -142,7 +161,7 @@ function showEditBg(promoter_id){
 	   eval('data='+data+'')
        for(var i=0;i<data.length;i++){
        	
-       	  con+='<span style="text-align:center;"><video id="my-video" class="video-js vjs-big-play-centered" controls src="'+data[i]['video_url']+'"><p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that</p></video><a onclick="delEditBg('+data[i]['video_id']+',this);"></a>录课老师: '+data[i]['teacher_name']+'</span>';
+       	  con+='<span style="text-align:center;" class="spanvideo"><video id="my-video" class="video-js vjs-big-play-centered" controls src="'+data[i]['video_url']+'"><p class="vjs-no-js">To view this video please enable JavaScript, and consider upgrading to a web browser that</p></video><a onclick="delEditBg('+data[i]['video_id']+',this);"></a>录课老师: '+data[i]['teacher_name']+'<span class="try_see">试看时长：'+data[i]['try_see']+'分钟</span></span>';
        }
        $(".modal-dl2 dd").html(con);
 	})

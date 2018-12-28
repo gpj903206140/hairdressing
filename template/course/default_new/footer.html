@@ -1,0 +1,42 @@
+<!-- 底部菜单 -->
+<div class="foot-gap"></div>
+<div class="foot ">
+    <ul>
+        <li>
+            <a href="{:__URL('COURSE_MAIN/Index/Index')}" class="active">
+                <span class="icon icon-ft1"></span>
+                <div class="mui-media-body">首页</div>
+            </a>
+        </li>
+        <li>
+            <a href="my_course.html">
+                <span class="icon icon-ft2"></span>
+                <div class="mui-media-body">我的课程</div>
+            </a>
+        </li>
+        <li>
+            <a href="{:__URL('COURSE_MAIN/Member/Index')}">
+                <span class="icon icon-ft3"></span>
+                <div class="mui-media-body">个人中心</div>
+            </a>
+        </li>
+
+    </ul>
+</div>
+<script src="__TEMP__/{$style}/public/mui/js/mui.js"></script>
+<script type="text/javascript">
+    mui('body').on('tap', 'a', function () {
+        document.location.href = this.href;
+    })
+    mui('body').on('tap', '#submint', function () {
+        var search = $("#search_keyword").val();
+        var url="{:__URL('COURSE_MAIN/courses/kc_more&name=search')}&search="+search;
+        document.location.href = url;
+    })
+</script>
+<script type="text/javascript" charset="utf-8">
+    var gallery = mui('.mui-slider');
+    gallery.slider({
+        interval: 5000//自动轮播周期，若为0则不自动播放，默认为0；
+    });
+</script>

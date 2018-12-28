@@ -1,10 +1,12 @@
 {extend name="adminblue/base" /}
+
 {block name="resources"/}
 <style>
 .error{padding:5px 0 0;}
 </style>
 {/block}
 {block name="main"}
+{include file="adminblue/Course/CourseInputCss"}
 <div class="space-10"></div>
 <div class="set-style">
 	<dl>
@@ -52,20 +54,7 @@
 			<p><textarea id="description" placeholder="请输入描述" class="textarea-common"></textarea></p>
 		</dd>
 	</dl>
-	<!-- <dl>
-		<dt>电脑端分类页面模板：</dt>
-		<dd>
-			{$template_url['pc_template_url']}&nbsp;<input type="text" class="input-common harf" name="" id="pc_custom_template" style="width: 80px;" onkeyup="value=value.replace(/[^\w\.\/]/ig,'')">&nbsp;.html
-			<p class="hint">用户自定义模板必须存放在{$template_url['pc_template_url']}下，模板名只能由英文组成</p>
-		</dd>
-	</dl> -->
-	<dl>
-		<dt>手机端合作机构页面模板：</dt>
-		<dd>
-			{$template_url['wap_template_url']}&nbsp;<input type="text" class="input-common harf" name="" id="wap_custom_template" style="width: 80px;" onkeyup="value=value.replace(/[^\w\.\/]/ig,'')">&nbsp;.html
-			<p class="hint">用户自定义模板必须存放在{$template_url['wap_template_url']}下，模板名只能由英文组成</p>
-		</dd>
-	</dl>
+	
 	<dl>
 		<dt></dt>
 		<dd>
@@ -120,14 +109,6 @@ function addGoodsCategoryAjax() {
 	}else{
 		var is_visible = 0;
 	}
-	/*var attr_id = $("#attr_id").val();
-	if(attr_id.length>0){
-		var attr_name = $("#attr_id").find("option:selected").text();
-	}else{
-		var attr_name = '';
-	}*/
-	var pc_custom_template = $("#pc_custom_template").val();
-	var wap_custom_template = $("#wap_custom_template").val();
 	if(verify(mechanism_name, sort, description)){
 		if(flag) return;
 		flag = true;
@@ -139,9 +120,7 @@ function addGoodsCategoryAjax() {
 				'sort' : sort,
 				'description' : description,
 				'is_visible' : is_visible,
-				"mechanism_pic" : mechanism_pic,
-				"pc_custom_template" : pc_custom_template,
-				"wap_custom_template" : wap_custom_template
+				"mechanism_pic" : mechanism_pic
 			},
 			success : function(data) {
 				if (data["code"] > 0) {

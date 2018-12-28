@@ -14,6 +14,9 @@
 .add-child:hover i{
 	display: inline-block;
 }
+.upload-btn-common>img {
+    margin-left: 0px; 
+}
 </style>
 {/block}
 {block name="right_tab"}
@@ -26,7 +29,8 @@
 {notempty name="$category_list"}
 <table class="table-class">
 	<colgroup>
-		<col style="width: 2%;">
+		<col style="width: 1%;">
+		<col style="width: 4%;">
 		<col style="width: 30%;">
 		<col style="width: 10%;">
 		<col style="width: 10%;">
@@ -38,6 +42,7 @@
 	<thead>
 		<tr align="center">
 			<th></th>
+			<th align="left">图片</th>
 			<th align="left">合作机构名称</th>
 			<th align="left">机构老师</th>
 			<th align="center">老师数量</th>
@@ -53,13 +58,17 @@
 			<td>
 				
 			</td>
-			
+			<td align="left">
+				{if condition="$v1.mechanism_pic"}<div class="upload-btn-common">
+					<img id="preview_logo2" src="__STATIC__/blue/img/upload-common-select.png" {if condition="$v1.mechanism_pic"}data-src="{:__IMG($v1.mechanism_pic)}"{/if} data-html="true" data-container="body" data-placement="top" data-trigger="manual"/>
+				</div>{/if}
+			</td>
 			<td>
 				{$v1['mechanism_name']}
 				
 			</td>
 			<td><a href="{:__URL('ADMIN_MAIN/course/courseTeacherList','mechanism_id='.$v1['mechanism_id'])}">查看</a></td>
-			<td align="center">{$v1['teacher_num']}</td>
+			<td align="center"><a href="{:__URL('ADMIN_MAIN/course/courseTeacherList','mechanism_id='.$v1['mechanism_id'])}">{$v1['teacher_num']}</a></td>
 			<td align="center"><a href="javascript:void(0);" onclick="showEditBg({$v1['mechanism_id']});">查看</a></td>
 			<td style="text-align: center;">{$v1['is_visible'] ? '是' : '否'}</td>
 			<td style="text-align: center;"><input type="number" class="sort input-common input-common-sort" fieldid="{$v1['mechanism_id']}" fieldname="sort" value="{$v1['sort']}" size="1"></td>

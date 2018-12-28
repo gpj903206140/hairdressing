@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>美发课程</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1,maximum-scale=1,user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="shortcut  icon" type="image/x-icon" href="__TEMP__/{$style}/public/images/favicon.ico" media="screen"/>
+    <link rel="stylesheet" href="__TEMP__/{$style}/public/mui/css/mui.min.css">
+    <link rel="stylesheet" href="__TEMP__/{$style}/public/css/fapinkc.css">
+    <script src="__TEMP__/{$style}/public/js/jquery-1.8.3.min.js"></script>
+    <script src="__TEMP__/{$style}/public/js/showBox.js"></script>
+    <script src="ADMIN_JS/layer/layer.js"></script>
+    <script src="__STATIC__/js/common.js"></script>
+    <script>
+	function __URL(url)
+	{
+	    url = url.replace('SHOP_MAIN', '');
+	    url = url.replace('APP_MAIN', 'wap');
+	    if(url == ''|| url == null){
+	        return 'SHOP_MAIN';
+	    }else{
+	        var str=url.substring(0, 1);
+	        if(str=='/' || str=="\\"){
+	            url=url.substring(1, url.length);
+	        }
+	        if($("#root_rewrite_model").val()==1 || $("#root_rewrite_model").val()==true){
+	            return 'SHOP_MAIN/'+url;
+	        }
+	        var action_array = url.split('?');
+	        //检测是否是pathinfo模式
+	        url_model = $("#root_url_model").val();
+	        if(url_model==1 || url_model==true)
+	        {
+	            var base_url = 'SHOP_MAIN/'+action_array[0];
+	            var tag = '?';
+	        }else{
+	            var base_url = 'SHOP_MAIN?s=/'+ action_array[0];
+	            var tag = '&';
+	        }
+	        if(action_array[1] != '' && action_array[1] != null){
+	            return base_url + tag + action_array[1];
+	        }else{
+	             return base_url;
+	        }
+	    }
+	}
+	/**
+	 * 处理图片路径
+	 */
+	function __IMG(img_path){
+	    var path = "";
+	    if(img_path != undefined && img_path != ""){
+	        if(img_path.indexOf("http://") == -1 && img_path.indexOf("https://") == -1){
+	            path = "__UPLOAD__\/"+img_path;
+	        }else{
+	            path = img_path;
+	        }
+	    }
+	    return path;
+	}
+	</script>
+</head>
+<body>

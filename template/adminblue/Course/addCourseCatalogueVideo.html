@@ -13,13 +13,22 @@
 </style>
 {/block}
 {block name="main"}
+{include file="adminblue/Course/CourseInputCss"}
 <div class="space-10"></div>
 <div class="set-style">
+<dl>
+		<dt>试看时长：</dt>
+		<dd>
+			<input type="number" class="span1 input-common harf" id="try_see" placeholder="0" 
+			/><em class="unit">分钟</em>
+			<span class="help-inline">试看时长必须是数字，且不能为负数</span>
+		</dd>
+	</dl>
 	<dl>
 		<dt><span class="color-red">*</span>机构老师：</dt>
 		<dd>
 			<p>
-			 <select id="teacher_id" class="input-common" style="width: 290px !important;">
+			 <select id="teacher_id" class="input-common" style="">
 				<option value="0">请选择机构老师</option>
                 {foreach name="teacher_list" item="teacher"}
 					<option value="{$teacher.teacher_id}">{$teacher.teacher_name}</option>
@@ -55,7 +64,7 @@
     <dl>
 		<dt>输入网址：</dt>
 		<dd>
-			<input type="text" id="video_url" class="input-common" style="width: 290px !important;" placeholder="在此输入外链视频地址"  />
+			<input type="text" id="video_url" class="input-common" style="" placeholder="在此输入外链视频地址"  />
 			<p class="hint">
 				<span>展示视频<i class="important-note">支持手动输入外链视频地址</i>或者<i class="important-note">上传本地视频</i></span>
 			</p>
@@ -104,9 +113,14 @@ function verify( video_url){
 var flag = false;
 function addGoodsCategoryAjax() {
 	var goods_id = $("#goods_id").val();
+	var try_see = $("#try_see").val();
 	var catalogue_id = $("#catalogue_id").val();
 	var teacher_id = $("#teacher_id option:selected").val();
 	var teacher_name = $("#teacher_id option:selected").text();
+	if(try_see<0){
+		layer.msg('试看时长不能为负数');
+		return false;
+	}
 	if(teacher_id==0){
 		teacher_name = '';
 	}
@@ -120,6 +134,7 @@ function addGoodsCategoryAjax() {
 			url : "{:__URL('ADMIN_MAIN/course/addCourseCatalogueVideo')}",
 			data : {
 				'goods_id' : goods_id,
+				'try_see' : try_see,
 				'catalogue_id' : catalogue_id,
 				'sort' : sort,
 				'teacher_id' : teacher_id,
@@ -129,7 +144,7 @@ function addGoodsCategoryAjax() {
 			success : function(data) {
 				if (data["code"] > 0) {
 					showTip(data['message'],"success");
-					location.href = "{:__URL('ADMIN_MAIN/course/CourseCataloguelist')}&goods_id={$goods_id}";
+					setTimeout(function(){location.href = "{:__URL('ADMIN_MAIN/course/CourseCataloguelist')}&goods_id={$goods_id}"},1000); 
 				}else{
 					showTip(data['message'],"error");
 					flag = false;
