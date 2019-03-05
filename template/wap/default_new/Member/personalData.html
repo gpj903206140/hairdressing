@@ -373,19 +373,6 @@ function backPage(){
 	}
 }
 
-function logout(){
-	$.ajax({
-		url: "{:__URL('APP_MAIN/member/logout')}",
-		type: "post",
-		success: function (res) {
-			if (res['code'] > 0) {
-				window.location.href=__URL("APP_MAIN/login/index");
-			} else if(res["message"]!=null){
-				showBox(res["message"],"error");
-			}
-		}
-	})
-}
 
 $("#logout").click(function (){
 	var json ={ "logout" : "1" }

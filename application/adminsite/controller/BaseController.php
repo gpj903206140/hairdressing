@@ -231,7 +231,7 @@ class BaseController extends Controller
                         'menu_name' => $this->module_info['module_name'],
                         'active' => 1
                     )
-                );
+                );      
                 $this->assign('child_menu_list', $child_menu_list);
                 $this->assign('ShopNavigationData', $ShopNavigationData['data']);
                 $this->assign('first_menu_list', $first_menu_list);

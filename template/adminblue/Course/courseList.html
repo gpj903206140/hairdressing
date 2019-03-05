@@ -137,12 +137,14 @@ input, textarea, .uneditable-input {width: 147px;}
 		<table class="table-class">
 			<colgroup>
 				<col style="width: 2%;">
-				<col style="width: 20%;">
-				<col style="width: 10%;">
+				<col style="width: 15%;">
+				<col style="width: 8%;">
 				
-				<col style="width: 10%;">
-				<col style="width: 10%;">
-				<col style="width: 11%;">
+				<col style="width: 8%;">
+				<col style="width: 8%;">
+				<col style="width: 8%;">
+				<col style="width: 8%;">
+				<col style="width: 6%;">
 				<col style="width: 10%;">
 				<col style="width: 9%;">
 				<col style="width: 4%;">
@@ -160,6 +162,8 @@ input, textarea, .uneditable-input {width: 147px;}
 					<th class="goods-fields-sort" data-field="total_num" style="text-align: right;">总课数<span class="desc"></span></th>
 					<th class="goods-fields-sort" data-field="release_num" style="text-align: right;">发布课数<span class="desc"></span></th>
 					<th class="goods-fields-sort" data-field="sales" style="text-align: right;">销量<span class="desc"></span></th>
+					<th style="text-align: right;">收藏</th>
+					<th style="text-align: right;">分享</th>
 <!-- 					<th>上下架</th> -->
 					<th>适合人群</th>
 					<th>课程目录</th>
@@ -335,7 +339,7 @@ function LoadingInfo(page_index) {
 // 							html += '</label>';
 						html += '</td>';
 
-						html += '<td colspan="9" style="border-bottom:0;">';
+						html += '<td colspan="11" style="border-bottom:0;">';
 							html += '<div style="display: inline-block; width: 100%;font-size:12px;color:#666;" class="pro-code">';
 								html += '<span></span>';
 								html += '<span class="pro-code" style="margin-left:10px;">创建时间：'+timeStampTurnTime(data["data"][i]["create_time"]);
@@ -421,6 +425,16 @@ function LoadingInfo(page_index) {
 						html += '<td style="text-align: right;">';
 							html += '<div class="cell">';
 								html += '<span class="pro-stock" style="color: #666;" id="moreChangeStock'+ data["data"][i]["goods_id"]+'">' + data["data"][i]["real_sales"] + '</span>';
+							html += '</div>';
+						html += '</td>';
+						html += '<td style="text-align: right;">';
+							html += '<div class="cell">';
+								html += '' + data["data"][i]["collects"] + '';
+							html += '</div>';
+						html += '</td>';
+						html += '<td style="text-align: right;">';
+							html += '<div class="cell">';
+								html += '' + data["data"][i]["shares"] + '';
 							html += '</div>';
 						html += '</td>';
 						

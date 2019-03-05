@@ -1511,10 +1511,22 @@ class Course extends BaseService implements ICourse
     public function deleteEvaluate($id)
     {
         $goodsEvaluate = new NsCourseAssessModel();
-        $info = $goodsEvaluate->getInfo(['id'=>$id],'goods_id');
-        $res =  $goodsEvaluate->destroy($id);
-        $this->course->where("goods_id={$info['goods_id']}")->setDec('evaluates',1);
-        return $res;
+        $goodsEvaluate->startTrans();
+        try {
+            $info = $goodsEvaluate->getInfo(['id'=>$id],'goods_id');
+            $res =  $goodsEvaluate->destroy($id);
+            $result = $this->course->where("goods_id={$info['goods_id']}")->setDec('evaluates',1);
+            if($result){
+                $goodsEvaluate->commit();
+            }else{
+                $goodsEvaluate->rollback();
+            }
+            return $result;
+         } catch (\Exception $e) {
+            $goodsEvaluate->rollback();
+            return $e->getMessage();
+        }
+        return 0;
     }
 
     /**
@@ -2198,7 +2210,7 @@ class Course extends BaseService implements ICourse
         }
         $viewObj = $goods_model->alias("ng")
             ->join('sys_album_picture ng_sap', 'ng_sap.pic_id = ng.picture', 'left')
-            ->field("ng.goods_id,ng.goods_name,ng.promotion_price,ng.crowd,ng.total_num,ng.release_num,ng.market_price,ng.goods_type,ng.introduction,ng.state,ng.is_hot,ng.score,ng.is_recommend,ng.is_new,ng.is_showprice,ng.sales,ng_sap.pic_cover,ng_sap.pic_cover_micro,ng.create_time,ng.QRcode,ng.price,ng.real_sales,ng.sort,ng.group_id_array,ng.allow_delete");
+            ->field("ng.tune_num,ng.collects,ng.shares,ng.goods_id,ng.goods_name,ng.promotion_price,ng.crowd,ng.total_num,ng.release_num,ng.market_price,ng.goods_type,ng.introduction,ng.state,ng.is_hot,ng.score,ng.is_recommend,ng.is_new,ng.is_showprice,ng.sales,ng_sap.pic_cover,ng_sap.pic_cover_micro,ng.create_time,ng.QRcode,ng.price,ng.real_sales,ng.sort,ng.group_id_array,ng.allow_delete");
         $queryList = $goods_model->viewPageQuery($viewObj, $page_index, $page_size, $condition, $order);
         $queryCount = $this->getGoodsQueryCount($condition);
         $list = $goods_model->setReturnList($queryList, $queryCount, $page_size);
@@ -2305,7 +2317,13 @@ class Course extends BaseService implements ICourse
             $return = $course->where(['goods_id'=>$goods_id])->setInc($field_name,$num);
             return $return;
         }elseif($status==2){ //减
-            $return = $course->where(['goods_id'=>$goods_id])->setDec($field_name,$num);
+            $count = $course->getInfo(['goods_id'=>$goods_id],$field_name);
+            if($count[$field_name]>0){
+                $return = $course->where(['goods_id'=>$goods_id])->setDec($field_name,$num);
+            }else{
+                $return = $course->ModifyTableField('goods_id',$goods_id,$field_name,0);
+            }
+            
             return $return;
         }
         return false;

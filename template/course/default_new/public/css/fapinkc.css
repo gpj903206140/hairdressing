@@ -208,7 +208,7 @@ ul li, ul {
     right: 0;
     height: 5rem;
     background: #111;
-    z-index: 900
+    z-index: 1000
 }
 
 .foot ul li {
@@ -573,6 +573,7 @@ a.blue{color: #007aff}
 .icon-my4{background-image: url("../images/wd04.png") ;}
 .icon-my5{background-image: url("../images/wd05.png") ;background-size: 22px; line-height: 1.4}
 .icon-my6{background-image: url("../images/wd06.png") ;}
+.icon-my7{background-image: url("../images/wd07.png") ;}
 .jyjt{padding-right: 2rem; color: #999}
 .my.mui-table-view::after{background: inherit}
 .my a{font-size: 1.6rem}

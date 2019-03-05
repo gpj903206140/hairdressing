@@ -3,6 +3,8 @@
 // 核心中文语言包
 //命名规则：商城相关 shop_, 会员相关 member_, 商品相关 goods_,订单相关order_
 return [
+    //课程
+    'course_detail_price'                     => '浏览',
     // 商城相关
     'shop_index'                     => '商城首页',
     'attention_mall'                 => '关注商城',

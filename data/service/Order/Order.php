@@ -9,8 +9,10 @@ use data\model\NsOrderActionModel as NsOrderActionModel;
 use data\model\NsOrderExpressCompanyModel;
 use data\model\NsOrderGoodsExpressModel;
 use data\model\NsOrderGoodsModel;
+use data\model\NsCourseOrderGoodsModel;
 use data\model\NsOrderGoodsPromotionDetailsModel;
 use data\model\NsOrderModel;
+use data\model\NsCourseOrderModel;
 use data\model\NsOrderPickupModel;
 use data\model\NsOrderPromotionDetailsModel;
 use data\model\NsOrderRefundAccountRecordsModel;
@@ -495,6 +497,168 @@ class Order extends BaseService
             return $e->getMessage();
         }
     }
+    /**
+     * 课程订单创建
+     */
+    public function courseOrderCreate($order_id,$out_trade_no, $order_no, $goods_id, $payment_type,$user_money,$goods_money,$discount_price,$order_from)
+    {
+        $order = new NsCourseOrderModel();
+        $order->startTrans();
+        $shop_id = 0;
+        try {
+            if($order_id>0){
+                // 店铺名称
+                $data_order = array(
+                    'payment_type'=>1,
+                    'pay_money' => $user_money, // decimal(10, 2) NOT NULL COMMENT '订单实付金额',
+                    'user_money' => $user_money, // decimal(10, 2) NOT NULL COMMENT '订单实付金额',
+                    'order_status' => 1, // tinyint(4) NOT NULL COMMENT '订单状态',
+                    'pay_status' => 1, // tinyint(4) NOT NULL COMMENT '订单付款状态',
+                ); // 固定电话
+                if($payment_type==1){
+                    $data_order['finish_time'] = time();
+                }
+                $order->save($data_order,['order_id'=>$order_id]);
+                // 积分兑换抵用金额
+                $account_flow = new MemberAccount();
+                if ($user_money > 0 && $payment_type==1) {
+                    $retval_user_money = $account_flow->addMemberAccountData(0, 2, $this->uid, 0, $user_money * (- 1), 1, $order_id, '课程订单付款');
+                    if ($retval_user_money < 0) {
+                        $this->order->rollback();
+                        return ORDER_CREATE_LOW_USER_MONEY;
+                    }
+                }
+                
+                $this->addOrderAction($order_id, $this->uid, '课程订单付款');
+                $order->commit();
+                return $order_id;
+            }else{
+                // 设定不使用会员余额支付
+                //$user_money = 0;
+                // 单店版查询网站内容
+                $web_site = new WebSite();
+                $web_info = $web_site->getWebSiteInfo();
+                $shop_name = $web_info['title'];
+                
+                // 获取购买人信息
+                $buyer = new UserModel();
+                $buyer_info = $buyer->getInfo([
+                    'uid' => $this->uid
+                ], 'nick_name,is_promoters');
+
+                // 订单来源
+                if (isWeixin()) {
+                    $order_from = 1; // 微信
+                } elseif (request()->isMobile()) {
+                    $order_from = 2; // 手机
+                } else {
+                    $order_from = 3; // 电脑
+                }
+                // 订单支付方式
+                
+                // 订单待支付
+                $order_status = 0;
+                if ($shipping_type == 1) {
+                    $full_mail_array = array();
+                    
+                }
+
+                // 订单费用(具体计算)
+                $order_money = $goods_money;
+                
+                if ($order_money < 0) {
+                    $order_money = 0;
+                    $user_money = 0;
+                    $platform_money = 0;
+                }
+                
+                if (! empty($buyer_invoice)) {
+                    // 添加税费
+                    $config = new Config();
+                    $tax_value = $config->getConfig(0, 'ORDER_INVOICE_TAX');
+                    if (empty($tax_value['value'])) {
+                        $tax = 0;
+                    } else {
+                        $tax = $tax_value['value'];
+                    }
+                    $tax_money = $order_money * $tax / 100;
+                } else {
+                    $tax_money = 0;
+                }
+                
+                $order_money = $order_money + $tax_money;
+                
+                if($payment_type==1){
+                    $order_money = $user_money;
+                    $pay_money = 0;
+                    $order_status = 1;
+                    $pay_status = 1;
+                }elseif($payment_type==2){
+                    $order_money = $discount_price;
+                    $pay_money = $discount_price;
+                    $order_status = 0;
+                    $pay_status = 0;
+                }
+                // 店铺名称
+                $data_order = array(
+                    'order_type' => 1,
+                    'order_no' => $order_no,
+                    'out_trade_no' => $out_trade_no,
+                    'payment_type' => $payment_type,
+                    'order_from' => $order_from,
+                    'buyer_id' => $this->uid,
+                    'user_name' => $buyer_info['nick_name'],
+                    'buyer_ip' => $buyer_ip,
+                    'goods_money' => $goods_money, // decimal(19, 2) NOT NULL COMMENT '商品总价',
+                    'tax_money' => $tax_money, // 税费
+                    'order_money' => $order_money, // decimal(10, 2) NOT NULL COMMENT '订单总价',
+                    'pay_money' => $pay_money, // decimal(10, 2) NOT NULL COMMENT '订单实付金额',
+                    'refund_money' => 0, // decimal(10, 2) NOT NULL COMMENT '订单退款金额',
+                    'order_status' => $order_status, // tinyint(4) NOT NULL COMMENT '订单状态',
+                    'pay_status' => $pay_status, // tinyint(4) NOT NULL COMMENT '订单付款状态',
+                    'review_status' => 0, // tinyint(4) NOT NULL COMMENT '订单评价状态',
+                    'user_platform_money' => 0, // 平台余额支付
+                    'create_time' => time()
+                ); // 固定电话
+                   // datetime NOT NULL DEFAULT 'CURRENT_TIMESTAMP' COMMENT '订单创建时间',
+                if ($pay_status == 2) {
+                    $data_order["pay_time"] = time();
+                }
+                if($payment_type==1){
+                    $data_order['user_money'] = $user_money;
+                    $data_order['finish_time'] = time();
+                }
+                $order->save($data_order);
+                $order_id = $order->order_id;
+                $pay = new UnifyPay();
+                $pay->createPayment($shop_id, $out_trade_no, $shop_name . "课程订单", $shop_name . "课程订单", $pay_money, 1, $order_id);
+                
+                // 积分兑换抵用金额
+                $account_flow = new MemberAccount();
+                if ($user_money > 0 && $payment_type==1) {
+                    $retval_user_money = $account_flow->addMemberAccountData(0, 2, $this->uid, 0, $user_money * (- 1), 1, $order_id, '课程订单');
+                    if ($retval_user_money < 0) {
+                        $this->order->rollback();
+                        return ORDER_CREATE_LOW_USER_MONEY;
+                    }
+                }
+
+                // 添加订单项
+                $order_goods = new OrderGoods();
+                $res_order_goods = $order_goods->addCourseOrderGoods($order_id, $goods_id);
+                
+                $this->addOrderAction($order_id, $this->uid, '创建课程订单');
+                
+                $order->commit();
+                return $order_id;
+            }
+            
+        } catch (\Exception $e) {
+            $order->rollback();
+            return $e->getMessage();
+        }
+    }
+    
     /**
      * 预约订单创建
      *

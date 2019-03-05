@@ -79,7 +79,7 @@
                 </ul>
             </div>
             
-            <div class="tixian-tip">当前可提现金额<span id="Amount">{$account}</span>，<a href="#" class="blue"> 全部提现</a></div>
+            <div class="tixian-tip">当前可提现金额<span id="Amount">{$account}</span><!-- ，<a href="#" class="blue"> 全部提现</a> --></div>
             {if condition="$cash neq '' && $poundage neq ''"}
             <div class="tip-text">{:lang('member_minimum_withdrawal')}<span id="MinaAmountCash">{$cash}</span>{:lang('element')}，{:lang('member_must_serve')}<span id="IntTimes">{$poundage}</span>{:lang('member_integral_multiple')}</div>
             {else/}

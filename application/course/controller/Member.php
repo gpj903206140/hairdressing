@@ -27,6 +27,7 @@ use data\model\ConfigModel;
 
 use data\service\Course as CourseService;
 use data\model\NsCourseFollowModel as CourseFollow;
+use data\service\CourseCatalogue as CourseCatalogue;
 
 /**
  * 会员
@@ -57,6 +58,7 @@ class Member extends BaseController
         $this->notice['noticeEmail'] = $noticeEmail[0]['is_use'];
         $this->notice['noticeMobile'] = $noticeMobile[0]['is_use'];
         $this->assign("notice", $this->notice);
+        $this->assign("fthis", '3');
     }
 
     /**
@@ -323,5 +325,48 @@ class Member extends BaseController
         $this->assign("withdraws", $withdraw_list);
         $this->assign("shopid", $shopid);
         return view($this->style . 'Member/my_balance');
+    }
+
+    /**
+     * 我的课程
+     *
+     */
+    public function my_course()
+    {
+        if(request()->isAjax()){
+            $courseervice = new CourseService();
+            $page_index = request()->get("page_index", 1);
+            $page_size = request()->post("page_size", PAGESIZE);
+            $condition['state'] = 1;
+            $course_type = request()->get("course_type", 0); //线上/线下课程
+            $condition['course_type'] = $course_type;
+            $OrderService = new OrderService();
+            $con = $OrderService->getCourseOrderGoodsIdList(['buyer_id'=>$this->uid,'order_status'=>['neq',2]],'goods_id','order_id desc','goods_id');
+            /*$coursecate = new CourseCatalogue();
+            $share = $coursecate->getShareQuery(['uid'=>$this->uid],'goods_id','goods_id desc','goods_id');
+            foreach($share as $s){
+                if(!in_array($s['goods_id'],$goods_id)){
+                    $goods_id[] = $s['goods_id'];
+                }
+            }*/
+            if(!empty($con['goods_id'])){
+                $con['goods_id'] = trim(implode(',',$con['goods_id']),',');
+            }else{
+                $con['goods_id'] = 0;
+            }
+            
+            $condition['goods_id'] = array('in',$con['goods_id']);
+            $result = $courseervice->getSearchGoodsList($page_index, $page_size, $condition, 'sort,goods_id desc');
+            if(!empty($result['data'])){
+                return json_encode($result);
+            }else{
+                return 0;
+            }
+        }else{
+            $course_type = request()->get("course_type", 0); //线上/线下课程
+            $this->assign("course_type", $course_type);
+            $this->assign("fthis", '2');
+            return view($this->style . 'Member/my_course');
+        }
     }
 }

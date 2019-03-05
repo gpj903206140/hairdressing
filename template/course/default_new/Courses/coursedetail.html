@@ -42,7 +42,7 @@
         <div class="kcjj-down1 clearfix">
             <ul>
                 <li><i class="icon icon-rq"></i> {$course_info.crowd}</li>
-                <li><i class="icon icon-gm"></i> {$course_info.sales}人已购买</li>
+                <li><i class="icon icon-gm"></i> {$course_info.sales}人已{:lang('course_detail_price')}</li>
             </ul>
         </div>
         <div>
@@ -140,8 +140,10 @@
                             <div class="plzl">
                                 <div class="txname">{$assess.member_name}</div>
                                 <div class="date">{$assess.addtime|date="Y-m-d H:i:s",###}</div>
-                                <div>{$assess.content}
-                                </div>
+                                <div>{$assess.content}</div>
+                                {if condition="$assess.explain_first neq ''"}
+                                <div><span style="color:#f00;margin-left:0px;">商家回复: </span> {$assess.explain_first}</div>
+                                {/if}
                             </div>
                         </div>
                     </li>
@@ -192,8 +194,8 @@
                         <div class="course-bt">{$submit.goods_name}</div>
                         <div class="zhineng">{$submit.introduction}</div>
                         <div class="clearfix rel">
-                            <div class="listen">{$submit.sales}人收听</div>
-                            <div class="price">￥{$submit.price}</div>
+                            <!-- <div class="listen">{$submit.sales}人收听</div> -->
+                            <div class="price" style="height: 1.5rem;">{if condition="$recommend.is_showprice eq 1"}￥{$submit.price}{/if}</div>
                         </div>
                     </div>
                 </a>
@@ -213,20 +215,118 @@
             </a>
         </li>
         <li>
-            <a href="javascript:;">
+            <a href="{$customservice_config['value']['service_addr']}">
                 <span class="icon icon-ft4"></span>
                 <div class="mui-media-body">客服</div>
             </a>
         </li>
-        <li class="ljgm">
-            <a href="kc_buy.html">
-                <div class="mui-media-body">立即购买</div>
-            </a>
+        
+            
+            {if condition="$is_buy eq 1"}
+                {if condition="$order_status eq 1"}
+                <li class="ljgm showCourse" style="background: #6eb1fa;">
+                 <a href="javascript:;">
+                    <div class="mui-media-body">进入课程</div>
+                </a>
+                {else/}
+                <li class="ljgm">
+                <a href="{:__URL('COURSE_MAIN/Order/course_buy&order_id='.$order_id.'&goods_id='.$course_info.goods_id)}">
+                    <div class="mui-media-body">去付款</div>
+                </a>
+                {/if}
+            {else/}
+            <li class="ljgm" {if condition="$course_info.is_showprice eq 0"}style="background:#dedede;"{/if}>
+            {if condition="$course_info.is_showprice eq 1"}
+                <a href="{:__URL('COURSE_MAIN/Order/course_buy&goods_id='.$course_info.goods_id)}">
+                    <div class="mui-media-body">购买</div>
+                </a>
+            {else/}
+                <a href="javascript:;">
+                    <div class="mui-media-body">购买</div>
+                </a>
+                {/if}
+            {/if}
         </li>
 
     </ul>
 </div>
-
+<style>
+.grays{
+    width:100%;
+    height:100%;
+    position: fixed;
+    left:0;
+    top:0;
+    background: rgba(0,0,0,0.5);
+    float:left;
+    display:none;
+}
+.course_list{
+    width:100%;
+    height:50%;
+    position: fixed;
+    left:0;
+    bottom:95px;
+    background: #fff;
+    display:none;
+    z-index:1000;
+    border-bottom:1px solid #fff;
+}
+.course_list h3{
+    width:100%;
+    height:45px;
+    line-height:45px;
+    padding:0 4%;
+    font-size:18px;
+    color:#333;
+    border-bottom:1px solid #dedede;
+}
+.course_list h3 span{
+    width:12px;
+    height:12px;
+    position:absolute;
+    right:10px;
+    top:1px;
+}
+.course_list h3 span img{
+    width:100%;
+    height:100%;
+}
+.new-course.meifa ul li{
+    width:94%;
+    margin:0 3%;
+    border-bottom:1px solid #dedede;
+}
+</style>
+<div class="grays"></div>
+<div class="course_list">
+    <h3>课程目录 <span><img src="__TEMP__/{$style}/public/images/temp/close.png"></span></h3>
+    <div class=" new-course meifa " style="height:100%;overflow:auto;">
+        <ul>
+            {volist name="course_info.catalogue" id="catalogue" key="ck"}
+            <li>
+                <a href="{:__URL('COURSE_MAIN/courses/video_view&goods_id='.$course_info.goods_id.'&id='.$catalogue.catalogue_id)}">
+                    <div class="bofang"><i class="icon icon-bf"></i></div>
+                    <div class="zhezhao"></div>
+                    <div class="photo-hair l">
+                    {if condition="$catalogue.catalogue_pic"}
+                    <img src="{:__IMG($catalogue.catalogue_pic)}">
+                    {else/}
+                    <img src="__TEMP__/{$style}/public/images/temp/noImg.png">
+                    {/if}
+                    </div>
+                    <div class="juli">
+                        <div class="course-bt">{$catalogue.catalogue_name}</div>
+                        <div class="zhineng">{$catalogue.description}</div>
+                    </div>
+                </a>
+            </li>
+            {/volist}
+            
+            <li class="wsj" style="display: none"><img src="__TEMP__/{$style}/public/images/wtp.png"><br>暂无数据</li>
+        </ul>
+    </div>
+</div>
 <script src="__TEMP__/{$style}/public/mui/js/mui.js"></script>
 
 <script type="text/javascript">
@@ -243,6 +343,16 @@
 
         });
     });
+    //显示课程目录
+    mui('body').on('tap', '.showCourse', function () {
+        $(".grays").show();
+        $(".course_list").show();
+    })
+    //隐藏课程目录
+    mui('body').on('tap', '.grays,.course_list h3 span', function () {
+        $(".grays").hide();
+        $(".course_list").hide();
+    })
     mui('body').on('tap', '.logins', function () {
         layer.msg('你还未登录,请先登录!');
         setTimeout(function(){window.location.href="{:__URL('COURSE_MAIN/login')}";},1000);
@@ -319,6 +429,7 @@
                 }
             }
         });
+
     })
 </script>
 </body>

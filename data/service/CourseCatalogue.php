@@ -9,6 +9,7 @@ use data\model\NsCourseModel as NsCourseModel;
 use data\model\NsCourseCatalogueModel as NsCourseCatalogueModel;
 use data\model\NsCourseCatalogueVideoModel as NsCourseCatalogueVideoModel;
 use data\model\NsCourseVideoShareModel as videoShare;
+use data\model\NsCourseVideoPlayModel as videoPlay;
 use data\api\ICourseCatalogue as ICourseCatalogue;
 use data\model\NsGoodsModel;
 use data\model\NsGoodsBrandModel;
@@ -17,6 +18,7 @@ use data\model\NsGoodsViewModel;
 use think\Cache;
 use data\model\NsGoodsAttributeModel;
 use data\model\NsAttributeModel;
+use data\model\UserModel;
 
 class CourseCatalogue extends BaseService implements ICourseCatalogue
 {
@@ -301,13 +303,23 @@ class CourseCatalogue extends BaseService implements ICourseCatalogue
             'create_time' => time(),
         );
         $videoShare = new videoShare();
+        $videoShare->startTrans();
+        $count = $videoShare->getCount(['goods_id'=>$goods_id,'uid' => $uid]);
         $result = $videoShare->save($data);
-        /*$course = new NsCourseModel();
-        $course->where("goods_id={$goods_id}")->setInc('release_num',1);*/
+        if($count==0){
+            //课程分享数+1
+            $course = new NsCourseModel();
+            $course->where("goods_id={$goods_id}")->setInc('shares',1);
+            //用户分享数+1
+            $user_model = new UserModel();
+            $user_model->where("uid={$uid}")->setInc('share_num',1);
+        }
         if ($result) {
             $res = $videoShare->share_id;
+            $videoShare->commit();
         } else {
             $res = $videoShare->getError();
+            $videoShare->rollback();
         }
         return $res;
         // TODO Auto-generated method stub
@@ -323,6 +335,60 @@ class CourseCatalogue extends BaseService implements ICourseCatalogue
         return $result;
     }
 
+    /*
+     * 获取用户分享记录
+     */
+    public function getShareQuery($condition,$field,$order,$group='')
+    {
+        $videoShare = new videoShare();
+        if(!empty($group)){
+            $result = $videoShare->where($condition)->field($field)->order($order)->group($group)->select();
+        }else{
+            $result = $videoShare->where($condition)->field($field)->order($order)->select();
+        }
+        
+        return $result;
+    }
+    
+    /*
+     * 添加用户播放记录
+     */
+    public function addPlay($goods_id,$uid,$video_id,$time,$video_duration,$state,$token)
+    {
+        $videoPlay = new videoPlay();
+        $NsCourseModel = new NsCourseModel();
+        $playInfo = $videoPlay->getInfo(['token'=>$token]);
+        if($state==0){
+            if(empty($playInfo)){
+                $count = $videoPlay->getCount(['goods_id'=>$goods_id,'uid'=>$uid]);
+                $data = [
+                    'goods_id'=>$goods_id,
+                    'video_id'=>$video_id,
+                    'uid'=>$uid,
+                    'start_time'=>$time,
+                    'video_duration'=>$video_duration,
+                    'token'=>$token,
+                    'create_time'=>time(),
+                ];
+                $result = $videoPlay->save($data);
+                if($result&&empty($count)){
+                    //$NsCourseModel->where(['goods_id'=>$goods_id])->setInc('tune_num',1);
+                }
+            }else{
+                $result = true;
+            }
+            
+        }elseif($state==1){
+            
+            $data = [
+                'end_time'=>$time,
+                'last_time'=>time(),
+            ];
+            $result = $videoPlay->save($data,['play_id'=>$playInfo['play_id']]);
+        }
+        
+        return $result;
+    }
     
 }
 

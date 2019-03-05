@@ -40,6 +40,8 @@ class Login extends Controller
 
     public $style;
 
+    public $style2;
+
     public $logo;
     
     protected $instance_id;
@@ -89,10 +91,11 @@ class Login extends Controller
         if (empty($use_wap_template)) {
             $use_wap_template['value'] = 'default_new';
         }
-        if (! checkTemplateIsExists("wap", $use_wap_template['value'])) {
+        if (! checkTemplateIsExists("course", $use_wap_template['value'])) {
             $this->error("模板配置有误，请联系商城管理员");
         }
         $this->style = "wap/" . $use_wap_template['value'] . "/";
+        $this->style2 = "course/" . $use_wap_template['value'] . "/";
         $this->assign("style", "wap/" . $use_wap_template['value']);
     }
 
@@ -145,7 +148,7 @@ class Login extends Controller
                     if ($retval == 1) {
                         $this->user->modifyUserWxhatLogin($token['openid'], $wx_unionid);
                     } elseif ($retval == USER_LOCK) {
-                        $redirect = __URL(__URL__ . "/wap/login/userlock");
+                        $redirect = __URL(__URL__ . "/course/login/userlock");
                         $this->redirect($redirect);
                     } else {
                         $retval = $this->user->wchatLogin($token['openid']);
@@ -168,7 +171,7 @@ class Login extends Controller
                             }
                         } elseif ($retval == USER_LOCK) {
                             // 锁定跳转
-                            $redirect = __URL(__URL__ . "/wap/login/userlock");
+                            $redirect = __URL(__URL__ . "/course/login/userlock");
                             $this->redirect($redirect);
                         }
                     }
@@ -194,7 +197,7 @@ class Login extends Controller
                         }
                     } elseif ($retval == USER_LOCK) {
                         // 锁定跳转
-                        $redirect = __URL(__URL__ . "/wap/login/userlock");
+                        $redirect = __URL(__URL__ . "/course/login/userlock");
                         $this->redirect($redirect);
                     }
                 }
@@ -202,7 +205,7 @@ class Login extends Controller
                 if (! empty($_SESSION['login_pre_url'])) {
                     $this->redirect($_SESSION['login_pre_url']);
                 } else {
-                    $redirect = __URL(__URL__ . "/wap/member");
+                    $redirect = __URL(__URL__ . "/course/member");
                     $this->redirect($redirect);
                 }
             }
@@ -288,7 +291,7 @@ class Login extends Controller
         $register_adv = $platform -> getPlatformAdvPositionDetailByApKeyword("wapLogAndRegAdv");
         $this->assign("register_adv", $register_adv['adv_list'][0]);
         
-        return view($this->style . 'Login/login');
+        return view($this->style2 . 'Login/login');
     }
 
     /**
@@ -1358,7 +1361,7 @@ class Login extends Controller
         }
         $type = request()->get('type', 1);
         $this->assign("type", $type);
-        return view($this->style . "Login/findPasswd");
+        return view($this->style2 . "Login/findPasswd");
     }
 
     /**

@@ -3,7 +3,21 @@
 .guanzhubt a.active{
    background:#9c9c9c;
 }
+.clearfix li img{
+    height:140px;
+}
+.guanzhubt {
+    position: absolute;
+    right: 2rem;
+    top: 2rem;
+}
+.guanzhubt a {
+    padding: .5rem 1.5rem .2rem 1.5rem;
+}
 </style>
+<header class="arrow">
+    <a class="mui-action-back mui-icon mui-icon-left-nav" href="{:__URL('COURSE_MAIN/Index/index')}" data-return="1"></a>
+</header>
 <div class="hezuojg rel ">
     {if condition="$data.mechanism_pic"}
     <img src="{:__IMG($data.mechanism_pic)}" class="photo-img hz-img">
@@ -11,8 +25,8 @@
     <img src="__TEMP__/{$style}/public/images/temp/noImg.png" class="photo-img hz-img">
     {/if}
     <h3>{$data.mechanism_name}</h3>
-    <div class="guanzhubt"><a href="javascript:;"  class="follow {if condition='$state eq 1'}active{/if}" data-state="1">{if condition='$state eq 1'}-关注{else/}+关注{/if}</a></div>
-    <div class="gzren">{$data.follow_num} 人关注</div>
+    <div class="guanzhubt"><a href="javascript:;"  class="follow {if condition='$state eq 1'}active{/if}" data-state="1">{if condition='$state eq 1'}已关注{else/}+关注{/if}</a></div>
+    <div class="gzren"><span>{$data.follow_num}</span> 人关注</div>
 </div>
 <div class="jigoujj">
     <div class="jj">{$data.description}</div>
@@ -46,9 +60,10 @@
     </div>
     <div >
         <div id="item1" class="mui-control-content mui-active">
-            <div class=" mui-content  mui-scroll-wrapper new-course " id="refreshContainer" style="top:0;">
+            <div class=" mui-content  mui-scroll-wrapper new-course " id="refreshContainer" style="top:0;min-height: 35vh;">
                 <div class="mui-scroll">
-                    <ul class="mui-table-view " id="list"></ul>
+                    <ul class="mui-table-view " id="list" style="padding-bottom: 0px;"></ul>
+
                 </div>
             </div>
         </div>
@@ -63,6 +78,7 @@
             <div class=" mui-content  mui-scroll-wrapper new-course zpq " id="refreshContainer" style="top:0;">
                 <div class="mui-scroll">
                     <ul class="mui-table-view clearfix " id="list2">
+                    {if condition="$imgs"}
                         {volist name="imgs" id="img" key="k"}
                         <li >
                             <a href="{:__URL('COURSE_MAIN/Index/photo_wall&mechanism_id='.$mechanism_id)}">
@@ -74,6 +90,11 @@
                             </a>
                         </li>
                         {/volist}
+                    {else /}
+                        <div id="list_c1" style="display:block;">
+                           <p style="width: 100%;text-align: center;margin-top:20px;"><img src="__TEMP__/{$style}/public/images/wtp.png" style="width: 22%;"><br>暂无数据</p>
+                        </div>
+                    {/if}
                     </ul>
                 </div>
             </div>
@@ -84,17 +105,7 @@
 
     <div id="list_c" style="display:none;">
         
-        <li class="wsj" style="display: none"><img src="__TEMP__/{$style}/public/images/wtp.png"><br>暂无数据</li>
-    </div>
-    <div id="list_c1" style="display:none;">
-        
-
-        <li class="wsj" style="display: none"><img src="__TEMP__/{$style}/public/images/wtp.png"><br>暂无数据</li>
-    </div>
-    <div id="list_c2" style="display:none;">
-        
-        
-        <li class="wsj" style="display: none"><img src="__TEMP__/{$style}/public/images/wtp.png"><br>暂无数据</li>
+        <li class="wsj" style="display: none;padding: 2rem 0;"><img src="__TEMP__/{$style}/public/images/wtp.png"><br>暂无数据</li>
     </div>
 
 </div>
@@ -102,23 +113,36 @@
 <input type="hidden" id="course_type" value="{$type}">
 <script src="__TEMP__/{$style}/public/mui/js/mui.js"></script>
 <script type="text/javascript">
+    mui('body').on('tap', 'a', function () {
+        window.location.href = this.href;
+        var returns = $(this).attr('data-return');
+        if(returns==1){
+            return false;
+        }
+    })
+    mui.init();
+</script>
+<script type="text/javascript">
     mui('body').on('tap', '.follow', function () {
         var ai=$(this);
         var cover_id="{$data.mechanism_id}";
         var cover_name="{$data.mechanism_name}";
         var state=$(this).attr('data-state');
+        var follow_num = $(".gzren span").html();
         var url="{:__URL('COURSE_MAIN/Courses/follow')}";
         $.post(url,{cover_id:cover_id,cover_name:cover_name,state:state},function(reslut){
             if(reslut==1){
                 layer.msg('关注成功');
                 ai.addClass("active");
-                ai.html("-关注");
+                ai.html("已关注");
+                $(".gzren span").html(follow_num*1+1);
             }else if(reslut==2){
                 layer.msg('关注失败');
             }else if(reslut==3){
                 layer.msg('取消关注成功');
                 ai.removeClass("active");
                 ai.html("+关注");
+                $(".gzren span").html(follow_num*1-1);
             }else if(reslut==4){
                 layer.msg('取消关注失败');
             }else if(reslut==5){
@@ -128,10 +152,7 @@
             }
         })
     })
-    mui('body').on('tap', 'a', function () {
-        document.location.href = this.href;
-    })
-    mui.init();
+    
     $(function () {
         var count = 1;
         mui.init({
@@ -197,9 +218,9 @@
                         var item=myjson['data'][i];
                         html+='<li class="mui-table-view-cell">';
                             html+='<a href="'+__URL('COURSE_MAIN/courses/coursedetail?id='+item.goods_id)+'">';
-                                if(item.pic_cover){
-                                   var pic_cover=item.pic_cover;
-                                   html+='<div class="img-jq l" style="background-image: url('+__IMG(item.pic_cover)+')"></div>';
+                                if(item.picture_info.pic_cover){
+                                   var pic_cover=item.picture_info.pic_cover;
+                                   html+='<div class="img-jq l" style="background-image: url('+__IMG(item.picture_info.pic_cover)+')"></div>';
                                 }else{
                                    html+='<div class="img-jq l" style="background-image: url("__TEMP__/{$style}/public/images/temp/noImg.png")"></div>'; 
                                 }
@@ -211,7 +232,7 @@
                                     html+='<div class="course-bt">'+item.goods_name+'</div>';
                                     html+='<div class="zhineng">'+item.introduction+'</div>';
                                     html+='<div class="clearfix rel">';
-                                        html+='<div class="listen">'+item.sales+'人购买</div>';
+                                        html+='<div class="listen">'+item.sales+'人{:lang('course_detail_price')}</div>';
                                         html+='<div class="price" style="height: 1.5rem;">';
                                         if(item.is_showprice==1){
                                         html+='￥'+item.price;

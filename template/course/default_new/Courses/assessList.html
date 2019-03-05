@@ -20,8 +20,8 @@
     </div>
     <div class="pl-people clearfix">
         <ul>
-            <li>收听人数（{$course_info.tune_num}）</li>
-            <li>购买人数（{$course_info.sales}）</li>
+            <!-- <li>收听人数（{$course_info.tune_num}）</li> -->
+            <li>浏览人数（{$course_info.sales}）</li>
         </ul>
     </div>
 </div>
@@ -233,6 +233,9 @@
                                     html+='<div class="txname">'+item.member_name+'</div>';
                                     html+='<div class="date">'+timeStampTurnTime(item.addtime)+'</div>';
                                     html+='<div>'+item.content+'</div>';
+                                    if(item.explain_first!=''){
+                                        html+='<div><span style="color:#f00;margin-left:0px;">商家回复: </span>'+item.explain_first+'</div>';
+                                    }
                                 html+='</div>';
                             html+='</div>';
                         html+='</li>';

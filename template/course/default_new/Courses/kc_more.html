@@ -109,10 +109,10 @@
                                         html+='<div class="l"><span class="fashion-tab">'+item['goods_group_name'][0]+'</span></div>';
                                         html+='<div class="r"><i class="icon icon-star"></i><span class="juse">'+item.score+'</span></div>';
                                     html+='</div>';
-                                    html+='<div class="course-bt">'+item.goods_name+'</div>';
+                                    html+='<div class="course-bt" style="height:20px;display: -webkit-box;-webkit-box-orient: vertical;-webkit-line-clamp: 1;overflow: hidden;">'+item.goods_name+'</div>';
                                     html+='<div class="zhineng">'+item.introduction+'</div>';
                                     html+='<div class="clearfix rel">';
-                                        html+='<div class="listen">'+item.sales+'人购买</div>';
+                                        html+='<div class="listen">'+item.sales+'人{:lang('course_detail_price')}</div>';
                                         html+='<div class="price" style="height: 1.5rem;">';
                                         if(item.is_showprice==1){
                                         html+='￥'+item.price;

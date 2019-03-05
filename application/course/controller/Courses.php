@@ -14,9 +14,11 @@ use data\service\Platform;
 use data\service\promotion\PromoteRewardRule;
 use data\service\WebSite;
 use think\Cookie;
+use think\Session;
 use data\service\Promotion;
 
 use data\model\NsCourseFollowModel as CourseFollow;
+use data\service\Order as OrderService;
 
 class Courses extends BaseController
 {
@@ -128,6 +130,30 @@ class Courses extends BaseController
             $condition["is_show"] = 1;
             $assessList = $course->getGoodsEvaluateList($page_index, $page_size, $condition, 'addtime desc');
             $this->assign('assessList',$assessList['data']);
+             // 客服
+            $config_service = new Config();
+            $customservice_config = $config_service->getcustomserviceConfig($shop_id);
+            if (empty($customservice_config)) {
+                $list['id'] = '';
+                $list['value']['service_addr'] = '';
+            }
+            //判断用户是否已购买
+            $OrderService = new OrderService();
+            $con = $OrderService->getCourseOrderGoodsIdList(['buyer_id'=>$this->uid,'order_status'=>['neq',2]],'goods_id','order_id desc','goods_id');
+            $is_buy = 0;
+            $order_id = 0;
+            $order_status = 0;
+            if(!empty($con)){
+                if(in_array($goodsId,$con['goods_id'])){
+                    $order_status = $con['order_status'][$goodsId];
+                    $order_id = $con['order_id'][$goodsId];
+                    $is_buy = 1;
+                }
+            }
+            $this->assign("order_id", $order_id);
+            $this->assign("order_status", $order_status);
+            $this->assign("is_buy", $is_buy);
+            $this->assign("customservice_config", $customservice_config);
             $this->assign('uid',$uid);
             return view($this->style . 'Courses/coursedetail');
         }
@@ -153,6 +179,10 @@ class Courses extends BaseController
             $goods_id = request()->get('goods_id', 0);
             $course_info = $course->getGoodsDetail($goods_id);
             $this->assign('course_info',$course_info);
+            //获取课程购买情况
+            $OrderService = new OrderService();
+            $courseorder_num = $OrderService->getCourseIsOrder($uid,$goods_id);
+            $this->assign('courseorder_num',$courseorder_num);
             //获取课程目录
             $catalogue_id = request()->get('id', 0);
             $course_catalogue = new CourseCatalogue();
@@ -170,14 +200,15 @@ class Courses extends BaseController
                 foreach($res as $k=>$v){
                     $teacher_info = $ourseTeacher->getCourseTeacherDetail($v['teacher_id']);
                     $res[$k]['teacher_pic'] =  $teacher_info['teacher_pic'];
-                    if($uid){
+                    /*if($uid){
                         $res[$k]['share_num'] =  $coursecate->getVideoShareCount(['video_id'=>$v['video_id'],'uid'=>$uid]);
                         if($res[$k]['share_num']>0){
                            $i++; 
                         }
                     }else{
                         $res[$k]['share_num'] =  0;
-                    } 
+                    } */
+                    $res[$k]['share_num'] =  0;
                 }
             }
             
@@ -197,6 +228,33 @@ class Courses extends BaseController
         }
     }
     /**
+     * 添加用户播放记录
+     *
+     */
+    public function addPlay()
+    {
+        $uid = $this->uid;
+        $goods_id = request()->post('goods_id', 0); //课程ID
+        $video_id = request()->post('video_id', 0); //视频ID
+        $video_duration = request()->post('duration', 0);  //总时长
+        $time = request()->post('time', 0);  //已播放时间
+        $state = request()->post('state', 0); //0 开始  1结束
+        $course_catalogue = new CourseCatalogue();
+        $name = $uid.$video_id;
+        if($state==0){
+             if($time==0){
+                $token = md5($uid.$video_id.time());
+                Session::set($name,$token);
+                $result = $course_catalogue->addPlay($goods_id,$uid,$video_id,$time,$video_duration,$state,$token);
+             }
+        }else if($state==1){
+             $token = Session::get($name);
+             $result = $course_catalogue->addPlay($goods_id,$uid,$video_id,$time,$video_duration,$state,$token);
+        }
+        
+        return $result;
+    }
+    /**
      * 关注&收藏
      *
      */
@@ -214,6 +272,7 @@ class Courses extends BaseController
         $member_info = $member->getUserInfo();
         $CourseFollow = new CourseFollow();
         $follow_info = $CourseFollow->getInfo(['id'=>$uid,'cover_id'=>$cover_id],'follow_id');
+        $CourseFollow->startTrans();
         $data = [
              'id'=>$uid,
              'id_name'=>$member_info['user_name'],
@@ -224,20 +283,44 @@ class Courses extends BaseController
 
         ];
         $course = new CourseService();
+        $courseMechanism = new CourseMechanism();
+        $memberService = new MemberService();
         if(empty($follow_info)){
             if($CourseFollow->save($data)){
-                //课程收藏数量+1
-                $course->updateFiledNum($cover_id,'collects',1);
+                if($state==0){
+                    //课程收藏数量+1
+                    $course->updateFiledNum($cover_id,'collects',1);
+                    //用户收藏字段值+1
+                    $memberService->updateFiledNum($uid,'collect_num',1);
+                }elseif($state==1){
+                    //机构关注人数+1
+                    $courseMechanism->updateFiledNum($cover_id,'follow_num',1);
+                    //用户关注字段值+1
+                    $memberService->updateFiledNum($uid,'follow_num',1);
+                }
+                $CourseFollow->commit();
                 echo 1;
             }else{
+                $CourseFollow->rollback();
                 echo 2;
             }
         }else{
             if($CourseFollow->destroy(['follow_id'=>$follow_info['follow_id']])){
-                //课程收藏数量-1
-                $course->updateFiledNum($cover_id,'collects',2);
+                if($state==0){
+                    //课程收藏数量-1
+                    $course->updateFiledNum($cover_id,'collects',2);
+                    //用户收藏字段值-1
+                    $memberService->updateFiledNum($uid,'collect_num',2);
+                }elseif($state==1){
+                    //机构关注人数-1
+                    $courseMechanism->updateFiledNum($cover_id,'follow_num',2);
+                    //用户关注字段值-1
+                    $memberService->updateFiledNum($uid,'follow_num',2);
+                }
+                $CourseFollow->commit();
                 echo 3;
             }else{
+                $CourseFollow->rollback();
                 echo 4;
             }
         }

@@ -18,6 +18,8 @@ use data\model\NsOrderExpressCompanyModel;
 use data\model\NsOrderGoodsExpressModel;
 use data\model\NsOrderGoodsModel;
 use data\model\NsOrderModel;
+use data\model\NsCourseOrderModel;
+use data\model\NsCourseOrderGoodsModel;
 use data\model\NsOrderPaymentModel;
 use data\model\NsOrderRefundAccountRecordsModel;
 use data\model\NsOrderShopReturnModel;
@@ -524,7 +526,152 @@ class Order extends BaseService implements IOrder
         }
         return $order_list;
     }
-    
+    /*课程订单
+     * (non-PHPdoc)
+     * @see \data\api\IOrder::getCourseOrderList()
+     */
+    public function getCourseOrderList($page_index = 1, $page_size = 0, $condition = '', $order = '')
+    {
+        $order_model = new NsCourseOrderModel();
+        // 查询主表
+        $order_list = $order_model->pageQuery($page_index, $page_size, $condition, $order, '*');
+        if (! empty($order_list['data'])) {
+            foreach ($order_list['data'] as $k => $v) {
+                // 查询订单项表
+                $order_item = new NsCourseOrderGoodsModel();
+                $order_item_list = $order_item->where([
+                    'order_id' => $v['order_id']
+                ])->select();
+              
+                foreach ($order_item_list as $key_item => $v_item) {
+                    // 通过sku_id查询ns_goods_sku中code
+                    /*$goods_sku = new NsGoodsSkuModel();
+                    $goods_sku_info = $goods_sku->getInfo([
+                        'sku_id' => $v_item['sku_id']
+                    ], 'code');
+                    $order_item_list[$key_item]['code'] = $goods_sku_info['code'];*/
+                    // 查询商品sku结束
+                    
+                    $picture = new AlbumPictureModel();
+                    // $order_item_list[$key_item]['picture'] = $picture->get($v_item['goods_picture']);
+                    $goods_picture = $picture->get($v_item['goods_picture']);
+                    if (empty($goods_picture)) {
+                        $goods_picture = array(
+                            'pic_cover' => '',
+                            'pic_cover_big' => '',
+                            'pic_cover_mid' => '',
+                            'pic_cover_small' => '',
+                            'pic_cover_micro' => '',
+                            "upload_type" => 1,
+                            "domain" => ""
+                        );
+                    }
+                    $order_item_list[$key_item]['picture'] = $goods_picture;
+                    if ($v_item['refund_status'] != 0) {
+                        $order_refund_status = OrderStatus::getRefundStatus();
+                        foreach ($order_refund_status as $k_status => $v_status) {
+                            
+                            if ($v_status['status_id'] == $v_item['refund_status']) {
+                                $order_item_list[$key_item]['refund_operation'] = $v_status['refund_operation'];
+                                $order_item_list[$key_item]['status_name'] = $v_status['status_name'];
+                            }
+                        }
+                    } else {
+                        $order_item_list[$key_item]['refund_operation'] = '';
+                        $order_item_list[$key_item]['status_name'] = '';
+                    }
+                    
+                    //查询是否有售后信息
+                   // $v_item['customer_info'] = $this->getCustomerServiceInfo(0, $v_item['order_goods_id']);
+                }
+                $order_list['data'][$k]['order_item_list'] = $order_item_list;
+                $order_list['data'][$k]['operation'] = '';
+                // 订单来源名称
+                $order_from = OrderStatus::getOrderFrom($v['order_from']);
+                $order_list['data'][$k]['order_from_name'] = $order_from['type_name'];
+                $order_list['data'][$k]['order_from_tag'] = $order_from['tag'];
+                $order_list['data'][$k]['pay_type_name'] = OrderStatus::getPayType($v['payment_type']);
+                // 根据订单类型判断订单相关操作
+                if ($order_list['data'][$k]['order_type'] == 1 || $order_list['data'][$k]['order_type'] == 3 || $order_list['data'][$k]['order_type'] == 5) {
+                    if ($order_list['data'][$k]['payment_type'] == 6) {
+                        $order_status = OrderStatus::getSinceOrderStatus();
+                    }else{
+                        $order_status = OrderStatus::getOrderCommonStatus();
+                    }
+                }
+                
+                // 查询订单操作
+                foreach ($order_status as $k_status => $v_status) {
+                    
+                    if ($v_status['status_id'] == $v['order_status']) {
+                        $order_list['data'][$k]['operation'] = $v_status['operation'];
+                        $order_list['data'][$k]['member_operation'] = $v_status['member_operation'];
+                        $order_list['data'][$k]['status_name'] = $v_status['status_name'];
+                        $order_list['data'][$k]['is_refund'] = $v_status['is_refund'];
+                    }
+                }
+                
+            }
+        }
+        return $order_list;
+    }
+    /*获取课程订单的商品ID
+     * (non-PHPdoc)
+     * @see \data\api\IOrder::getCourseOrderList()
+     */
+    public function getCourseOrderGoodsIdList($condition,$field,$order,$group='')
+    {
+        $order_model = new NsCourseOrderModel();
+        $order_list = $order_model->getQuery($condition,'order_id,order_status','order_id desc');
+
+        $con = array();
+        if (! empty($order_list)) {
+            foreach ($order_list as $k => $v) {
+                // 查询订单项表
+                $order_item = new NsCourseOrderGoodsModel();
+                if(!empty($group)){
+                    $order_item_list = $order_item->where([
+                    'order_id' => $v['order_id']
+                   ])->field($field)->order($order)->group($group)->select();
+                }else{
+                    $order_item_list = $order_item->where([
+                    'order_id' => $v['order_id']
+                   ])->field($field)->order($order)->select();
+                }
+                
+              
+                foreach ($order_item_list as $key_item => $v_item) {
+                    $con['goods_id'][]  = $v_item['goods_id'];
+                    $con['order_status'][$v_item['goods_id']]  = $v['order_status'];
+                    $con['order_id'][$v_item['goods_id']]  = $v['order_id'];
+                }
+            }
+        }
+        return $con;
+    }
+     /*获取课程下单情况
+     * (non-PHPdoc)
+     * @see \data\api\IOrder::getCourseOrderList()
+     */
+    public function getCourseIsOrder($uid,$goods_id)
+    {
+        $order_model = new NsCourseOrderModel();
+        $viewObj = $order_model->alias('sua')->where(['sua.buyer_id'=>$uid])
+        ->join('ns_course_order_goods og', 'og.order_id=sua.order_id and og.goods_id='.$goods_id.'','inner')
+        ->field('sua.order_id');
+        $count = $order_model->viewCount($viewObj,$condition);
+        return $count;
+    }
+     /*获取单条课程
+     * (non-PHPdoc)
+     * @see \data\api\IOrder::getCourseOrderList()
+     */
+    public function getCourseOrderOne($order_id,$field="*")
+    {
+         $order_model = new NsCourseOrderModel();
+         $res = $order_model->getInfo(['order_id'=>$order_id],$field);
+         return $res;
+    }
     /*
      * 订单创建（实物商品）
      * (non-PHPdoc)
@@ -575,6 +722,40 @@ class Order extends BaseService implements IOrder
         
         return $retval;
         // TODO Auto-generated method stub
+    }
+    /*
+     * 课程订单创建（实物商品）
+     * (non-PHPdoc)
+     * @see \data\api\IOrder::orderCreate()
+     */
+    public function courseOrderCreate($order_id,$out_trade_no, $order_no, $goods_id, $payment_type,$user_money,$goods_money,$discount_price,$order_from)
+    {
+        $order = new OrderBusiness();
+        $retval = $order->courseOrderCreate($order_id,$out_trade_no, $order_no, $goods_id, $payment_type,$user_money,$goods_money,$discount_price,$discount_price,$order_from);
+        
+        return $retval;
+        // TODO Auto-generated method stub
+    }
+    /**
+     * 课程订单取消
+     */
+    public function ourCourseOrder($order_id)
+    {
+        $order = new NsCourseOrderModel();
+        try {
+                // 店铺名称
+                $data_order = array(
+                    'order_status' => 2, // tinyint(4) NOT NULL COMMENT '订单状态',
+                ); 
+                if($order->save($data_order,['order_id'=>$order_id])){
+                    return $order_id;
+                }else{
+                    return 0;
+                }
+                
+        } catch (\Exception $e) {
+            return $e->getMessage();
+        }
     }
     /*
      * 预约订单创建
@@ -2896,6 +3077,24 @@ class Order extends BaseService implements IOrder
         return $retval;
     }
 
+     /**
+     * 添加卖家对课程订单的备注
+     *
+     * @param unknown $order_goods_id            
+     */
+    public function addCourseOrderSellerMemo($order_id, $memo)
+    {
+        $order = new NsCourseOrderModel();
+        $data = array(
+            'seller_memo' => $memo
+        );
+        $retval = $order->save($data, [
+            'order_id' => $order_id
+        ]);
+        return $retval;
+    }
+
+
     /**
      * 获取订单备注信息
      *
@@ -2906,6 +3105,26 @@ class Order extends BaseService implements IOrder
     public function getOrderSellerMemo($order_id)
     {
         $order = new NsOrderModel();
+        $res = $order->getQuery([
+            'order_id' => $order_id
+        ], "seller_memo", '');
+        $seller_memo = "";
+        if (! empty($res[0]['seller_memo'])) {
+            $seller_memo = $res[0]['seller_memo'];
+        }
+        return $seller_memo;
+    }
+
+    /**
+     * 获取订单备注信息
+     *
+     * @ERROR!!!
+     *
+     * @see \data\api\IOrder::getOrderRemark()
+     */
+    public function getCourseOrderSellerMemo($order_id)
+    {
+        $order = new NsCourseOrderModel();
         $res = $order->getQuery([
             'order_id' => $order_id
         ], "seller_memo", '');
@@ -3098,6 +3317,49 @@ class Order extends BaseService implements IOrder
     }
 
     /**
+     * 删除课程订单
+     *
+     * @param unknown $order_id
+     *            订单id
+     * @param unknown $operator_type
+     *            操作人类型 1商家 2用户
+     * @param unknown $operator_id
+     *            操作人id
+     */
+    public function deleteCourseOrder($order_id, $operator_type, $operator_id)
+    {
+        $order_model = new NsCourseOrderModel();
+        $data = array(
+            "is_deleted" => 1,
+            "operator_type" => $operator_type,
+            "operator_id" => $operator_id
+        );
+        $order_id_array = explode(',', $order_id);
+        if ($operator_type == 1) {
+            // 商家删除 目前之针对已关闭订单
+            $res = $order_model->save($data, [
+                "order_status" => 2,
+                "order_id" => [
+                    "in",
+                    $order_id_array
+                ],
+                "shop_id" => $operator_id
+            ]);
+        } elseif ($operator_type == 2) {
+            // 用户删除
+            $res = $order_model->save($data, [
+                "order_status" => ['in','5,10'],
+                "order_id" => [
+                    "in",
+                    $order_id_array
+                ],
+                "buyer_id" => $operator_id
+            ]);
+        }
+        return 1;
+    }
+
+    /**
      * 根据外部交易号查询订单编号，为了兼容多店版。所以返回一个数组
      *
      * @ERROR!!!
@@ -3115,7 +3377,24 @@ class Order extends BaseService implements IOrder
         }
         return [];
     }
-
+     /**
+     * 根据外部交易号查询课程订单编号，返回一个数组
+     *
+     * @ERROR!!!
+     *
+     * @see \data\api\IOrder::getOrderNoByOutTradeNo()
+     */
+    public function getCourseOrderNoByOutTradeNo($out_trade_no)
+    {
+        if (! empty($out_trade_no)) {
+            $order_model = new NsCourseOrderModel();
+            $list = $order_model->getQuery([
+                'out_trade_no' => $out_trade_no
+            ], 'order_no', '');
+            return $list;
+        }
+        return [];
+    }
     /**
      *
      * 根据外部交易号查询订单状态

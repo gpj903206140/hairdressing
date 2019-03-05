@@ -1,4 +1,4 @@
-<?php if (!defined('THINK_PATH')) exit(); /*a:3:{s:44:"template/course\default_new\Index\index.html";i:1545800542;s:39:"template/course\default_new\header.html";i:1545876327;s:39:"template/course\default_new\footer.html";i:1545705028;}*/ ?>
+<?php if (!defined('THINK_PATH')) exit(); /*a:3:{s:44:"template/course\default_new\Index\index.html";i:1546669703;s:39:"template/course\default_new\header.html";i:1545876327;s:39:"template/course\default_new\footer.html";i:1546484966;}*/ ?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -149,7 +149,7 @@
                         <div class="course-bt"><?php echo $recommend['goods_name']; ?></div>
                         <div class="zhineng"><?php echo $recommend['introduction']; ?></div>
                         <div class="clearfix rel">
-                            <div class="listen"><?php echo $recommend['tune_num']; ?>人收听</div>
+                            <!-- <div class="listen"><?php echo $recommend['tune_num']; ?>人收听</div> -->
                             <div class="price"  style="height: 1.5rem;"><?php if($recommend['is_showprice'] == 1): ?>￥<?php echo $recommend['price']; endif; ?></div>
                         </div>
                     </div>
@@ -271,7 +271,7 @@
                         <div class="course-bt"><?php echo $new['goods_name']; ?></div>
                         <div class="zhineng"><?php echo $new['introduction']; ?></div>
                         <div class="clearfix rel">
-                            <div class="listen"><?php echo $new['tune_num']; ?>人收听</div>
+                            <!-- <div class="listen"><?php echo $new['tune_num']; ?>人收听</div> -->
                             <div class="price" style="height: 1.5rem;"><?php if($new['is_showprice'] == 1): ?>￥<?php echo $new['price']; endif; ?></div>
                         </div>
                     </div>
@@ -336,19 +336,19 @@
 <div class="foot ">
     <ul>
         <li>
-            <a href="<?php echo __URL('COURSE_MAIN/Index/Index'); ?>" class="active">
+            <a href="<?php echo __URL('COURSE_MAIN/Index/Index'); ?>" class="<?php if($fthis == 1): ?>active<?php endif; ?>">
                 <span class="icon icon-ft1"></span>
                 <div class="mui-media-body">首页</div>
             </a>
         </li>
         <li>
-            <a href="my_course.html">
+            <a href="<?php echo __URL('COURSE_MAIN/Member/my_course'); ?>" class="<?php if($fthis == 2): ?>active<?php endif; ?>">
                 <span class="icon icon-ft2"></span>
                 <div class="mui-media-body">我的课程</div>
             </a>
         </li>
         <li>
-            <a href="<?php echo __URL('COURSE_MAIN/Member/Index'); ?>">
+            <a href="<?php echo __URL('COURSE_MAIN/Member/Index'); ?>" class="<?php if($fthis == 3): ?>active<?php endif; ?>">
                 <span class="icon icon-ft3"></span>
                 <div class="mui-media-body">个人中心</div>
             </a>

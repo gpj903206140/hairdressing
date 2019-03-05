@@ -210,7 +210,7 @@ body.panel-active{
 .nk_top .nk_cell{float:left;width:50%; text-align: center;background:#FFFFFF;color:gray;font-size: 14px;}	
 .nk_top .nk_cell_one{float:left;width:100%; text-align: center;background:#FFFFFF;color:gray;}
 .nk_top .nk_cell span,.nk_top .nk_cell_one span{height: 35px;display: inline-block;padding: 0 5px;}		
-.nk_top .nk_cell.active span,.nk_top .nk_cell_one.active span{color: #FF4E05;border-bottom: 1px solid #FF4E05;}
+.nk_top .nk_cell.active span,.nk_top .nk_cell_one.active span{/*color: #FF4E05;border-bottom: 1px solid #FF4E05;*/color: #006ab6;border-bottom: 1px solid #006ab6;}
 .active .nk_line{position: absolute;width:50%;height:2px;background: red;}
 .nk_line{height:2px;background:#E6E0E0;}
 .right_login_user{background: url(../images/nk_error1.png) no-repeat;background-size:16px;width:20px;height:25px;display:block; margin-top: 9px;float:right;}		

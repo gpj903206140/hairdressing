@@ -2,7 +2,7 @@
 
 <div class="mui-content  ">
     <div class="cousetop buy">
-        <div class="wzbt">订单详情</div>
+        <div class="wzbt">订单详情{if condition="$order_id gt 0"}<span style="float:right;color:#f00;font-size:14px;">关闭订单</span>{/if}</div>
     </div>
     <ul class="mui-table-view zxun">
         <li class="mui-table-view-cell ">
@@ -10,6 +10,8 @@
             <div class="r ">
                {$order_no}
             </div>
+            <input type="hidden" value="{$order_no}" id="order_no">
+            <input type="hidden" value="{$goods_id}" id="goods_id">
         </li>
         <li class="mui-table-view-cell ">
             <div class=" mui-pull-left">订单信息</div>
@@ -23,16 +25,16 @@
                 ￥{$course_info.price}元
             </div>
         </li>
-        <li class="mui-table-view-cell ">
+        <!-- <li class="mui-table-view-cell ">
             <div class=" mui-pull-left">预付红包</div>
             <div class="r ">
                 抵扣&nbsp;￥5.00元
             </div>
-        </li>
+        </li> -->
         <li class="mui-table-view-cell ">
             <div class=" mui-pull-left">需付款</div>
             <div class="r red ">
-                ￥{$course_info.price}元
+                ￥{$course_info.discount_price}元 {if condition="$course_info.goods_discount gt 0"}(会员折扣{$course_info.goods_discount*100}%){/if}
             </div>
         </li>
         <li class="mui-table-view-cell ">
@@ -51,25 +53,83 @@
         <li class="mui-table-view-cell ">
             <div class="mui-input-row mui-radio">
                 <label><i class="icon icon-pay1"></i> 余额支付</label>
-                <input name="radio1" type="radio">
+                <input name="radio1" type="radio" value="1">
             </div>
         </li>
         <li class="mui-table-view-cell ">
             <div class="mui-input-row mui-radio">
                 <label><i class="icon icon-pay2"></i>微信支付</label>
-                <input name="radio1" type="radio">
+                <input name="radio1" type="radio" value="2">
             </div>
         </li>
     </ul>
 </div>
 <div class="zhifu">
-<a href="javascript:;" class="tjbtn ">立即支付</a>
+<a href="javascript:;" class="tjbtn" id="submit">立即支付</a>
 </div>
 
 <script src="__TEMP__/{$style}/public/mui/js/mui.js"></script>
 <script type="text/javascript">
+    //取消课程订单
+    mui('body').on('tap', '.wzbt span', function () {
+        var url="{:__URL('COURSE_MAIN/order/ourCourseOrder&order_id='.$order_id)}";
+        $.get(url,function(result){
+            if(result>0){
+                layer.msg('关闭课程订单成功!');
+                setTimeout(function(){history.go(-1);},1000);
+            }else{
+                layer.msg('关闭课程订单失败!');
+                setTimeout(function(){window.location.reload();},1000);
+            }
+        })
+        return false;
+    })
     mui('body').on('tap', 'a', function () {
         document.location.href = this.href;
+    })
+    //下单
+    var flag = false;
+    mui('body').on('tap', '#submit', function () {
+        var order_id = "{$order_id}";
+        var order_no=$("#order_no").val();
+        var goods_id=$("#goods_id").val();
+        var payment_type=$("input[name='radio1']:checked").val();
+        var account_balance=0;
+        var prices="{$course_info.price}";
+        var discount_price="{$course_info.discount_price}";
+        if(!payment_type){
+            layer.msg('请选择支付方式!');
+            return false;
+        }else if(payment_type==1){
+
+             var sum="{$sum}";
+             if(sum*1<discount_price*1){
+                layer.msg('您的余额不足,请选择其他方式支付!');
+                return false;
+             }
+             account_balance = discount_price;
+        }
+        if(payment_type==2&&order_id>0){
+            var code="{$code}";
+            window.location.href="{:__URL('COURSE_MAIN/pay/getpayvalue')}&out_trade_no="+code;
+            return false;
+        }
+        //if(flag) return;
+        flag = true;
+        var url="{:__URL('COURSE_MAIN/Order/course_buy&goods_id='.$goods_id)}";
+        $.post(url,{order_id:order_id,order_no:order_no,goods_id:goods_id,payment_type:payment_type,account_balance:account_balance,goods_money:prices,discount_price:discount_price},function(result){
+              if(result['code']>0){
+                  layer.msg(result['message']);
+                  if(payment_type==1){
+                      setTimeout(function(){window.location.href="{:__URL('COURSE_MAIN/pay/paycallback&msg=1')}&out_trade_no="+result['code'];},1000);
+                  }else if(payment_type==2){
+                      setTimeout(function(){window.location.href="{:__URL('COURSE_MAIN/pay/getpayvalue')}&out_trade_no="+result['code'];},1000);
+                  }
+              }else{
+                  layer.msg(result['message']);
+                  flag = false;
+              }
+        })
     })
 </script>
 

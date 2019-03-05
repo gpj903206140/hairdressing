@@ -32,6 +32,11 @@ class Index extends BaseController
      * @var unknown
      */
     public $recommend_course_num = 4;
+     public function __construct()
+    {
+        parent::__construct();
+        $this->assign("fthis", '1');
+    }
     /**
      * 手机端首页
      *

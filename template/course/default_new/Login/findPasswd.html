@@ -33,7 +33,7 @@
 
 {block name="goodsHead"}
 <section class="head">
-	<a class="head_back" id="backoutapp" href="{:__URL('APP_MAIN/login')}"><i class="icon-back"></i></a>
+	<a class="head_back" id="backoutapp" href="{:__URL('COURSE_MAIN/login')}"><i class="icon-back"></i></a>
 	<div class="head-title" id="title">忘记密码</div>
 </section>
 {/block}
@@ -241,7 +241,7 @@ $("#btn_submit").click(function(){
 				data : {"userInfo":mobile,"password":mobile_pass,"type":"mobile"},
 				success : function(data){
 					if(data['code'] == 1){
-						location.href=__URL("APP_MAIN/login");
+						location.href=__URL("COURSE_MAIN/login");
 					}else{
 						layer.msg(data['message']);
 						setTimeout(function(){
@@ -302,7 +302,7 @@ $("#btn_submit").click(function(){
 				data : {"userInfo":email,"password":email_pass,"type":"email"},
 				success : function(data){
 					if(data['code'] == 1){
-						location.href=__URL("APP_MAIN/login");
+						location.href=__URL("COURSE_MAIN/login");
 					}else{
 						layer.msg(data['message']);
 							setTimeout(function(){

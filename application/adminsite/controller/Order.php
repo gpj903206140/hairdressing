@@ -1774,6 +1774,19 @@ class Order extends BaseController
     }
 
     /**
+     * 删除课程订单
+     */
+    public function deleteCourseOrder()
+    {
+        if (request()->isAjax()) {
+            $order_service = new OrderService();
+            $order_id = request()->post("order_id", "");
+            $res = $order_service->deleteCourseOrder($order_id, 1, $this->instance_id);
+            return AjaxReturn($res);
+        }
+    }
+
+    /**
      * 订单退款（测试）
      */
     public function orderrefundtest()
@@ -1956,6 +1969,37 @@ class Order extends BaseController
         }
         $this->assign("order_list", $list['data']);
         return view($this->style . "Order/printOrder");
+    }
+
+    /**
+     * 打印课程订单
+     */
+    public function printCourseOrder()
+    {
+        // 网站信息
+        $web_info = $webSiteInfo = $this->website->getWebSiteInfo();
+        $this->assign("web_info", $web_info);
+        $order_ids = request()->get("print_order_ids", "");
+        $order_service = new OrderService();
+        $condition = array(
+            "order_id" => array(
+                "in",
+                $order_ids
+            ),
+            "shop_id" => $this->instance_id,
+            'order_type' => array(
+                "in",
+                "1,3"
+            )
+        );
+        $list = $order_service->getCourseOrderList(1, 0, $condition, '');
+        foreach ($list["data"] as $k => $v) {
+            $order_detail = $order_service->getOrderDetail($v["order_id"]);
+            $list["data"][$k]["goods_packet_list"] = $order_detail["goods_packet_list"];
+        }
+        //print_r($list['data']);exit;
+        $this->assign("order_list", $list['data']);
+        return view($this->style . "Order/printCourseOrder");
     }
 
     /**

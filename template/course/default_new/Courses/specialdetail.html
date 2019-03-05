@@ -14,7 +14,7 @@
     </div>
 </div>
 <div class="cousetop">
-    <div class="wzbt">收费课程（<span>0</span>）</div>
+    <div class="wzbt">课程（<span>0</span>）</div>
 </div>
 <div class="rel">
 
@@ -101,9 +101,9 @@
                         var item=myjson['data'][i];
                         html+='<li class="mui-table-view-cell">';
                             html+='<a href="'+__URL('COURSE_MAIN/courses/coursedetail?id='+item.goods_id)+'">';
-                                if(item.pic_cover){
-                                   var pic_cover=item.pic_cover;
-                                   html+='<div class="img-jq l" style="background-image: url('+__IMG(item.pic_cover)+')"></div>';
+                                if(item.picture_info.pic_cover){
+                                   var pic_cover=item.picture_info.pic_cover;
+                                   html+='<div class="img-jq l" style="background-image: url('+__IMG(item.picture_info.pic_cover)+')"></div>';
                                 }else{
                                    html+='<div class="img-jq l" style="background-image: url("__TEMP__/{$style}/public/images/temp/noImg.png")"></div>'; 
                                 }
@@ -115,7 +115,7 @@
                                     html+='<div class="course-bt">'+item.goods_name+'</div>';
                                     html+='<div class="zhineng">'+item.introduction+'</div>';
                                     html+='<div class="clearfix rel">';
-                                        html+='<div class="listen">'+item.sales+'人购买</div>';
+                                        html+='<div class="listen">'+item.sales+'人{:lang('course_detail_price')}</div>';
                                         html+='<div class="price" style="height: 1.5rem;">';
                                         if(item.is_showprice==1){
                                         html+='￥'+item.price;

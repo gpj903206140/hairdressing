@@ -70,20 +70,25 @@ class CourseAssess extends BaseService implements ICourseAssess
             'addtime' => time(),
         );
         $this->course_assess->startTrans();
-        $result = $this->course_assess->save($data);
-        if ($result) {
-            $course = new NsCourseModel();
-            $avg = $this->course_assess->getAvg(['goods_id' => $goods_id],'score');
-            $course->ModifyTableField('goods_id',$goods_id,'score',$avg);
-            $course->where("goods_id={$goods_id}")->setInc('evaluates',1);
-            $res = $this->course_assess->id;
-            $this->course_assess->commit();
-        } else {
-            $res = $this->course_assess->getError();
+        try{
+            $result = $this->course_assess->save($data);
+            if ($result) {
+                $course = new NsCourseModel();
+                $avg = $this->course_assess->getAvg(['goods_id' => $goods_id],'score');
+                $course->ModifyTableField('goods_id',$goods_id,'score',$avg);
+                $course->where("goods_id={$goods_id}")->setInc('evaluates',1);
+                $res = $this->course_assess->id;
+                $this->course_assess->commit();
+            } else {
+                $res = $this->course_assess->getError();
+                $this->course_assess->rollback();
+            }
+            return $res;
+        } catch(\Exception $e){
             $this->course_assess->rollback();
+            return $e->getMessage();
         }
-       
-        return $res;
+        return 0;
         // TODO Auto-generated method stub
     }
     

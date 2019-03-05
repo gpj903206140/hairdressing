@@ -3,9 +3,11 @@ namespace data\service\Order;
 
 use data\model\AlbumPictureModel;
 use data\model\NsGoodsModel;
+use data\model\NsCourseModel;
 use data\model\NsGoodsSkuModel;
 use data\model\NsGoodsSkuPictureModel;
 use data\model\NsOrderGoodsModel;
+use data\model\NsCourseOrderGoodsModel;
 use data\model\NsOrderGoodsPromotionDetailsModel;
 use data\model\NsOrderModel;
 use data\model\NsOrderRefundModel;
@@ -149,6 +151,55 @@ class OrderGoods extends BaseService
             }
         } catch (\Exception $e) {
             $this->order_goods->rollback();
+            return $e->getMessage();
+        }
+    }
+        /**
+     * 课程订单创建添加订单项           
+     */
+    public function addCourseOrderGoods($order_id, $goods_sku_list, $adjust_money = 0)
+    {
+        $course_order_goods = new NsCourseOrderGoodsModel();
+        $course_order_goods->startTrans();
+        try {
+            $err = 0;
+            $goods_sku_list_array = explode(",", $goods_sku_list);
+            foreach ($goods_sku_list_array as $k => $goods_sku_array) {
+                $goods_model = new NsCourseModel();
+                $goods_info = $goods_model->getInfo([
+                    'goods_id' => $goods_sku_array
+                ], 'goods_id,goods_name,price,goods_type,picture,promotion_type');
+                
+                // 销量增加
+                $goods_model->where(['goods_id'=>$goods_info['goods_id']])->setInc('sales',1); //销售数量
+                $goods_model->where(['goods_id'=>$goods_info['goods_id']])->setInc('real_sales',1); //real_sales
+                $data_order_sku = array(
+                    'order_id' => $order_id,
+                    'goods_id' => $goods_info['goods_id'],
+                    'goods_name' => $goods_info['goods_name'],
+                    'price' => $goods_info['price'],
+                    'num' => 1,
+                    'adjust_money' => $adjust_money,
+                    'goods_money' => $goods_info['price'],
+                    'goods_picture' => $goods_info['picture'], // 商品主图
+                    'shop_id' => 0,
+                    'buyer_id' => $this->uid,
+                    'goods_type' => $goods_info['goods_type'],
+                    'promotion_id' => $goods_info['promote_id'],
+                    'promotion_type_id' => $goods_info['promotion_type'],
+                    'order_type' => 1, // 订单类型默认1
+                ); // 积分数量默认0
+                $course_order_goods->save($data_order_sku);
+            }
+            if ($err == 0) {
+                $course_order_goods->commit();
+                return 1;
+            } elseif ($err == 1) {
+                $course_order_goods->rollback();
+                return ORDER_GOODS_ZERO;
+            }
+        } catch (\Exception $e) {
+            $course_order_goods->rollback();
             return $e->getMessage();
         }
     }

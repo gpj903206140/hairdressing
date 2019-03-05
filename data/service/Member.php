@@ -395,7 +395,22 @@ class Member extends User implements IMember
         }
         return $data;
     }
-
+    /**
+     * 获取用户等级
+     *
+     */
+    public function getMemberLevelInfo($level_id)
+    {
+        $memberLevel = new NsMemberLevelModel();
+        if (! empty($level_id)) {
+            $data = $memberLevel->getInfo([
+                'level_id' => $level_id
+            ], '*');
+        } else {
+            $data = '';
+        }
+        return $data;
+    }
     /**
      * (non-PHPdoc)
      *
@@ -2577,5 +2592,30 @@ class Member extends User implements IMember
         } else {
             return false;
         }
+    }
+    /**
+     * 单个字段数值加或减
+     * @param  [type] $goods_id   [description]
+     * @param  [type] $field_name [description]
+     * @param  [type] $status     [description]
+     * @return [type]             [description]
+     */
+    public function updateFiledNum($uid,$field_name,$status=1,$num=1)
+    {
+        $user = new UserModel();
+        if($status==1){ //加
+            $return = $user->where(['uid'=>$uid])->setInc($field_name,$num);
+            return $return;
+        }elseif($status==2){ //减
+            $count = $user->getInfo(['uid'=>$uid],$field_name);
+            if($count[$field_name]>0){
+                $return = $user->where(['uid'=>$uid])->setDec($field_name,$num);
+            }else{
+                $return = $user->ModifyTableField('uid',$uid,$field_name,0);
+            }
+            
+            return $return;
+        }
+        return false;
     }
 }

@@ -140,7 +140,8 @@ textarea {resize: none;}
 	vertical-align: middle;
 	cursor: pointer;
 	white-space: nowrap;
-	background-color: #FF4E00;
+	/*background-color: #FF4E00;*/
+	background-color: #006ab6;
 	height: 35px;
 	line-height: 35px;
 	font-size: 14px;
@@ -156,10 +157,11 @@ textarea {resize: none;}
 }
 .register_immediately{
 	background:#fff;
-	color: #FF4E00;
+	color: #006ab6;
 	height: 33px;
 	line-height: 33px;
-	border: 1px solid #FF4E00;
+	/*border: 1px solid #FF4E00;*/
+	border: 1px solid #006ab6;
 }
 /* 无背景按钮 */
 .lang-cancel{background:0;color:#2d3e50}

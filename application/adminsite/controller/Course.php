@@ -17,6 +17,13 @@ use Qiniu\json_decode;
 use think\Config;
 use data\service\VirtualGoods;
 use data\service\Config as ConfigService;
+
+
+use data\service\Express as ExpressService;
+use data\service\Order\OrderGoods;
+use data\service\Order\OrderStatus;
+use data\service\Order as OrderService;
+use data\service\Order\OrderExpress;
 /**
  * 课程控制器
  */
@@ -1301,6 +1308,125 @@ $product["description"], $product['qrcode'], // 课程二维码
         $video_id = request()->get('id', '');
         $res = $coursecate->deleteCourseCatalogueVideo($video_id);
         return AjaxReturn($res);
+    }
+    
+    /**
+     * 课程订单列表
+     */
+    public function courseOrderList()
+    {
+        if (request()->isAjax()) {
+            $page_index = request()->post('page_index', 1);
+            $page_size = request()->post('page_size', PAGESIZE);
+            $start_date = request()->post('start_date') == "" ? 0 : getTimeTurnTimeStamp(request()->post('start_date'));
+            $end_date = request()->post('end_date') == "" ? 0 : getTimeTurnTimeStamp(request()->post('end_date'));
+            $user_name = request()->post('user_name', '');
+            $order_no = request()->post('order_no', '');
+            $order_status = request()->post('order_status', '');
+            $receiver_mobile = request()->post('receiver_mobile', '');
+            $payment_type = request()->post('payment_type', 0);
+            $condition['order_type'] = array(
+                "in",
+                "1,3"
+            ); // 订单类型
+            $condition['is_deleted'] = 0; // 未删除订单
+            if ($start_date != 0 && $end_date != 0) {
+                $condition["create_time"] = [
+                    [
+                        ">",
+                        $start_date
+                    ],
+                    [
+                        "<",
+                        $end_date
+                    ]
+                ];
+            } elseif ($start_date != 0 && $end_date == 0) {
+                $condition["create_time"] = [
+                    [
+                        ">",
+                        $start_date
+                    ]
+                ];
+            } elseif ($start_date == 0 && $end_date != 0) {
+                $condition["create_time"] = [
+                    [
+                        "<",
+                        $end_date
+                    ]
+                ];
+            }
+            if ($order_status != '') {
+                $condition['order_status'] = $order_status;
+            }
+            if (! empty($payment_type)) {
+                $condition['payment_type'] = $payment_type;
+            }
+            if (! empty($user_name)) {
+                $condition['receiver_name'] = $user_name;
+            }
+            if (! empty($order_no)) {
+                $condition['order_no'] = $order_no;
+            }   
+            $order_service = new OrderService();
+            $list = $order_service->getCourseOrderList($page_index, $page_size, $condition, 'create_time desc');
+            return $list;
+        } else {
+            $status = request()->get('status', '');
+            $this->assign("status", $status);
+            $all_status = OrderStatus::getCourseOrderCommonStatus();
+            $child_menu_list = array();
+            $child_menu_list[] = array(
+                'url' => "course/courseOrderList",
+                'menu_name' => '全部',
+                "active" => $status == '' ? 1 : 0
+            );
+            foreach ($all_status as $k => $v) {
+                // 针对发货与提货状态名称进行特殊修改
+                /*
+                 * if($v['status_id'] == 1)
+                 * {
+                 * $status_name = '待发货/待提货';
+                 * }elseif($v['status_id'] == 3){
+                 * $status_name = '已收货/已提货';
+                 * }else{
+                 * $status_name = $v['status_name'];
+                 * }
+                 */
+                $child_menu_list[] = array(
+                    'url' => "course/courseOrderList?status=" . $v['status_id'],
+                    'menu_name' => $v['status_name'],
+                    "active" => $status == $v['status_id'] ? 1 : 0
+                );
+            }
+            $this->assign('child_menu_list', $child_menu_list);
+            $this->assign('status', $status);
+            return view($this->style . "Course/courseOrderList");
+        }
+    }
+    /**
+     * 添加备注
+     */
+    public function addMemo()
+    {
+        $order_service = new OrderService();
+        $order_id = request()->post('order_id');
+        $memo = request()->post('memo');
+        $result = $order_service->addCourseOrderSellerMemo($order_id, $memo);
+        return AjaxReturn($result);
+    }
+
+    /**
+     * 获取订单备注信息
+     *
+     * @return unknown
+     */
+    public function getOrderSellerMemo()
+    {
+        $order_service = new OrderService();
+        $order_id = request()->post('order_id');
+        $res = $order_service->getCourseOrderSellerMemo($order_id);
+        return $res;
     }
 
     /**

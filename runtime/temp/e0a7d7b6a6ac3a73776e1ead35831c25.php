@@ -1,4 +1,4 @@
-<?php if (!defined('THINK_PATH')) exit(); /*a:2:{s:53:"template/course\default_new\Courses\coursedetail.html";i:1545966690;s:39:"template/course\default_new\header.html";i:1545876327;}*/ ?>
+<?php if (!defined('THINK_PATH')) exit(); /*a:2:{s:53:"template/course\default_new\Courses\coursedetail.html";i:1546930343;s:39:"template/course\default_new\header.html";i:1545876327;}*/ ?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -105,7 +105,7 @@
         <div class="kcjj-down1 clearfix">
             <ul>
                 <li><i class="icon icon-rq"></i> <?php echo $course_info['crowd']; ?></li>
-                <li><i class="icon icon-gm"></i> <?php echo $course_info['sales']; ?>人已购买</li>
+                <li><i class="icon icon-gm"></i> <?php echo $course_info['sales']; ?>人已<?php echo lang('course_detail_price'); ?></li>
             </ul>
         </div>
         <div>
@@ -203,8 +203,10 @@
                             <div class="plzl">
                                 <div class="txname"><?php echo $assess['member_name']; ?></div>
                                 <div class="date"><?php echo date("Y-m-d H:i:s",$assess['addtime']); ?></div>
-                                <div><?php echo $assess['content']; ?>
-                                </div>
+                                <div><?php echo $assess['content']; ?></div>
+                                <?php if($assess['explain_first'] != ''): ?>
+                                <div><span style="color:#f00;margin-left:0px;">商家回复: </span> <?php echo $assess['explain_first']; ?></div>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </li>
@@ -255,8 +257,8 @@
                         <div class="course-bt"><?php echo $submit['goods_name']; ?></div>
                         <div class="zhineng"><?php echo $submit['introduction']; ?></div>
                         <div class="clearfix rel">
-                            <div class="listen"><?php echo $submit['sales']; ?>人收听</div>
-                            <div class="price">￥<?php echo $submit['price']; ?></div>
+                            <!-- <div class="listen"><?php echo $submit['sales']; ?>人收听</div> -->
+                            <div class="price" style="height: 1.5rem;"><?php if($recommend['is_showprice'] == 1): ?>￥<?php echo $submit['price']; endif; ?></div>
                         </div>
                     </div>
                 </a>
@@ -276,20 +278,115 @@
             </a>
         </li>
         <li>
-            <a href="javascript:;">
+            <a href="<?php echo $customservice_config['value']['service_addr']; ?>">
                 <span class="icon icon-ft4"></span>
                 <div class="mui-media-body">客服</div>
             </a>
         </li>
-        <li class="ljgm">
-            <a href="kc_buy.html">
-                <div class="mui-media-body">立即购买</div>
-            </a>
+        
+            
+            <?php if($is_buy == 1): if($order_status == 1): ?>
+                <li class="ljgm showCourse" style="background: #6eb1fa;">
+                 <a href="javascript:;">
+                    <div class="mui-media-body">进入课程</div>
+                </a>
+                <?php else: ?>
+                <li class="ljgm">
+                <a href="<?php echo __URL('COURSE_MAIN/Order/course_buy&order_id='.$order_id.'&goods_id='.$course_info['goods_id']); ?>">
+                    <div class="mui-media-body">去付款</div>
+                </a>
+                <?php endif; else: ?>
+            <li class="ljgm" <?php if($course_info['is_showprice'] == 0): ?>style="background:#dedede;"<?php endif; ?>>
+            <?php if($course_info['is_showprice'] == 1): ?>
+                <a href="<?php echo __URL('COURSE_MAIN/Order/course_buy&goods_id='.$course_info['goods_id']); ?>">
+                    <div class="mui-media-body">购买</div>
+                </a>
+            <?php else: ?>
+                <a href="javascript:;">
+                    <div class="mui-media-body">购买</div>
+                </a>
+                <?php endif; endif; ?>
         </li>
 
     </ul>
 </div>
-
+<style>
+.grays{
+    width:100%;
+    height:100%;
+    position: fixed;
+    left:0;
+    top:0;
+    background: rgba(0,0,0,0.5);
+    float:left;
+    display:none;
+}
+.course_list{
+    width:100%;
+    height:50%;
+    position: fixed;
+    left:0;
+    bottom:95px;
+    background: #fff;
+    display:none;
+    z-index:1000;
+    border-bottom:1px solid #fff;
+}
+.course_list h3{
+    width:100%;
+    height:45px;
+    line-height:45px;
+    padding:0 4%;
+    font-size:18px;
+    color:#333;
+    border-bottom:1px solid #dedede;
+}
+.course_list h3 span{
+    width:12px;
+    height:12px;
+    position:absolute;
+    right:10px;
+    top:1px;
+}
+.course_list h3 span img{
+    width:100%;
+    height:100%;
+}
+.new-course.meifa ul li{
+    width:94%;
+    margin:0 3%;
+    border-bottom:1px solid #dedede;
+}
+</style>
+<div class="grays"></div>
+<div class="course_list">
+    <h3>课程目录 <span><img src="__TEMP__/<?php echo $style; ?>/public/images/temp/close.png"></span></h3>
+    <div class=" new-course meifa " style="height:100%;overflow:auto;">
+        <ul>
+            <?php if(is_array($course_info['catalogue']) || $course_info['catalogue'] instanceof \think\Collection || $course_info['catalogue'] instanceof \think\Paginator): $ck = 0; $__LIST__ = $course_info['catalogue'];if( count($__LIST__)==0 ) : echo "" ;else: foreach($__LIST__ as $key=>$catalogue): $mod = ($ck % 2 );++$ck;?>
+            <li>
+                <a href="<?php echo __URL('COURSE_MAIN/courses/video_view&goods_id='.$course_info['goods_id'].'&id='.$catalogue['catalogue_id']); ?>">
+                    <div class="bofang"><i class="icon icon-bf"></i></div>
+                    <div class="zhezhao"></div>
+                    <div class="photo-hair l">
+                    <?php if($catalogue['catalogue_pic']): ?>
+                    <img src="<?php echo __IMG($catalogue['catalogue_pic']); ?>">
+                    <?php else: ?>
+                    <img src="__TEMP__/<?php echo $style; ?>/public/images/temp/noImg.png">
+                    <?php endif; ?>
+                    </div>
+                    <div class="juli">
+                        <div class="course-bt"><?php echo $catalogue['catalogue_name']; ?></div>
+                        <div class="zhineng"><?php echo $catalogue['description']; ?></div>
+                    </div>
+                </a>
+            </li>
+            <?php endforeach; endif; else: echo "" ;endif; ?>
+            
+            <li class="wsj" style="display: none"><img src="__TEMP__/<?php echo $style; ?>/public/images/wtp.png"><br>暂无数据</li>
+        </ul>
+    </div>
+</div>
 <script src="__TEMP__/<?php echo $style; ?>/public/mui/js/mui.js"></script>
 
 <script type="text/javascript">
@@ -306,6 +403,16 @@
 
         });
     });
+    //显示课程目录
+    mui('body').on('tap', '.showCourse', function () {
+        $(".grays").show();
+        $(".course_list").show();
+    })
+    //隐藏课程目录
+    mui('body').on('tap', '.grays,.course_list h3 span', function () {
+        $(".grays").hide();
+        $(".course_list").hide();
+    })
     mui('body').on('tap', '.logins', function () {
         layer.msg('你还未登录,请先登录!');
         setTimeout(function(){window.location.href="<?php echo __URL('COURSE_MAIN/login'); ?>";},1000);
@@ -382,6 +489,7 @@
                 }
             }
         });
+
     })
 </script>
 </body>

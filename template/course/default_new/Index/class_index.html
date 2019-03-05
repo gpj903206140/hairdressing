@@ -92,7 +92,7 @@
                         <div class="course-bt">{$recommend.goods_name}</div>
                         <div class="zhineng">{$recommend.introduction}</div>
                         <div class="clearfix rel">
-                            <div class="listen">{$recommend.tune_num}人收听</div>
+                            <!-- <div class="listen">{$recommend.tune_num}人收听</div> -->
                             <div class="price" style="height: 1.5rem;">{if condition="$recommend.is_showprice eq 1"}￥{$recommend.price}{/if}</div>
                         </div>
                     </div>
@@ -240,7 +240,9 @@ function getCourse(pages=0,course_type,state){
                                     html+='<div class="course-bt">'+item.goods_name+'</div>';
                                     html+='<div class="zhineng">'+item.introduction+'</div>';
                                     html+='<div class="clearfix rel">';
-                                        html+='<div class="listen">'+item.sales+'人购买</div>';
+                                        if(item.is_showprice==1){
+                                        html+='<div class="listen">'+item.sales+'人{:lang('course_detail_price')}</div>';
+                                        }
                                         html+='<div class="price" style="height: 1.5rem;">';
                                         if(item.is_showprice==1){
                                         html+='￥'+item.price;

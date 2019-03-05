@@ -1,4 +1,4 @@
-<?php if (!defined('THINK_PATH')) exit(); /*a:8:{s:41:"template/adminblue\Course\courseList.html";i:1545633928;s:28:"template/adminblue\base.html";i:1545011442;s:45:"template/adminblue\controlCommonVariable.html";i:1530933188;s:32:"template/adminblue\urlModel.html";i:1531183408;s:50:"template/adminblue\Course\courseThreeCategory.html";i:1545211966;s:50:"template/adminblue\Goods\batchProcessingModal.html";i:1522665946;s:34:"template/adminblue\pageCommon.html";i:1538099192;s:34:"template/adminblue\openDialog.html";i:1522669943;}*/ ?>
+<?php if (!defined('THINK_PATH')) exit(); /*a:8:{s:41:"template/adminblue\Course\courseList.html";i:1546570672;s:28:"template/adminblue\base.html";i:1546935702;s:45:"template/adminblue\controlCommonVariable.html";i:1530933188;s:32:"template/adminblue\urlModel.html";i:1531183408;s:50:"template/adminblue\Course\courseThreeCategory.html";i:1545211966;s:50:"template/adminblue\Goods\batchProcessingModal.html";i:1522665946;s:34:"template/adminblue\pageCommon.html";i:1538099192;s:34:"template/adminblue\openDialog.html";i:1522669943;}*/ ?>
 <!DOCTYPE html>
 <html>
 	<head>
@@ -487,8 +487,8 @@ function __IMG(img_path){
 			</ul>
 		</nav>
 		<div class="ns-base-tool">
-			<!-- <i class="i-home"  title="前台首页"><a href="<?php echo __URL('SHOP_MAIN'); ?>" target="_blank"></a></i> -->
-			<i class="i-home"  title="前台首页"><a href="<?php echo __URL('SHOP_MAIN/frontDesk/index'); ?>" target="_blank"></a></i>
+			<i class="i-home"  title="前台首页"><a href="<?php echo __URL('SHOP_MAIN'); ?>" target="_blank"></a></i>
+			<!-- <i class="i-home"  title="前台首页"><a href="<?php echo __URL('SHOP_MAIN/frontDesk/index'); ?>" target="_blank"></a></i> -->
 			<i class="i-close" title="退出登录"><a href="<?php echo __URL('ADMIN_MAIN/login/logout'); ?>"></a></i>
 			<i class="ns-vertical-bar"></i>
 			<div class="ns-help">
@@ -925,12 +925,14 @@ $("#confirmSelect").click(function(){
 		<table class="table-class">
 			<colgroup>
 				<col style="width: 2%;">
-				<col style="width: 20%;">
-				<col style="width: 10%;">
+				<col style="width: 15%;">
+				<col style="width: 8%;">
 				
-				<col style="width: 10%;">
-				<col style="width: 10%;">
-				<col style="width: 11%;">
+				<col style="width: 8%;">
+				<col style="width: 8%;">
+				<col style="width: 8%;">
+				<col style="width: 8%;">
+				<col style="width: 6%;">
 				<col style="width: 10%;">
 				<col style="width: 9%;">
 				<col style="width: 4%;">
@@ -948,6 +950,8 @@ $("#confirmSelect").click(function(){
 					<th class="goods-fields-sort" data-field="total_num" style="text-align: right;">总课数<span class="desc"></span></th>
 					<th class="goods-fields-sort" data-field="release_num" style="text-align: right;">发布课数<span class="desc"></span></th>
 					<th class="goods-fields-sort" data-field="sales" style="text-align: right;">销量<span class="desc"></span></th>
+					<th style="text-align: right;">收藏</th>
+					<th style="text-align: right;">分享</th>
 <!-- 					<th>上下架</th> -->
 					<th>适合人群</th>
 					<th>课程目录</th>
@@ -1901,7 +1905,7 @@ function LoadingInfo(page_index) {
 // 							html += '</label>';
 						html += '</td>';
 
-						html += '<td colspan="9" style="border-bottom:0;">';
+						html += '<td colspan="11" style="border-bottom:0;">';
 							html += '<div style="display: inline-block; width: 100%;font-size:12px;color:#666;" class="pro-code">';
 								html += '<span></span>';
 								html += '<span class="pro-code" style="margin-left:10px;">创建时间：'+timeStampTurnTime(data["data"][i]["create_time"]);
@@ -1987,6 +1991,16 @@ function LoadingInfo(page_index) {
 						html += '<td style="text-align: right;">';
 							html += '<div class="cell">';
 								html += '<span class="pro-stock" style="color: #666;" id="moreChangeStock'+ data["data"][i]["goods_id"]+'">' + data["data"][i]["real_sales"] + '</span>';
+							html += '</div>';
+						html += '</td>';
+						html += '<td style="text-align: right;">';
+							html += '<div class="cell">';
+								html += '' + data["data"][i]["collects"] + '';
+							html += '</div>';
+						html += '</td>';
+						html += '<td style="text-align: right;">';
+							html += '<div class="cell">';
+								html += '' + data["data"][i]["shares"] + '';
 							html += '</div>';
 						html += '</td>';
 						

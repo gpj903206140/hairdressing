@@ -304,6 +304,33 @@ textarea{width: 350px;}
 	</div>
 </div>
 
+<!-- 模态框（Modal） -->
+<div class="modal fade hide" id="Memobox2" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="width:700px;left:45%;top:30%;">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h3>备注信息</h3>
+			</div>
+			<div class="set-style">
+				<dl>
+					<dt><span class="required">*</span>备注:</dt>
+					<dd>
+						<p>
+							<textarea rows="3" cols="20" id="memo2" class="textarea-common"></textarea>
+						</p>
+						<p class="error">请输入备注</p>
+					</dd>
+				</dl>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn-common btn-big" onclick="addCourseMemoAjax()">保存</button>
+				<button class="btn-common-cancle btn-big" data-dismiss="modal">关闭</button>
+			</div>
+		</div>
+	</div>
+</div>
+
 
 <!-- 修改运单号 -->
 <div class="modal hide fade" id="update_express" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="width: 700px; left: 45%; top: 30%; display: none;">
@@ -410,6 +437,8 @@ function operation(operation_type, order_id){
 		pickuporder(order_id);//提货
 	}else if(operation_type == 'seller_memo'){
 		orderSellerMemo(order_id);//备注
+	}else if(operation_type == 'seller_memo2'){
+		courseOrderSellerMemo(order_id);//课程备注
 	}else if(operation_type == 'logistics'){
 		//查看物流
 		location.href = __URL(ADMINMAIN+'/order/orderdetail?order_id='+order_id);
@@ -821,6 +850,19 @@ function orderSellerMemo(order_id){
 		}
 	});
 }
+//查看课程订单备注
+function courseOrderSellerMemo(order_id){
+	$.ajax({
+		type : 'post',
+		url : "{:__URL('ADMIN_MAIN/course/getordersellermemo')}",
+		data : { "order_id" : order_id },
+		success : function(res){
+			$("#order_id").val(order_id);
+			$("#memo").val(res);
+			$("#Memobox2").modal("show");
+		}
+	});
+}
 
 // 提货进行提交数据
 function orderPickupSubmit(){
@@ -1058,6 +1100,28 @@ function addMemoAjax(){
 		}
 	});
 }
+//修改课程备注
+function addCourseMemoAjax(){
+	var order_id = $("#order_id").val();
+	var memo = $("#memo2").val();
+	if(memo == ''){
+		$(".error").css("display","block");
+		return false;
+	}
+	$.ajax({
+		url: "{:__URL('ADMIN_MAIN/course/addmemo')}",
+		data: { "order_id": order_id,"memo":memo },
+		type : "post",
+		success: function(data) {
+			if (data.code > 0) {
+				showMessage('success','保存成功');
+				location.reload();
+			}else{
+				showMessage('error','保存失败');
+			}
+		}
+	});
+}
 
 function getdelivery(order_id){
 	$.ajax({
@@ -1083,6 +1147,32 @@ function delete_order(order_id){
 			$.ajax({
 				type : "post",
 				url : "{:__URL('ADMIN_MAIN/order/deleteOrder')}",
+				data : {"order_id" : order_id.toString()},
+				success : function(data) {
+					if(data["code"] > 0 ){
+						LoadingInfo(1);
+						showMessage('success', data["message"],window.location.reload());
+					}
+				}
+			})
+			$(this).dialog('close');
+			},
+			"取消,#f5f5f5,#666": function() {
+				$(this).dialog('close');
+			},
+		},
+		contentText:"确定要删除订单吗？",
+	});
+}
+
+//删除课程订单
+function delete_courseOrder(order_id){
+	$( "#dialog" ).dialog({
+		buttons: {
+			"确定": function() {
+			$.ajax({
+				type : "post",
+				url : "{:__URL('ADMIN_MAIN/order/deleteCourseOrder')}",
 				data : {"order_id" : order_id.toString()},
 				success : function(data) {
 					if(data["code"] > 0 ){
